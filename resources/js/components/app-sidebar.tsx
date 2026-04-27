@@ -1,5 +1,24 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, ShieldCheck, Users } from 'lucide-react';
+import { 
+    LayoutGrid, 
+    Users, 
+    GraduationCap, 
+    HeartPulse, 
+    Calendar, 
+    Activity, 
+    QrCode, 
+    ScanLine, 
+    Keyboard, 
+    Bell, 
+    Megaphone, 
+    BarChart3, 
+    Eye, 
+    Download, 
+    History, 
+    Settings,
+    FolderGit2,
+    BookOpen
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -26,15 +45,93 @@ const mainNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
     {
-        title: 'Roles',
+        title: 'User Management',
         href: '#',
-        icon: ShieldCheck,
+        icon: Users,
         roles: ['admin'],
     },
     {
-        title: 'Users',
+        title: 'Student Management',
         href: '#',
-        icon: Users,
+        icon: GraduationCap,
+        roles: ['admin'],
+    },
+    {
+        title: 'Parent / Guardian',
+        href: '#',
+        icon: HeartPulse,
+        roles: ['admin'],
+    },
+    {
+        title: 'Class / Section',
+        href: '#',
+        icon: Calendar,
+        roles: ['admin'],
+    },
+    {
+        title: 'Attendance',
+        href: '#',
+        icon: Activity,
+        roles: ['admin'],
+    },
+    {
+        title: 'QR Code Management',
+        href: '#',
+        icon: QrCode,
+        roles: ['admin'],
+    },
+    {
+        title: 'QR Scanner',
+        href: '#',
+        icon: ScanLine,
+        roles: ['admin'],
+    },
+    {
+        title: 'Manual Attendance',
+        href: '#',
+        icon: Keyboard,
+        roles: ['admin'],
+    },
+    {
+        title: 'Notifications',
+        href: '#',
+        icon: Bell,
+        roles: ['admin'],
+    },
+    {
+        title: 'Announcements',
+        href: '#',
+        icon: Megaphone,
+        roles: ['admin'],
+    },
+    {
+        title: 'Reports & Analytics',
+        href: '#',
+        icon: BarChart3,
+        roles: ['admin'],
+    },
+    {
+        title: 'Absentee Monitor',
+        href: '#',
+        icon: Eye,
+        roles: ['admin'],
+    },
+    {
+        title: 'Export Management',
+        href: '#',
+        icon: Download,
+        roles: ['admin'],
+    },
+    {
+        title: 'Logs / Audit Trail',
+        href: '#',
+        icon: History,
+        roles: ['admin'],
+    },
+    {
+        title: 'System Settings',
+        href: '#',
+        icon: Settings,
         roles: ['admin'],
     },
 ];
