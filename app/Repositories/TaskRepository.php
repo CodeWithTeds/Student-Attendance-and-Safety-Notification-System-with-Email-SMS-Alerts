@@ -13,7 +13,6 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class TaskRepository extends BaseRepository implements TaskRepositoryInterface
 {
-
     public function __construct(Task $model)
     {
         parent::__construct($model);
