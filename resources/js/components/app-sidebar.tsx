@@ -1,23 +1,23 @@
 import { Link, usePage } from '@inertiajs/react';
-import { 
-    LayoutGrid, 
-    Users, 
-    GraduationCap, 
-    HeartPulse, 
-    Calendar, 
-    Activity, 
-    QrCode, 
-    ScanLine, 
-    Keyboard, 
-    Bell, 
-    Megaphone, 
-    BarChart3, 
-    Eye, 
-    Download, 
-    History, 
+import {
+    LayoutGrid,
+    Users,
+    GraduationCap,
+    HeartPulse,
+    Calendar,
+    Activity,
+    QrCode,
+    ScanLine,
+    Keyboard,
+    Bell,
+    Megaphone,
+    BarChart3,
+    Eye,
+    Download,
+    History,
     Settings,
     FolderGit2,
-    BookOpen
+    BookOpen,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -153,8 +153,12 @@ export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const userRole = auth.user.role;
 
-    const filteredMainNavItems = mainNavItems.filter((item) => !item.roles || item.roles.includes(userRole));
-    const filteredAdminNavItems = adminNavItems.filter((item) => !item.roles || item.roles.includes(userRole));
+    const filteredMainNavItems = mainNavItems.filter(
+        (item) => !item.roles || item.roles.includes(userRole),
+    );
+    const filteredAdminNavItems = adminNavItems.filter(
+        (item) => !item.roles || item.roles.includes(userRole),
+    );
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -171,7 +175,12 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={filteredMainNavItems} />
-                {filteredAdminNavItems.length > 0 && <NavMain items={filteredAdminNavItems} label="Administration" />}
+                {filteredAdminNavItems.length > 0 && (
+                    <NavMain
+                        items={filteredAdminNavItems}
+                        label="Administration"
+                    />
+                )}
             </SidebarContent>
 
             <SidebarFooter>
