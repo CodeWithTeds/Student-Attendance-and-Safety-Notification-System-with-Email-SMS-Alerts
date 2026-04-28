@@ -1,9 +1,23 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import {
-    Search, Plus, Filter, Download, Trash2, Pencil, ChevronLeft, ChevronRight,
-    ChevronsLeft, ChevronsRight, UserCircle2, ShieldCheck, GraduationCap, Heart,
-    MoreHorizontal, Check, X
+    Search,
+    Plus,
+    Filter,
+    Download,
+    Trash2,
+    Pencil,
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
+    UserCircle2,
+    ShieldCheck,
+    GraduationCap,
+    Heart,
+    MoreHorizontal,
+    Check,
+    X,
 } from 'lucide-react';
 import type { SharedData } from '@/types';
 
@@ -31,9 +45,12 @@ interface Props {
     users: { data: User[]; meta: Omit<PaginatedUsers, 'data'> };
 }
 
-const roleMeta: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-    admin:   { label: 'Admin',   color: 'role-admin',   icon: ShieldCheck },
-    parent:  { label: 'Parent',  color: 'role-parent',  icon: Heart },
+const roleMeta: Record<
+    string,
+    { label: string; color: string; icon: React.ElementType }
+> = {
+    admin: { label: 'Admin', color: 'role-admin', icon: ShieldCheck },
+    parent: { label: 'Parent', color: 'role-parent', icon: Heart },
     student: { label: 'Student', color: 'role-student', icon: GraduationCap },
 };
 
@@ -44,26 +61,46 @@ export default function UsersIndex({ users }: Props) {
     const [roleFilter, setRoleFilter] = useState('');
 
     const data: User[] = users?.data ?? [];
-    const meta = users?.meta ?? { current_page: 1, last_page: 1, per_page: 15, total: 0, from: 0, to: 0 };
+    const meta = users?.meta ?? {
+        current_page: 1,
+        last_page: 1,
+        per_page: 15,
+        total: 0,
+        from: 0,
+        to: 0,
+    };
 
-    const filtered = data.filter(u => {
-        const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) ||
+    const filtered = data.filter((u) => {
+        const matchSearch =
+            u.name.toLowerCase().includes(search.toLowerCase()) ||
             u.email.toLowerCase().includes(search.toLowerCase());
         const matchRole = roleFilter ? u.role === roleFilter : true;
         return matchSearch && matchRole;
     });
 
-    const allSelected = filtered.length > 0 && filtered.every(u => selected.includes(u.id));
-    const toggleAll = () => setSelected(allSelected ? [] : filtered.map(u => u.id));
-    const toggleOne = (id: number) => setSelected(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+    const allSelected =
+        filtered.length > 0 && filtered.every((u) => selected.includes(u.id));
+    const toggleAll = () =>
+        setSelected(allSelected ? [] : filtered.map((u) => u.id));
+    const toggleOne = (id: number) =>
+        setSelected((p) =>
+            p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
+        );
 
-    const goToPage = (url: string | null) => { if (url) router.get(url, {}, { preserveState: true }); };
+    const goToPage = (url: string | null) => {
+        if (url) router.get(url, {}, { preserveState: true });
+    };
 
     const deleteUser = (id: number) => {
         if (confirm('Delete this user?')) router.delete(`/admin/users/${id}`);
     };
 
-    const formatDate = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    const formatDate = (d: string) =>
+        new Date(d).toLocaleDateString('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+        });
 
     return (
         <>
@@ -137,7 +174,7 @@ export default function UsersIndex({ users }: Props) {
                             className="ut-search"
                             placeholder="Search users…"
                             value={search}
-                            onChange={e => setSearch(e.target.value)}
+                            onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
 
@@ -145,7 +182,7 @@ export default function UsersIndex({ users }: Props) {
                         id="role-filter"
                         className="ut-select"
                         value={roleFilter}
-                        onChange={e => setRoleFilter(e.target.value)}
+                        onChange={(e) => setRoleFilter(e.target.value)}
                     >
                         <option value="">All Roles</option>
                         <option value="admin">Admin</option>
@@ -154,7 +191,9 @@ export default function UsersIndex({ users }: Props) {
                     </select>
 
                     {selected.length > 0 && (
-                        <span className="ut-count">{selected.length} selected</span>
+                        <span className="ut-count">
+                            {selected.length} selected
+                        </span>
                     )}
 
                     <div className="ut-spacer" />
@@ -177,14 +216,28 @@ export default function UsersIndex({ users }: Props) {
                     <table className="ut">
                         <thead>
                             <tr>
-                                <th><input type="checkbox" className="cb" checked={allSelected} onChange={toggleAll} /></th>
+                                <th>
+                                    <input
+                                        type="checkbox"
+                                        className="cb"
+                                        checked={allSelected}
+                                        onChange={toggleAll}
+                                    />
+                                </th>
                                 <th>#</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Created</th>
                                 <th>Updated</th>
-                                <th style={{ textAlign: 'right', paddingRight: 4 }}>Actions</th>
+                                <th
+                                    style={{
+                                        textAlign: 'right',
+                                        paddingRight: 4,
+                                    }}
+                                >
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -197,67 +250,140 @@ export default function UsersIndex({ users }: Props) {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : filtered.map((user, i) => {
-                                const rm = roleMeta[user.role] ?? { label: user.role, color: 'role-student', icon: UserCircle2 };
-                                const RoleIcon = rm.icon;
-                                const initials = user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-                                const avatarColors = ['#6366f1','#ec4899','#10b981','#f59e0b','#3b82f6','#8b5cf6'];
-                                const bg = avatarColors[user.id % avatarColors.length];
-                                const isSelected = selected.includes(user.id);
+                            ) : (
+                                filtered.map((user, i) => {
+                                    const rm = roleMeta[user.role] ?? {
+                                        label: user.role,
+                                        color: 'role-student',
+                                        icon: UserCircle2,
+                                    };
+                                    const RoleIcon = rm.icon;
+                                    const initials = user.name
+                                        .split(' ')
+                                        .map((w) => w[0])
+                                        .join('')
+                                        .slice(0, 2)
+                                        .toUpperCase();
+                                    const avatarColors = [
+                                        '#6366f1',
+                                        '#ec4899',
+                                        '#10b981',
+                                        '#f59e0b',
+                                        '#3b82f6',
+                                        '#8b5cf6',
+                                    ];
+                                    const bg =
+                                        avatarColors[
+                                            user.id % avatarColors.length
+                                        ];
+                                    const isSelected = selected.includes(
+                                        user.id,
+                                    );
 
-                                return (
-                                    <tr key={user.id} className={isSelected ? 'selected-row' : ''}>
-                                        <td>
-                                            <input
-                                                type="checkbox"
-                                                className="cb"
-                                                checked={isSelected}
-                                                onChange={() => toggleOne(user.id)}
-                                            />
-                                        </td>
-                                        <td style={{ color: '#9ca3af', fontSize: 11 }}>
-                                            {(meta.from ?? 0) + i}
-                                        </td>
-                                        <td>
-                                            <div className="ut-user-cell">
-                                                <div className="ut-avatar" style={{ background: bg, color: '#fff' }}>
-                                                    {initials}
+                                    return (
+                                        <tr
+                                            key={user.id}
+                                            className={
+                                                isSelected ? 'selected-row' : ''
+                                            }
+                                        >
+                                            <td>
+                                                <input
+                                                    type="checkbox"
+                                                    className="cb"
+                                                    checked={isSelected}
+                                                    onChange={() =>
+                                                        toggleOne(user.id)
+                                                    }
+                                                />
+                                            </td>
+                                            <td
+                                                style={{
+                                                    color: '#9ca3af',
+                                                    fontSize: 11,
+                                                }}
+                                            >
+                                                {(meta.from ?? 0) + i}
+                                            </td>
+                                            <td>
+                                                <div className="ut-user-cell">
+                                                    <div
+                                                        className="ut-avatar"
+                                                        style={{
+                                                            background: bg,
+                                                            color: '#fff',
+                                                        }}
+                                                    >
+                                                        {initials}
+                                                    </div>
+                                                    <span className="ut-name">
+                                                        {user.name}
+                                                    </span>
                                                 </div>
-                                                <span className="ut-name">{user.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="ut-email">{user.email}</td>
-                                        <td>
-                                            <span className={`role-badge ${rm.color}`}>
-                                                <RoleIcon size={10} />
-                                                {rm.label}
-                                            </span>
-                                        </td>
-                                        <td style={{ color: '#6b7280', fontSize: 11.5 }}>{formatDate(user.created_at)}</td>
-                                        <td style={{ color: '#6b7280', fontSize: 11.5 }}>{formatDate(user.updated_at)}</td>
-                                        <td>
-                                            <div className="ut-actions" style={{ justifyContent: 'flex-end' }}>
-                                                <button
-                                                    id={`edit-user-${user.id}`}
-                                                    className="ut-icon-btn edit"
-                                                    title="Edit"
-                                                    onClick={() => router.visit(`/admin/users/${user.id}/edit`)}
+                                            </td>
+                                            <td className="ut-email">
+                                                {user.email}
+                                            </td>
+                                            <td>
+                                                <span
+                                                    className={`role-badge ${rm.color}`}
                                                 >
-                                                    <Pencil size={13} />
-                                                </button>
-                                                <button
-                                                    id={`delete-user-${user.id}`}
-                                                    className="ut-icon-btn del"
-                                                    title="Delete"
-                                                    onClick={() => deleteUser(user.id)}
+                                                    <RoleIcon size={10} />
+                                                    {rm.label}
+                                                </span>
+                                            </td>
+                                            <td
+                                                style={{
+                                                    color: '#6b7280',
+                                                    fontSize: 11.5,
+                                                }}
+                                            >
+                                                {formatDate(user.created_at)}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    color: '#6b7280',
+                                                    fontSize: 11.5,
+                                                }}
+                                            >
+                                                {formatDate(user.updated_at)}
+                                            </td>
+                                            <td>
+                                                <div
+                                                    className="ut-actions"
+                                                    style={{
+                                                        justifyContent:
+                                                            'flex-end',
+                                                    }}
                                                 >
-                                                    <Trash2 size={13} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                                    <button
+                                                        id={`edit-user-${user.id}`}
+                                                        className="ut-icon-btn edit"
+                                                        title="Edit"
+                                                        onClick={() =>
+                                                            router.visit(
+                                                                `/admin/users/${user.id}/edit`,
+                                                            )
+                                                        }
+                                                    >
+                                                        <Pencil size={13} />
+                                                    </button>
+                                                    <button
+                                                        id={`delete-user-${user.id}`}
+                                                        className="ut-icon-btn del"
+                                                        title="Delete"
+                                                        onClick={() =>
+                                                            deleteUser(user.id)
+                                                        }
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -282,29 +408,38 @@ export default function UsersIndex({ users }: Props) {
                         <button
                             className="ut-page-btn"
                             disabled={meta.current_page === 1}
-                            onClick={() => goToPage(`?page=${meta.current_page - 1}`)}
+                            onClick={() =>
+                                goToPage(`?page=${meta.current_page - 1}`)
+                            }
                             title="Previous page"
                         >
                             <ChevronLeft size={13} />
                         </button>
 
-                        {Array.from({ length: Math.min(meta.last_page, 7) }, (_, i) => {
-                            const page = i + 1;
-                            return (
-                                <button
-                                    key={page}
-                                    className={`ut-page-btn ${meta.current_page === page ? 'active' : ''}`}
-                                    onClick={() => goToPage(`?page=${page}`)}
-                                >
-                                    {page}
-                                </button>
-                            );
-                        })}
+                        {Array.from(
+                            { length: Math.min(meta.last_page, 7) },
+                            (_, i) => {
+                                const page = i + 1;
+                                return (
+                                    <button
+                                        key={page}
+                                        className={`ut-page-btn ${meta.current_page === page ? 'active' : ''}`}
+                                        onClick={() =>
+                                            goToPage(`?page=${page}`)
+                                        }
+                                    >
+                                        {page}
+                                    </button>
+                                );
+                            },
+                        )}
 
                         <button
                             className="ut-page-btn"
                             disabled={meta.current_page === meta.last_page}
-                            onClick={() => goToPage(`?page=${meta.current_page + 1}`)}
+                            onClick={() =>
+                                goToPage(`?page=${meta.current_page + 1}`)
+                            }
                             title="Next page"
                         >
                             <ChevronRight size={13} />
