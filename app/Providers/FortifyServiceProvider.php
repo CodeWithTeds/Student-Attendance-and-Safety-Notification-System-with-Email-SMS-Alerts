@@ -40,6 +40,20 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = \App\Models\User::where('email', $request->email)->first();
+
+            if ($user && \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+                if ($user->role === \App\Enums\UserRole::STUDENT && $user->status === 'pending') {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        Fortify::username() => 'Your account is pending approval by an administrator.',
+                    ]);
+                }
+                return $user;
+            }
+            return null;
+        });
     }
 
     /**

@@ -54,4 +54,9 @@ class UserService
 
         return $updated;
     }
+
+    public function updateStatus(int $id, string $status): bool
+    {
+        return $this->userRepository->update($id, ['status' => $status]);
+    }
 }

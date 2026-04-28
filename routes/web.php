@@ -15,6 +15,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
         Route::put('users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
         Route::delete('users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+        
+        Route::get('students', [\App\Http\Controllers\Admin\StudentController::class, 'index'])->name('students.index');
+        Route::post('students/{id}/approve', [\App\Http\Controllers\Admin\StudentController::class, 'approve'])->name('students.approve');
     });
 });
 

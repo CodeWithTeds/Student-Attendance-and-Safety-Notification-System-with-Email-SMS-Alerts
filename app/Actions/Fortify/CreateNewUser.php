@@ -52,6 +52,8 @@ class CreateNewUser implements CreatesNewUsers
             'name' => implode(' ', $nameParts),
             'email' => $input['email'],
             'password' => $input['password'],
+            'role' => 'student',
+            'status' => 'pending',
             'student_id' => $input['student_id'] ?? (string) Str::uuid(),
             'student_number' => $input['student_number'] ?? '2580' . random_int(1000, 9999),
             'first_name' => $input['first_name'],

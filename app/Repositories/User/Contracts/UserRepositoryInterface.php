@@ -15,4 +15,5 @@ interface UserRepositoryInterface
     public function delete(int $id): bool;
     public function syncChildren(int $parentId, array $studentIds): void;
     public function getStudents(): Collection;
+    public function getStudentsPaginated(int $perPage = 15);
 }
