@@ -36,4 +36,16 @@ class User extends Authenticatable
             'role' => UserRole::class,
         ];
     }
+
+    public function children()
+    {
+        return $this->belongsToMany(User::class, 'parent_student', 'parent_id', 'student_id')
+            ->withTimestamps();
+    }
+
+    public function parents()
+    {
+        return $this->belongsToMany(User::class, 'parent_student', 'student_id', 'parent_id')
+            ->withTimestamps();
+    }
 }
