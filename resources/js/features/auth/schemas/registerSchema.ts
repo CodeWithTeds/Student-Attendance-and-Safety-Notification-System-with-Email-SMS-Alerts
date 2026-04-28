@@ -8,7 +8,7 @@
 
 import type { RegisterFormData, StepErrors } from '../types/registerTypes';
 
-// ── Helpers ──
+// ── Validation Helpers ──
 
 function required(value: string, label: string): string | null {
     return value.trim() ? null : `${label} is required.`;
@@ -20,6 +20,27 @@ function minLength(value: string, min: number, label: string): string | null {
         : `${label} must be at least ${min} characters.`;
 }
 
+function maxLength(value: string, max: number, label: string): string | null {
+    return value.trim().length <= max
+        ? null
+        : `${label} must not exceed ${max} characters.`;
+}
+
+function lettersOnly(value: string, label: string): string | null {
+    const regex = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
+    return regex.test(value.trim()) ? null : `${label} must contain letters only.`;
+}
+
+function alphaWithPunctuation(value: string, label: string): string | null {
+    const regex = /^[a-zA-Z0-9À-ÿñÑ\s'\-\.\,#\/]+$/;
+    return regex.test(value.trim()) ? null : `${label} contains invalid characters.`;
+}
+
+function digitsOnly(value: string, label: string): string | null {
+    const regex = /^[0-9]+$/;
+    return regex.test(value.trim()) ? null : `${label} must contain numbers only.`;
+}
+
 function isEmail(value: string): string | null {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(value.trim()) ? null : 'Please enter a valid email address.';
@@ -29,25 +50,89 @@ function matchesField(value: string, other: string, label: string): string | nul
     return value === other ? null : `${label} does not match.`;
 }
 
+// ── Composed validators ──
+
+function validateName(value: string, label: string, isRequired: boolean): string | null {
+    if (isRequired) {
+        const req = required(value, label);
+        if (req) return req;
+    } else if (!value.trim()) {
+        return null; // optional and empty — skip
+    }
+
+    const len = minLength(value, 2, label);
+    if (len) return len;
+
+    const max = maxLength(value, 100, label);
+    if (max) return max;
+
+    const letters = lettersOnly(value, label);
+    if (letters) return letters;
+
+    return null;
+}
+
+function validateAlphaField(value: string, label: string, isRequired: boolean): string | null {
+    if (isRequired) {
+        const req = required(value, label);
+        if (req) return req;
+    } else if (!value.trim()) {
+        return null;
+    }
+
+    const letters = lettersOnly(value, label);
+    if (letters) return letters;
+
+    return null;
+}
+
+function validateAddressField(value: string, label: string, isRequired: boolean): string | null {
+    if (isRequired) {
+        const req = required(value, label);
+        if (req) return req;
+    } else if (!value.trim()) {
+        return null;
+    }
+
+    const fmt = alphaWithPunctuation(value, label);
+    if (fmt) return fmt;
+
+    return null;
+}
+
 // ── Step 1: Basic Information ──
 
 export function validateBasicInfo(data: RegisterFormData): StepErrors {
     const errors: StepErrors = {};
 
-    const firstNameErr = required(data.first_name, 'First name');
-    if (firstNameErr) errors.first_name = firstNameErr;
+    const firstName = validateName(data.first_name, 'First name', true);
+    if (firstName) errors.first_name = firstName;
 
-    const lastNameErr = required(data.last_name, 'Last name');
-    if (lastNameErr) errors.last_name = lastNameErr;
+    const middleName = validateName(data.middle_name, 'Middle name', false);
+    if (middleName) errors.middle_name = middleName;
 
-    const genderErr = required(data.gender, 'Gender');
-    if (genderErr) errors.gender = genderErr;
+    const lastName = validateName(data.last_name, 'Last name', true);
+    if (lastName) errors.last_name = lastName;
 
-    const dobErr = required(data.date_of_birth, 'Date of birth');
-    if (dobErr) errors.date_of_birth = dobErr;
+    // Suffix — optional, letters & dots only (e.g. Jr., Sr., III)
+    if (data.suffix.trim()) {
+        const suffixRegex = /^[a-zA-Z\s\.]+$/;
+        if (!suffixRegex.test(data.suffix.trim())) {
+            errors.suffix = 'Suffix must contain letters and periods only.';
+        }
+    }
 
-    const nationalityErr = required(data.nationality, 'Nationality');
-    if (nationalityErr) errors.nationality = nationalityErr;
+    const gender = required(data.gender, 'Gender');
+    if (gender) errors.gender = gender;
+
+    const dob = required(data.date_of_birth, 'Date of birth');
+    if (dob) errors.date_of_birth = dob;
+
+    const placeOfBirth = validateAlphaField(data.place_of_birth, 'Place of birth', false);
+    if (placeOfBirth) errors.place_of_birth = placeOfBirth;
+
+    const nationality = validateAlphaField(data.nationality, 'Nationality', true);
+    if (nationality) errors.nationality = nationality;
 
     return errors;
 }
@@ -57,20 +142,31 @@ export function validateBasicInfo(data: RegisterFormData): StepErrors {
 export function validateAddressInfo(data: RegisterFormData): StepErrors {
     const errors: StepErrors = {};
 
-    const streetErr = required(data.street, 'Street');
-    if (streetErr) errors.street = streetErr;
+    const houseNo = validateAddressField(data.house_no, 'House No.', false);
+    if (houseNo) errors.house_no = houseNo;
 
-    const barangayErr = required(data.barangay, 'Barangay');
-    if (barangayErr) errors.barangay = barangayErr;
+    const street = validateAddressField(data.street, 'Street', true);
+    if (street) errors.street = street;
 
-    const cityErr = required(data.city, 'City / Municipality');
-    if (cityErr) errors.city = cityErr;
+    const barangay = validateAlphaField(data.barangay, 'Barangay', true);
+    if (barangay) errors.barangay = barangay;
 
-    const provinceErr = required(data.province, 'Province');
-    if (provinceErr) errors.province = provinceErr;
+    const city = validateAlphaField(data.city, 'City / Municipality', true);
+    if (city) errors.city = city;
 
-    const zipErr = required(data.zip_code, 'Zip code');
-    if (zipErr) errors.zip_code = zipErr;
+    const province = validateAlphaField(data.province, 'Province', true);
+    if (province) errors.province = province;
+
+    const zipReq = required(data.zip_code, 'Zip code');
+    if (zipReq) {
+        errors.zip_code = zipReq;
+    } else {
+        const zipDigits = digitsOnly(data.zip_code, 'Zip code');
+        if (zipDigits) errors.zip_code = zipDigits;
+
+        const zipLen = maxLength(data.zip_code, 4, 'Zip code');
+        if (zipLen) errors.zip_code = zipLen;
+    }
 
     return errors;
 }

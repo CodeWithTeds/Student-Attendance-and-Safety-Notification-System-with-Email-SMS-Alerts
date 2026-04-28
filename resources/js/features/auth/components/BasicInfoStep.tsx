@@ -1,6 +1,7 @@
 /**
  * BasicInfoStep — Step 1 of student registration.
  * Handles personal information fields.
+ * Uses input sanitizers to prevent invalid characters in real-time.
  */
 
 import InputError from '@/components/input-error';
@@ -14,6 +15,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type { RegisterFormData, StepErrors } from '../types/registerTypes';
+import { sanitizeName, sanitizeAlpha, sanitizeSuffix } from '../utils/inputSanitizers';
 
 interface BasicInfoStepProps {
     data: RegisterFormData;
@@ -60,7 +62,7 @@ export default function BasicInfoStep({ data, stepErrors, onChange }: BasicInfoS
                         id="first_name"
                         className={`h-10 ${stepErrors.first_name ? 'border-destructive' : ''}`}
                         value={data.first_name}
-                        onChange={(e) => onChange('first_name', e.target.value)}
+                        onChange={(e) => onChange('first_name', sanitizeName(e.target.value))}
                         placeholder="Juan"
                     />
                     <InputError message={stepErrors.first_name} />
@@ -69,11 +71,12 @@ export default function BasicInfoStep({ data, stepErrors, onChange }: BasicInfoS
                     <Label htmlFor="middle_name">Middle Name <span className="text-xs text-muted-foreground">(optional)</span></Label>
                     <Input
                         id="middle_name"
-                        className="h-10"
+                        className={`h-10 ${stepErrors.middle_name ? 'border-destructive' : ''}`}
                         value={data.middle_name}
-                        onChange={(e) => onChange('middle_name', e.target.value)}
+                        onChange={(e) => onChange('middle_name', sanitizeName(e.target.value))}
                         placeholder="Santos"
                     />
+                    <InputError message={stepErrors.middle_name} />
                 </div>
             </div>
 
@@ -84,7 +87,7 @@ export default function BasicInfoStep({ data, stepErrors, onChange }: BasicInfoS
                         id="last_name"
                         className={`h-10 ${stepErrors.last_name ? 'border-destructive' : ''}`}
                         value={data.last_name}
-                        onChange={(e) => onChange('last_name', e.target.value)}
+                        onChange={(e) => onChange('last_name', sanitizeName(e.target.value))}
                         placeholder="Dela Cruz"
                     />
                     <InputError message={stepErrors.last_name} />
@@ -93,11 +96,12 @@ export default function BasicInfoStep({ data, stepErrors, onChange }: BasicInfoS
                     <Label htmlFor="suffix">Suffix <span className="text-xs text-muted-foreground">(optional)</span></Label>
                     <Input
                         id="suffix"
-                        className="h-10"
+                        className={`h-10 ${stepErrors.suffix ? 'border-destructive' : ''}`}
                         value={data.suffix}
-                        onChange={(e) => onChange('suffix', e.target.value)}
+                        onChange={(e) => onChange('suffix', sanitizeSuffix(e.target.value))}
                         placeholder="Jr., Sr., III"
                     />
+                    <InputError message={stepErrors.suffix} />
                 </div>
             </div>
 
@@ -135,11 +139,12 @@ export default function BasicInfoStep({ data, stepErrors, onChange }: BasicInfoS
                     <Label htmlFor="place_of_birth">Place of Birth <span className="text-xs text-muted-foreground">(optional)</span></Label>
                     <Input
                         id="place_of_birth"
-                        className="h-10"
+                        className={`h-10 ${stepErrors.place_of_birth ? 'border-destructive' : ''}`}
                         value={data.place_of_birth}
-                        onChange={(e) => onChange('place_of_birth', e.target.value)}
+                        onChange={(e) => onChange('place_of_birth', sanitizeAlpha(e.target.value))}
                         placeholder="Manila, Philippines"
                     />
+                    <InputError message={stepErrors.place_of_birth} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="nationality">Nationality <span className="text-destructive">*</span></Label>
@@ -147,7 +152,7 @@ export default function BasicInfoStep({ data, stepErrors, onChange }: BasicInfoS
                         id="nationality"
                         className={`h-10 ${stepErrors.nationality ? 'border-destructive' : ''}`}
                         value={data.nationality}
-                        onChange={(e) => onChange('nationality', e.target.value)}
+                        onChange={(e) => onChange('nationality', sanitizeAlpha(e.target.value))}
                     />
                     <InputError message={stepErrors.nationality} />
                 </div>
