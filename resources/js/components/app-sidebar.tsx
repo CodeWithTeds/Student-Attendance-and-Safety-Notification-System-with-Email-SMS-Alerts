@@ -46,21 +46,21 @@ const mainNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
     {
         title: 'User Management',
-        href: '#',
+        href: '/admin/users',
         icon: Users,
         roles: ['admin'],
-    },
-    {
-        title: 'Student Management',
-        href: '#',
-        icon: GraduationCap,
-        roles: ['admin'],
-    },
-    {
-        title: 'Parent / Guardian',
-        href: '#',
-        icon: HeartPulse,
-        roles: ['admin'],
+        items: [
+            {
+                title: 'Student Management',
+                href: '#',
+                icon: GraduationCap,
+            },
+            {
+                title: 'Parent / Guardian',
+                href: '#',
+                icon: HeartPulse,
+            },
+        ],
     },
     {
         title: 'Class / Section',

@@ -69,7 +69,7 @@ export default function UsersIndex({ users }: Props) {
         <>
             <Head title="User Management" />
             <style>{`
-                .ut-root { font-family: 'Inter', system-ui, sans-serif; height: 100%; display: flex; flex-direction: column; gap: 0; }
+                .ut-root { font-family: 'Inter', system-ui, sans-serif; height: 100%; display: flex; flex-direction: column; gap: 0; margin: 16px; background: var(--background); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
                 .ut-toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
                 .ut-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
                 .ut-search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #6b7280; pointer-events: none; }
@@ -84,16 +84,16 @@ export default function UsersIndex({ users }: Props) {
                 .ut-spacer { flex: 1; }
                 .ut-count { font-size: 12px; color: #6b7280; padding: 0 4px; }
 
-                .ut-table-wrap { flex: 1; overflow: auto; }
-                table.ut { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+                .ut-table-wrap { flex: 1; overflow: auto; padding: 0 16px; }
+                table.ut { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 800px; }
                 table.ut thead tr { border-bottom: 1.5px solid var(--border); }
                 table.ut thead th { padding: 7px 10px; text-align: left; font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; background: var(--background); position: sticky; top: 0; z-index: 1; }
-                table.ut thead th:first-child { padding-left: 14px; width: 36px; }
+                table.ut thead th:first-child { padding-left: 4px; width: 36px; }
                 table.ut tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
                 table.ut tbody tr:hover { background: rgba(99,102,241,.04); }
                 table.ut tbody tr.selected-row { background: rgba(99,102,241,.07); }
                 table.ut tbody td { padding: 6px 10px; vertical-align: middle; color: var(--foreground); white-space: nowrap; }
-                table.ut tbody td:first-child { padding-left: 14px; }
+                table.ut tbody td:first-child { padding-left: 4px; }
 
                 .ut-avatar { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
                 .ut-user-cell { display: flex; align-items: center; gap: 8px; }
@@ -184,7 +184,7 @@ export default function UsersIndex({ users }: Props) {
                                 <th>Role</th>
                                 <th>Created</th>
                                 <th>Updated</th>
-                                <th style={{ textAlign: 'right', paddingRight: 14 }}>Actions</th>
+                                <th style={{ textAlign: 'right', paddingRight: 4 }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
