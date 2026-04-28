@@ -18,6 +18,7 @@ import {
     Settings,
     FolderGit2,
     BookOpen,
+    ShieldCheck,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -43,25 +44,34 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const adminNavItems: NavItem[] = [
+// Access Management group — collapsible with 3 sub-items
+const accessManagementItems: NavItem[] = [
     {
-        title: 'User Management',
-        href: '/admin/users',
-        icon: Users,
+        title: 'Access Management',
+        href: '#',
+        icon: ShieldCheck,
         roles: ['admin'],
         items: [
             {
+                title: 'User Management',
+                href: '/admin/users',
+                icon: Users,
+            },
+            {
                 title: 'Student Management',
-                href: '#',
+                href: '/admin/students',
                 icon: GraduationCap,
             },
             {
                 title: 'Parent / Guardian',
-                href: '#',
+                href: '/admin/parents',
                 icon: HeartPulse,
             },
         ],
     },
+];
+
+const adminNavItems: NavItem[] = [
     {
         title: 'Class / Section',
         href: '#',
@@ -156,6 +166,9 @@ export function AppSidebar() {
     const filteredMainNavItems = mainNavItems.filter(
         (item) => !item.roles || item.roles.includes(userRole),
     );
+    const filteredAccessItems = accessManagementItems.filter(
+        (item) => !item.roles || item.roles.includes(userRole),
+    );
     const filteredAdminNavItems = adminNavItems.filter(
         (item) => !item.roles || item.roles.includes(userRole),
     );
@@ -175,6 +188,12 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={filteredMainNavItems} />
+                {filteredAccessItems.length > 0 && (
+                    <NavMain
+                        items={filteredAccessItems}
+                        label="Access Management"
+                    />
+                )}
                 {filteredAdminNavItems.length > 0 && (
                     <NavMain
                         items={filteredAdminNavItems}
