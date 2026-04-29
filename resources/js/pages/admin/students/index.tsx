@@ -76,6 +76,35 @@ export default function StudentsIndex({ users }: Props) {
         setIsEditModalOpen(true);
     };
 
+    const handleExport = () => {
+        if (filtered.length === 0) return;
+
+        const headers = ['ID', 'Name', 'Email', 'Student Number', 'Status', 'Created At'];
+        const csvContent = [
+            headers.join(','),
+            ...filtered.map((s) =>
+                [
+                    s.id,
+                    `"${s.name}"`,
+                    `"${s.email}"`,
+                    `"${s.student_number || 'Pending'}"`,
+                    `"${s.status || 'pending'}"`,
+                    `"${new Date(s.created_at).toLocaleDateString()}"`,
+                ].join(','),
+            ),
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `students_export_${new Date().getTime()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="flex h-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm transition-all m-4">
             <Head title="Student Management" />
@@ -85,6 +114,7 @@ export default function StudentsIndex({ users }: Props) {
                 onSearchChange={setSearch}
                 selectedCount={selected.length}
                 onAddClick={() => setIsAddModalOpen(true)}
+                onExport={handleExport}
             />
 
             <StudentTable

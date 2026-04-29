@@ -5,9 +5,10 @@ interface Props {
     onSearchChange: (value: string) => void;
     selectedCount: number;
     onAddClick: () => void;
+    onExport: () => void;
 }
 
-export default function StudentToolbar({ search, onSearchChange, selectedCount, onAddClick }: Props) {
+export default function StudentToolbar({ search, onSearchChange, selectedCount, onAddClick, onExport }: Props) {
     return (
         <div className="flex flex-wrap items-center gap-3 border-b border-[var(--border)] p-4 bg-[var(--background)]">
             <div className="relative flex-1 min-w-[200px] max-w-[320px]">
@@ -29,6 +30,7 @@ export default function StudentToolbar({ search, onSearchChange, selectedCount, 
             <div className="flex-1" />
 
             <button 
+                onClick={onExport}
                 className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 text-[13px] font-medium text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors"
             >
                 <Download size={14} /> Export
