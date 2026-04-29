@@ -2,11 +2,10 @@
 
 namespace App\Http\Requests\User;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
 use App\Enums\UserRole;
+use Illuminate\Foundation\Http\FormRequest;
 
-class StoreUserRequest extends FormRequest
+class StoreStudentRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -19,12 +18,16 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', new Enum(UserRole::class)],
-            'student_ids' => ['nullable', 'array'],
-            'student_ids.*' => ['exists:users,id'],
             'first_name' => ['nullable', 'string', 'max:255'],
             'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
+        ];
+    }
+
+    public function studentData(): array
+    {
+        return $this->validated() + [
+            'role' => UserRole::STUDENT->value,
         ];
     }
 }

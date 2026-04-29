@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\User\UserService;
-use App\Repositories\User\Contracts\UserRepositoryInterface;
+use App\Http\Requests\User\StoreStudentRequest;
 use App\Http\Resources\UserResource;
+use App\Repositories\User\Contracts\UserRepositoryInterface;
+use App\Services\User\UserService;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class StudentController extends Controller
 {
@@ -24,9 +25,15 @@ class StudentController extends Controller
         ]);
     }
 
+    public function store(StoreStudentRequest $request): RedirectResponse
+    {
+        $this->userService->createUser($request->studentData());
+        return redirect()->route('admin.students.index')->with('success', 'Student created successfully.');
+    }
+
     public function approve(int $id): RedirectResponse
     {
-        $this->userService->updateStatus($id, 'approved');
+        $this->userService->approveStudent($id);
         return redirect()->route('admin.students.index')->with('success', 'Student approved successfully.');
     }
 }

@@ -14,8 +14,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 
 use App\Enums\UserRole;
+use App\Enums\UserStatus;
 
-#[Fillable(['name', 'email', 'password', 'role', 'status', 'student_id', 'student_number', 'first_name', 'middle_name', 'last_name', 'suffix', 'gender', 'date_of_birth', 'place_of_birth', 'nationality', 'house_no', 'street', 'barangay', 'city', 'province', 'zip_code'])]
+#[Fillable(['name', 'email', 'password', 'role', 'status', 'student_id', 'student_number', 'qr_code_value', 'qr_code_svg', 'first_name', 'middle_name', 'last_name', 'suffix', 'gender', 'date_of_birth', 'place_of_birth', 'nationality', 'house_no', 'street', 'barangay', 'city', 'province', 'zip_code'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -34,6 +35,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'role' => UserRole::class,
+            'status' => UserStatus::class,
         ];
     }
 

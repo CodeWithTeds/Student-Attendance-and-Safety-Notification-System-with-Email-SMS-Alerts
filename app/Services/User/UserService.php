@@ -2,26 +2,38 @@
 
 namespace App\Services\User;
 
+use App\Enums\UserStatus;
 use App\Repositories\User\Contracts\UserRepositoryInterface;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use App\Enums\UserRole;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserService
 {
     public function __construct(
-        protected UserRepositoryInterface $userRepository
+        protected UserRepositoryInterface $userRepository,
+        protected StudentQrCodeService $studentQrCodeService
     ) {}
 
     public function createUser(array $data): User
     {
         $data['password'] = Hash::make($data['password']);
-        
+
+        $isStudent = $data['role'] === UserRole::STUDENT->value;
+        $name = $this->resolveDisplayName($data);
+
         $user = $this->userRepository->create([
-            'name' => $data['name'],
+            'name' => $name,
             'email' => $data['email'],
             'password' => $data['password'],
             'role' => $data['role'],
+            'status' => $isStudent ? UserStatus::PENDING->value : UserStatus::APPROVED->value,
+            'student_id' => $isStudent ? (string) Str::uuid() : null,
+            'student_number' => $isStudent ? $this->generateStudentNumber() : null,
+            'first_name' => $data['first_name'] ?? null,
+            'middle_name' => $data['middle_name'] ?? null,
+            'last_name' => $data['last_name'] ?? null,
         ]);
 
         if (isset($data['student_ids']) && $data['role'] === UserRole::PARENT->value) {
@@ -39,10 +51,15 @@ class UserService
             unset($data['password']);
         }
 
+        $name = $this->resolveDisplayName($data);
+
         $updated = $this->userRepository->update($id, [
-            'name' => $data['name'],
+            'name' => $name,
             'email' => $data['email'],
             'role' => $data['role'],
+            'first_name' => $data['first_name'] ?? null,
+            'middle_name' => $data['middle_name'] ?? null,
+            'last_name' => $data['last_name'] ?? null,
         ] + (isset($data['password']) ? ['password' => $data['password']] : []));
 
         if ($updated && isset($data['student_ids'])) {
@@ -58,5 +75,47 @@ class UserService
     public function updateStatus(int $id, string $status): bool
     {
         return $this->userRepository->update($id, ['status' => $status]);
+    }
+
+    public function approveStudent(int $id): bool
+    {
+        $student = $this->userRepository->getById($id);
+
+        if (!$student) {
+            return false;
+        }
+
+        $studentId = $student->student_id ?: (string) Str::uuid();
+        $studentNumber = $student->student_number ?: $this->generateStudentNumber();
+        $payload = $student->qr_code_value ?: $this->studentQrCodeService->generatePayload($student, $studentId, $studentNumber);
+        $svg = $student->qr_code_svg ?: $this->studentQrCodeService->generateSvg($payload);
+
+        return $this->userRepository->update($id, [
+            'status' => UserStatus::APPROVED->value,
+            'student_id' => $studentId,
+            'student_number' => $studentNumber,
+            'qr_code_value' => $payload,
+            'qr_code_svg' => $svg,
+        ]);
+    }
+
+    protected function resolveDisplayName(array $data): string
+    {
+        $parts = array_filter([
+            $data['first_name'] ?? null,
+            $data['middle_name'] ?? null,
+            $data['last_name'] ?? null,
+        ]);
+
+        if ($parts !== []) {
+            return implode(' ', $parts);
+        }
+
+        return $data['name'];
+    }
+
+    protected function generateStudentNumber(): string
+    {
+        return now()->format('Y') . random_int(100000, 999999);
     }
 }
