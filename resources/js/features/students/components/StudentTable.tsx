@@ -124,14 +124,12 @@ export default function StudentTable({
                                     <td className="py-2.5 px-2">
                                         {student.qr_code_svg ? (
                                             <button
-                                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition-all hover:border-emerald-500 hover:text-emerald-600 hover:ring-2 hover:ring-emerald-500/10"
+                                                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors shadow-sm"
                                                 onClick={() => onViewQr(student)}
                                                 title="View Student QR ID"
                                             >
-                                                <div 
-                                                    className="h-6 w-6 flex items-center justify-center"
-                                                    dangerouslySetInnerHTML={{ __html: student.qr_code_svg }} 
-                                                />
+                                                <QrCode size={14} className="text-[var(--primary)]" />
+                                                View QR
                                             </button>
                                         ) : (
                                             <span className="inline-flex items-center gap-1 text-[11px] text-[var(--muted-foreground)]">
