@@ -1,4 +1,5 @@
 import AddStudentModal from '@/features/students/components/AddStudentModal';
+import EditStudentModal from '@/features/students/components/EditStudentModal';
 import StudentIdCard from '@/features/students/components/StudentIdCard';
 import StudentTable from '@/features/students/components/StudentTable';
 import StudentToolbar from '@/features/students/components/StudentToolbar';
@@ -26,7 +27,9 @@ export default function StudentsIndex({ users }: Props) {
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<number[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [activeQrStudent, setActiveQrStudent] = useState<User | null>(null);
+    const [studentToEdit, setStudentToEdit] = useState<User | null>(null);
 
     const data: User[] = users?.data ?? [];
     const meta = users?.meta ?? {
@@ -68,6 +71,11 @@ export default function StudentsIndex({ users }: Props) {
         }
     };
 
+    const handleEdit = (student: User) => {
+        setStudentToEdit(student);
+        setIsEditModalOpen(true);
+    };
+
     return (
         <div className="flex h-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm transition-all m-4">
             <Head title="Student Management" />
@@ -85,6 +93,7 @@ export default function StudentsIndex({ users }: Props) {
                 onToggleAll={toggleAll}
                 onToggleOne={toggleOne}
                 onViewQr={setActiveQrStudent}
+                onEdit={handleEdit}
                 onApprove={handleApprove}
                 meta={meta}
             />
@@ -94,6 +103,15 @@ export default function StudentsIndex({ users }: Props) {
             <AddStudentModal 
                 isOpen={isAddModalOpen} 
                 onClose={() => setIsAddModalOpen(false)} 
+            />
+
+            <EditStudentModal 
+                isOpen={isEditModalOpen} 
+                onClose={() => {
+                    setIsEditModalOpen(false);
+                    setStudentToEdit(null);
+                }} 
+                student={studentToEdit}
             />
 
             {activeQrStudent && (

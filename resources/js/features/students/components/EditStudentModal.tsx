@@ -1,33 +1,48 @@
 import { useForm } from '@inertiajs/react';
-import { GraduationCap, Plus, X } from 'lucide-react';
-import { FormEvent } from 'react';
-import { AddStudentForm } from '../types';
+import { GraduationCap, Save, X } from 'lucide-react';
+import { FormEvent, useEffect } from 'react';
+import { EditStudentForm, User } from '../types';
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
+    student: User | null;
 }
 
-const initialForm: AddStudentForm = {
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    first_name: '',
-    middle_name: '',
-    last_name: '',
-};
-
-export default function AddStudentModal({ isOpen, onClose }: Props) {
+export default function EditStudentModal({ isOpen, onClose, student }: Props) {
     const {
-        data: studentForm,
-        setData: setStudentForm,
-        post,
+        data: form,
+        setData: setForm,
+        put,
         processing,
         errors,
         reset,
         clearErrors,
-    } = useForm<AddStudentForm>(initialForm);
+    } = useForm<EditStudentForm>({
+        name: '',
+        email: '',
+        first_name: '',
+        middle_name: '',
+        last_name: '',
+        student_number: '',
+        password: '',
+        password_confirmation: '',
+    });
+
+    useEffect(() => {
+        if (student && isOpen) {
+            setForm({
+                name: student.name || '',
+                email: student.email || '',
+                first_name: student.first_name || '',
+                middle_name: student.middle_name || '',
+                last_name: student.last_name || '',
+                student_number: student.student_number || '',
+                password: '',
+                password_confirmation: '',
+            });
+        }
+    }, [student, isOpen]);
 
     if (!isOpen) return null;
 
@@ -39,7 +54,9 @@ export default function AddStudentModal({ isOpen, onClose }: Props) {
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        post('/admin/students', {
+        if (!student) return;
+
+        put(`/admin/users/${student.id}`, {
             preserveScroll: true,
             onSuccess: handleClose,
         });
@@ -56,17 +73,16 @@ export default function AddStudentModal({ isOpen, onClose }: Props) {
                     <div>
                         <div className="flex items-center gap-2.5 text-lg font-bold text-[var(--foreground)]">
                             <GraduationCap className="text-[var(--primary)]" size={22} />
-                            Add Student
+                            Edit Student
                         </div>
                         <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                            Create a pending student account. A unique QR code will be generated after approval.
+                            Update student information. Leave password fields blank to keep the current password.
                         </p>
                     </div>
                     <button
                         type="button"
                         onClick={handleClose}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] transition-colors"
-                        aria-label="Close add student modal"
                     >
                         <X size={16} />
                     </button>
@@ -79,8 +95,8 @@ export default function AddStudentModal({ isOpen, onClose }: Props) {
                             <label className="text-xs font-semibold text-[var(--foreground)]">Display name</label>
                             <input
                                 className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
-                                value={studentForm.name}
-                                onChange={(e) => setStudentForm('name', e.target.value)}
+                                value={form.name}
+                                onChange={(e) => setForm('name', e.target.value)}
                                 placeholder="Juan Dela Cruz"
                                 required
                             />
@@ -91,9 +107,8 @@ export default function AddStudentModal({ isOpen, onClose }: Props) {
                             <label className="text-xs font-semibold text-[var(--foreground)]">First name</label>
                             <input
                                 className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
-                                value={studentForm.first_name}
-                                onChange={(e) => setStudentForm('first_name', e.target.value)}
-                                placeholder="Juan"
+                                value={form.first_name}
+                                onChange={(e) => setForm('first_name', e.target.value)}
                                 required
                             />
                             {errors.first_name && <span className="text-[11px] text-red-500 font-medium">{errors.first_name}</span>}
@@ -103,64 +118,65 @@ export default function AddStudentModal({ isOpen, onClose }: Props) {
                             <label className="text-xs font-semibold text-[var(--foreground)]">Middle name</label>
                             <input
                                 className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
-                                value={studentForm.middle_name}
-                                onChange={(e) => setStudentForm('middle_name', e.target.value)}
-                                placeholder="Santos"
+                                value={form.middle_name}
+                                onChange={(e) => setForm('middle_name', e.target.value)}
                             />
-                            {errors.middle_name && <span className="text-[11px] text-red-500 font-medium">{errors.middle_name}</span>}
                         </div>
 
                         <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-semibold text-[var(--foreground)]">Last name</label>
                             <input
                                 className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
-                                value={studentForm.last_name}
-                                onChange={(e) => setStudentForm('last_name', e.target.value)}
-                                placeholder="Dela Cruz"
+                                value={form.last_name}
+                                onChange={(e) => setForm('last_name', e.target.value)}
                                 required
                             />
                             {errors.last_name && <span className="text-[11px] text-red-500 font-medium">{errors.last_name}</span>}
                         </div>
 
                         <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">Student Number</label>
+                            <input
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
+                                value={form.student_number}
+                                onChange={(e) => setForm('student_number', e.target.value)}
+                            />
+                            {errors.student_number && <span className="text-[11px] text-red-500 font-medium">{errors.student_number}</span>}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5 md:col-span-2">
                             <label className="text-xs font-semibold text-[var(--foreground)]">Email</label>
                             <input
                                 className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
                                 type="email"
-                                value={studentForm.email}
-                                onChange={(e) => setStudentForm('email', e.target.value)}
-                                placeholder="student@example.com"
+                                value={form.email}
+                                onChange={(e) => setForm('email', e.target.value)}
                                 required
                             />
                             {errors.email && <span className="text-[11px] text-red-500 font-medium">{errors.email}</span>}
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-semibold text-[var(--foreground)]">Password</label>
+                            <label className="text-xs font-semibold text-[var(--foreground)]">New Password</label>
                             <input
                                 className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
                                 type="password"
-                                value={studentForm.password}
-                                onChange={(e) => setStudentForm('password', e.target.value)}
-                                placeholder="At least 8 characters"
-                                required
+                                value={form.password}
+                                onChange={(e) => setForm('password', e.target.value)}
+                                placeholder="Optional"
                             />
                             {errors.password && <span className="text-[11px] text-red-500 font-medium">{errors.password}</span>}
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-semibold text-[var(--foreground)]">Confirm password</label>
+                            <label className="text-xs font-semibold text-[var(--foreground)]">Confirm Password</label>
                             <input
                                 className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
                                 type="password"
-                                value={studentForm.password_confirmation}
-                                onChange={(e) => setStudentForm('password_confirmation', e.target.value)}
-                                placeholder="Repeat password"
-                                required
+                                value={form.password_confirmation}
+                                onChange={(e) => setForm('password_confirmation', e.target.value)}
+                                placeholder="Optional"
                             />
-                            {errors.password_confirmation && (
-                                <span className="text-[11px] text-red-500 font-medium">{errors.password_confirmation}</span>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -179,8 +195,8 @@ export default function AddStudentModal({ isOpen, onClose }: Props) {
                         disabled={processing}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-colors disabled:opacity-50 shadow-sm"
                     >
-                        <Plus size={14} />
-                        {processing ? 'Saving...' : 'Add Student'}
+                        <Save size={14} />
+                        {processing ? 'Saving...' : 'Update Student'}
                     </button>
                 </div>
             </form>

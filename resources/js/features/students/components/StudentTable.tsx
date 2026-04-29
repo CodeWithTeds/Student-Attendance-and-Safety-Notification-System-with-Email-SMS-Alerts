@@ -8,6 +8,7 @@ interface Props {
     onToggleAll: () => void;
     onToggleOne: (id: number) => void;
     onViewQr: (student: User) => void;
+    onEdit: (student: User) => void;
     onApprove: (id: number) => void;
     meta: { from: number };
 }
@@ -18,6 +19,7 @@ export default function StudentTable({
     onToggleAll,
     onToggleOne,
     onViewQr,
+    onEdit,
     onApprove,
     meta,
 }: Props) {
@@ -151,7 +153,7 @@ export default function StudentTable({
                                             )}
                                             <button
                                                 className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--muted-foreground)] transition-colors hover:bg-[var(--accent)] hover:text-[var(--primary)]"
-                                                onClick={() => router.visit(`/admin/users/${student.id}/edit`)}
+                                                onClick={() => onEdit(student)}
                                                 title="Edit student"
                                             >
                                                 <Pencil size={14} />
