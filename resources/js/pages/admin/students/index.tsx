@@ -245,6 +245,39 @@ export default function StudentsIndex({ users }: Props) {
                     .student-modal { width: 100%; max-height: calc(100vh - 24px); }
                     .student-form-grid { grid-template-columns: 1fr; }
                 }
+
+                /* Virtual ID Card Styles */
+                .id-card-container { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #f8fafc; }
+                .id-card { width: 320px; height: 500px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.15); position: relative; display: flex; flex-direction: column; font-family: 'Outfit', sans-serif; }
+                
+                .id-card-top { height: 180px; background: #fff; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 30px; }
+                .id-card-logo { font-weight: 800; color: #1e3a8a; font-size: 14px; letter-spacing: 2px; margin-bottom: 5px; }
+                .id-card-company { font-weight: 900; color: #1e3a8a; font-size: 18px; text-transform: uppercase; }
+                
+                .id-card-qr-wrap { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); z-index: 10; width: 180px; height: 180px; background: #fff; padding: 10px; border: 4px solid #1e3a8a; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; }
+                .id-card-qr-wrap svg { width: 100%; height: 100%; }
+
+                .id-card-bottom { flex: 1; background: #1e3a8a; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 40px; color: #fff; text-align: center; }
+                .id-card-name { font-size: 22px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+                .id-card-role { font-size: 14px; opacity: 0.8; margin-bottom: 20px; font-weight: 400; }
+                .id-card-info { font-size: 12px; margin-bottom: 4px; }
+                .id-card-label { opacity: 0.7; margin-right: 4px; }
+                .id-card-value { font-weight: 600; }
+
+                /* Decorative shapes */
+                .id-shape-1 { position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: #1e3a8a; border-radius: 50%; }
+                .id-shape-2 { position: absolute; top: 20px; left: -10px; width: 30px; height: 60px; background: #1e3a8a; border-radius: 0 30px 30px 0; }
+                .id-shape-3 { position: absolute; bottom: 80px; left: -30px; width: 100px; height: 100px; border: 15px solid rgba(255,255,255,0.1); border-radius: 50%; }
+                .id-dots { position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: center; gap: 4px; opacity: 0.3; }
+                .id-dot { width: 4px; height: 4px; background: #fff; border-radius: 50%; }
+
+                @media print {
+                    .student-modal-backdrop { background: #fff; position: static; padding: 0; }
+                    .student-modal { border: none; box-shadow: none; width: auto; max-height: none; }
+                    .student-modal-header, .student-modal-footer, .ut-root { display: none !important; }
+                    .id-card-container { padding: 0; background: #fff; }
+                    .id-card { box-shadow: none; border: 1px solid #eee; margin: 0 auto; }
+                }
             `}</style>
 
             <div className="ut-root">
@@ -791,24 +824,53 @@ export default function StudentsIndex({ users }: Props) {
                             </button>
                         </div>
 
-                        <div className="student-modal-body">
-                            <div className="qr-preview">
-                                <div
-                                    className="qr-preview-box"
-                                    dangerouslySetInnerHTML={{
-                                        __html:
-                                            activeQrStudent.qr_code_svg ?? '',
-                                    }}
-                                />
-                                {activeQrStudent.qr_code_value && (
-                                    <div className="qr-code-value">
-                                        {activeQrStudent.qr_code_value}
+                        <div className="student-modal-body id-card-container">
+                            <div className="id-card">
+                                <div className="id-card-top">
+                                    <div className="id-shape-1"></div>
+                                    <div className="id-shape-2"></div>
+                                    <div className="id-card-logo">SASN</div>
+                                    <div className="id-card-company">STUDENT ID</div>
+                                    
+                                    <div className="id-card-qr-wrap" dangerouslySetInnerHTML={{ __html: activeQrStudent.qr_code_svg ?? '' }} />
+                                </div>
+                                
+                                <div className="id-card-bottom">
+                                    <div className="id-shape-3"></div>
+                                    
+                                    <div className="id-card-name">{activeQrStudent.name}</div>
+                                    <div className="id-card-role">Student</div>
+                                    
+                                    <div className="id-card-info">
+                                        <span className="id-card-label">ID:</span>
+                                        <span className="id-card-value">{activeQrStudent.student_number || 'PENDING'}</span>
                                     </div>
-                                )}
+                                    <div className="id-card-info">
+                                        <span className="id-card-label">Email:</span>
+                                        <span className="id-card-value">{activeQrStudent.email}</span>
+                                    </div>
+                                    <div className="id-card-info" style={{ marginTop: 8 }}>
+                                        <span className="id-card-label">Join Date:</span>
+                                        <span className="id-card-value">{formatDate(activeQrStudent.created_at)}</span>
+                                    </div>
+
+                                    <div className="id-dots">
+                                        {Array.from({ length: 10 }).map((_, i) => (
+                                            <div key={i} className="id-dot"></div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <div className="student-modal-footer">
+                            <button
+                                className="ut-btn ut-btn-ghost"
+                                type="button"
+                                onClick={() => window.print()}
+                            >
+                                <Download size={13} /> Print ID
+                            </button>
                             <button
                                 className="ut-btn ut-btn-primary"
                                 type="button"
