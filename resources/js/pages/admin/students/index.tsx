@@ -1,25 +1,21 @@
-import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
 import {
-    Search,
-    Plus,
-    Filter,
-    Download,
-    Trash2,
-    Pencil,
+    Check,
     ChevronLeft,
     ChevronRight,
     ChevronsLeft,
     ChevronsRight,
-    UserCircle2,
-    ShieldCheck,
+    Download,
     GraduationCap,
-    Heart,
-    MoreHorizontal,
-    Check,
+    Pencil,
+    Plus,
+    QrCode,
+    Search,
+    Trash2,
     X,
 } from 'lucide-react';
-import type { SharedData } from '@/types';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 
 interface User {
     id: number;
@@ -27,6 +23,9 @@ interface User {
     email: string;
     role: string;
     status?: string;
+    student_number?: string | null;
+    qr_code_value?: string | null;
+    qr_code_svg?: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -46,20 +45,41 @@ interface Props {
     users: { data: User[]; meta: Omit<PaginatedUsers, 'data'> };
 }
 
-const roleMeta: Record<
-    string,
-    { label: string; color: string; icon: React.ElementType }
-> = {
-    admin: { label: 'Admin', color: 'role-admin', icon: ShieldCheck },
-    parent: { label: 'Parent', color: 'role-parent', icon: Heart },
-    student: { label: 'Student', color: 'role-student', icon: GraduationCap },
+interface AddStudentForm {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+    first_name: string;
+    middle_name: string;
+    last_name: string;
+}
+
+const initialStudentForm: AddStudentForm = {
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
 };
 
 export default function StudentsIndex({ users }: Props) {
-    const { auth } = usePage<SharedData>().props;
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<number[]>([]);
-    
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [activeQrStudent, setActiveQrStudent] = useState<User | null>(null);
+    const {
+        data: studentForm,
+        setData: setStudentForm,
+        post,
+        processing,
+        errors,
+        reset,
+        clearErrors,
+    } = useForm<AddStudentForm>(initialStudentForm);
+
     const data: User[] = users?.data ?? [];
     const meta = users?.meta ?? {
         current_page: 1,
@@ -71,10 +91,13 @@ export default function StudentsIndex({ users }: Props) {
     };
 
     const filtered = data.filter((u) => {
-        const matchSearch =
-            u.name.toLowerCase().includes(search.toLowerCase()) ||
-            u.email.toLowerCase().includes(search.toLowerCase());
-        return matchSearch;
+        const searchValue = search.toLowerCase();
+
+        return (
+            u.name.toLowerCase().includes(searchValue) ||
+            u.email.toLowerCase().includes(searchValue) ||
+            (u.student_number ?? '').toLowerCase().includes(searchValue)
+        );
     });
 
     const allSelected =
@@ -87,15 +110,40 @@ export default function StudentsIndex({ users }: Props) {
         );
 
     const goToPage = (url: string | null) => {
-        if (url) router.get(url, {}, { preserveState: true });
+        if (url) {
+            router.get(url, {}, { preserveState: true });
+        }
+    };
+
+    const closeAddModal = () => {
+        setIsAddModalOpen(false);
+        reset();
+        clearErrors();
+    };
+
+    const submitStudent = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        post('/admin/students', {
+            preserveScroll: true,
+            onSuccess: closeAddModal,
+        });
     };
 
     const deleteUser = (id: number) => {
-        if (confirm('Delete this user?')) router.delete(`/admin/users/${id}`);
+        if (confirm('Delete this student?')) {
+            router.delete(`/admin/users/${id}`);
+        }
     };
 
     const approveUser = (id: number) => {
-        if (confirm('Approve this student?')) router.post(`/admin/students/${id}/approve`);
+        if (confirm('Approve this student and generate a QR code?')) {
+            router.post(
+                `/admin/students/${id}/approve`,
+                {},
+                { preserveScroll: true },
+            );
+        }
     };
 
     const formatDate = (d: string) =>
@@ -115,18 +163,17 @@ export default function StudentsIndex({ users }: Props) {
                 .ut-search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #6b7280; pointer-events: none; }
                 .ut-search { width: 100%; padding: 5px 10px 5px 32px; border: 1px solid var(--border); border-radius: 6px; font-size: 12.5px; background: var(--background); color: var(--foreground); outline: none; height: 30px; }
                 .ut-search:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.15); }
-                .ut-select { padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 12.5px; background: var(--background); color: var(--foreground); outline: none; height: 30px; cursor: pointer; }
                 .ut-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 500; cursor: pointer; border: none; height: 30px; white-space: nowrap; transition: opacity .15s; }
                 .ut-btn:hover { opacity: .85; }
+                .ut-btn:disabled { opacity: .55; cursor: not-allowed; }
                 .ut-btn-primary { background: #6366f1; color: #fff; }
                 .ut-btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--foreground); }
-                .ut-btn-danger { background: #ef4444; color: #fff; }
                 .ut-btn-success { background: #10b981; color: #fff; }
                 .ut-spacer { flex: 1; }
                 .ut-count { font-size: 12px; color: #6b7280; padding: 0 4px; }
 
                 .ut-table-wrap { flex: 1; overflow: auto; padding: 0 16px; }
-                table.ut { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 800px; }
+                table.ut { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 960px; }
                 table.ut thead tr { border-bottom: 1.5px solid var(--border); }
                 table.ut thead th { padding: 7px 10px; text-align: left; font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; background: var(--background); position: sticky; top: 0; z-index: 1; }
                 table.ut thead th:first-child { padding-left: 4px; width: 36px; }
@@ -140,16 +187,22 @@ export default function StudentsIndex({ users }: Props) {
                 .ut-user-cell { display: flex; align-items: center; gap: 8px; }
                 .ut-name { font-weight: 500; font-size: 12.5px; }
                 .ut-email { font-size: 11.5px; color: #6b7280; }
+                .ut-muted { color: #6b7280; font-size: 11.5px; }
 
                 .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-                .status-pending   { background: rgba(245,158,11,.12); color: #f59e0b; }
-                .status-approved  { background: rgba(16,185,129,.12); color: #10b981; }
+                .status-pending { background: rgba(245,158,11,.12); color: #f59e0b; }
+                .status-approved { background: rgba(16,185,129,.12); color: #10b981; }
+
+                .qr-button { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 6px; background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+                .qr-button:hover { border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,.12); }
+                .qr-button svg { width: 28px; height: 28px; }
+                .qr-missing { display: inline-flex; align-items: center; gap: 5px; color: #9ca3af; font-size: 11.5px; }
 
                 .ut-actions { display: flex; align-items: center; gap: 4px; }
                 .ut-icon-btn { width: 26px; height: 26px; border: none; background: transparent; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #6b7280; transition: background .15s, color .15s; }
                 .ut-icon-btn:hover.approve { background: rgba(16,185,129,.1); color: #10b981; }
                 .ut-icon-btn:hover.edit { background: rgba(99,102,241,.1); color: #6366f1; }
-                .ut-icon-btn:hover.del  { background: rgba(239,68,68,.1);  color: #ef4444; }
+                .ut-icon-btn:hover.del { background: rgba(239,68,68,.1); color: #ef4444; }
 
                 .ut-footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
                 .ut-footer-info { font-size: 12px; color: #6b7280; }
@@ -166,17 +219,42 @@ export default function StudentsIndex({ users }: Props) {
                 .empty-state { text-align: center; padding: 48px 16px; color: #6b7280; }
                 .empty-state svg { margin: 0 auto 12px; opacity: .4; }
                 .empty-state p { font-size: 13px; }
+
+                .student-modal-backdrop { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,.72); padding: 24px; }
+                .student-modal { width: 80vw; max-width: 980px; max-height: 86vh; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--background); box-shadow: 0 24px 70px rgba(15,23,42,.28); display: flex; flex-direction: column; }
+                .student-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+                .student-modal-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; }
+                .student-modal-subtitle { margin-top: 4px; color: #6b7280; font-size: 12.5px; }
+                .student-modal-close { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--foreground); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+                .student-modal-body { overflow: auto; padding: 20px; }
+                .student-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+                .student-field { display: flex; flex-direction: column; gap: 6px; }
+                .student-field.full { grid-column: 1 / -1; }
+                .student-label { color: var(--foreground); font-size: 12px; font-weight: 600; }
+                .student-input { width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 7px; background: var(--background); color: var(--foreground); padding: 8px 10px; font-size: 13px; outline: none; }
+                .student-input:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.14); }
+                .student-error { color: #ef4444; font-size: 11.5px; }
+                .student-modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); }
+                .qr-preview { display: grid; gap: 12px; justify-items: center; padding: 8px 0 4px; }
+                .qr-preview-box { width: min(300px, 60vw); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 10px; background: #fff; padding: 16px; }
+                .qr-preview-box svg { width: 100%; height: 100%; }
+                .qr-code-value { width: 100%; max-width: 520px; overflow-wrap: anywhere; border: 1px solid var(--border); border-radius: 8px; background: rgba(99,102,241,.04); padding: 10px; color: #6b7280; font-size: 12px; text-align: center; white-space: normal; }
+
+                @media (max-width: 720px) {
+                    .student-modal-backdrop { padding: 12px; align-items: flex-start; }
+                    .student-modal { width: 100%; max-height: calc(100vh - 24px); }
+                    .student-form-grid { grid-template-columns: 1fr; }
+                }
             `}</style>
 
             <div className="ut-root">
-                {/* ── Toolbar ── */}
                 <div className="ut-toolbar">
                     <div className="ut-search-wrap">
                         <Search size={13} />
                         <input
                             id="user-search"
                             className="ut-search"
-                            placeholder="Search students…"
+                            placeholder="Search students..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -197,13 +275,12 @@ export default function StudentsIndex({ users }: Props) {
                     <button
                         id="add-user-btn"
                         className="ut-btn ut-btn-primary"
-                        onClick={() => router.visit('/admin/users/create')}
+                        onClick={() => setIsAddModalOpen(true)}
                     >
                         <Plus size={13} /> Add Student
                     </button>
                 </div>
 
-                {/* ── Table ── */}
                 <div className="ut-table-wrap">
                     <table className="ut">
                         <thead>
@@ -219,7 +296,9 @@ export default function StudentsIndex({ users }: Props) {
                                 <th>#</th>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>Student No.</th>
                                 <th>Status</th>
+                                <th>QR Code</th>
                                 <th>Created</th>
                                 <th>Updated</th>
                                 <th
@@ -235,7 +314,7 @@ export default function StudentsIndex({ users }: Props) {
                         <tbody>
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8}>
+                                    <td colSpan={10}>
                                         <div className="empty-state">
                                             <GraduationCap size={40} />
                                             <p>No students found.</p>
@@ -265,6 +344,8 @@ export default function StudentsIndex({ users }: Props) {
                                     const isSelected = selected.includes(
                                         user.id,
                                     );
+                                    const isApproved =
+                                        user.status === 'approved';
 
                                     return (
                                         <tr
@@ -283,12 +364,7 @@ export default function StudentsIndex({ users }: Props) {
                                                     }
                                                 />
                                             </td>
-                                            <td
-                                                style={{
-                                                    color: '#9ca3af',
-                                                    fontSize: 11,
-                                                }}
-                                            >
+                                            <td className="ut-muted">
                                                 {(meta.from ?? 0) + i}
                                             </td>
                                             <td>
@@ -310,27 +386,52 @@ export default function StudentsIndex({ users }: Props) {
                                             <td className="ut-email">
                                                 {user.email}
                                             </td>
+                                            <td className="ut-muted">
+                                                {user.student_number ??
+                                                    'Pending'}
+                                            </td>
                                             <td>
                                                 <span
-                                                    className={`status-badge ${user.status === 'approved' ? 'status-approved' : 'status-pending'}`}
+                                                    className={`status-badge ${
+                                                        isApproved
+                                                            ? 'status-approved'
+                                                            : 'status-pending'
+                                                    }`}
                                                 >
-                                                    {user.status === 'approved' ? 'Approved' : 'Pending'}
+                                                    {isApproved
+                                                        ? 'Approved'
+                                                        : 'Pending'}
                                                 </span>
                                             </td>
-                                            <td
-                                                style={{
-                                                    color: '#6b7280',
-                                                    fontSize: 11.5,
-                                                }}
-                                            >
+                                            <td>
+                                                {user.qr_code_svg ? (
+                                                    <button
+                                                        className="qr-button"
+                                                        title="View student QR code"
+                                                        onClick={() =>
+                                                            setActiveQrStudent(
+                                                                user,
+                                                            )
+                                                        }
+                                                        type="button"
+                                                    >
+                                                        <span
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: user.qr_code_svg,
+                                                            }}
+                                                        />
+                                                    </button>
+                                                ) : (
+                                                    <span className="qr-missing">
+                                                        <QrCode size={13} />
+                                                        Not generated
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="ut-muted">
                                                 {formatDate(user.created_at)}
                                             </td>
-                                            <td
-                                                style={{
-                                                    color: '#6b7280',
-                                                    fontSize: 11.5,
-                                                }}
-                                            >
+                                            <td className="ut-muted">
                                                 {formatDate(user.updated_at)}
                                             </td>
                                             <td>
@@ -341,11 +442,15 @@ export default function StudentsIndex({ users }: Props) {
                                                             'flex-end',
                                                     }}
                                                 >
-                                                    {user.status !== 'approved' && (
+                                                    {!isApproved && (
                                                         <button
                                                             className="ut-icon-btn approve"
-                                                            title="Approve"
-                                                            onClick={() => approveUser(user.id)}
+                                                            title="Approve and generate QR code"
+                                                            onClick={() =>
+                                                                approveUser(
+                                                                    user.id,
+                                                                )
+                                                            }
                                                         >
                                                             <Check size={13} />
                                                         </button>
@@ -382,11 +487,10 @@ export default function StudentsIndex({ users }: Props) {
                     </table>
                 </div>
 
-                {/* ── Footer / Pagination ── */}
                 <div className="ut-footer">
                     <span className="ut-footer-info">
                         {meta.total > 0
-                            ? `${meta.from}–${meta.to} of ${meta.total} students`
+                            ? `${meta.from}-${meta.to} of ${meta.total} students`
                             : 'No results'}
                     </span>
 
@@ -394,7 +498,7 @@ export default function StudentsIndex({ users }: Props) {
                         <button
                             className="ut-page-btn"
                             disabled={meta.current_page === 1}
-                            onClick={() => goToPage(`?page=1`)}
+                            onClick={() => goToPage('?page=1')}
                             title="First page"
                         >
                             <ChevronsLeft size={13} />
@@ -414,10 +518,15 @@ export default function StudentsIndex({ users }: Props) {
                             { length: Math.min(meta.last_page, 7) },
                             (_, i) => {
                                 const page = i + 1;
+
                                 return (
                                     <button
                                         key={page}
-                                        className={`ut-page-btn ${meta.current_page === page ? 'active' : ''}`}
+                                        className={`ut-page-btn ${
+                                            meta.current_page === page
+                                                ? 'active'
+                                                : ''
+                                        }`}
                                         onClick={() =>
                                             goToPage(`?page=${page}`)
                                         }
@@ -449,6 +558,268 @@ export default function StudentsIndex({ users }: Props) {
                     </div>
                 </div>
             </div>
+
+            {isAddModalOpen && (
+                <div className="student-modal-backdrop" role="presentation">
+                    <form className="student-modal" onSubmit={submitStudent}>
+                        <div className="student-modal-header">
+                            <div>
+                                <div className="student-modal-title">
+                                    <GraduationCap size={20} />
+                                    Add Student
+                                </div>
+                                <p className="student-modal-subtitle">
+                                    Create a pending student account. A unique
+                                    QR code will be generated after approval.
+                                </p>
+                            </div>
+                            <button
+                                className="student-modal-close"
+                                type="button"
+                                onClick={closeAddModal}
+                                aria-label="Close add student modal"
+                            >
+                                <X size={15} />
+                            </button>
+                        </div>
+
+                        <div className="student-modal-body">
+                            <div className="student-form-grid">
+                                <label className="student-field full">
+                                    <span className="student-label">
+                                        Display name
+                                    </span>
+                                    <input
+                                        className="student-input"
+                                        value={studentForm.name}
+                                        onChange={(event) =>
+                                            setStudentForm(
+                                                'name',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Juan Dela Cruz"
+                                    />
+                                    {errors.name && (
+                                        <span className="student-error">
+                                            {errors.name}
+                                        </span>
+                                    )}
+                                </label>
+
+                                <label className="student-field">
+                                    <span className="student-label">
+                                        First name
+                                    </span>
+                                    <input
+                                        className="student-input"
+                                        value={studentForm.first_name}
+                                        onChange={(event) =>
+                                            setStudentForm(
+                                                'first_name',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Juan"
+                                    />
+                                    {errors.first_name && (
+                                        <span className="student-error">
+                                            {errors.first_name}
+                                        </span>
+                                    )}
+                                </label>
+
+                                <label className="student-field">
+                                    <span className="student-label">
+                                        Middle name
+                                    </span>
+                                    <input
+                                        className="student-input"
+                                        value={studentForm.middle_name}
+                                        onChange={(event) =>
+                                            setStudentForm(
+                                                'middle_name',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Santos"
+                                    />
+                                    {errors.middle_name && (
+                                        <span className="student-error">
+                                            {errors.middle_name}
+                                        </span>
+                                    )}
+                                </label>
+
+                                <label className="student-field">
+                                    <span className="student-label">
+                                        Last name
+                                    </span>
+                                    <input
+                                        className="student-input"
+                                        value={studentForm.last_name}
+                                        onChange={(event) =>
+                                            setStudentForm(
+                                                'last_name',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Dela Cruz"
+                                    />
+                                    {errors.last_name && (
+                                        <span className="student-error">
+                                            {errors.last_name}
+                                        </span>
+                                    )}
+                                </label>
+
+                                <label className="student-field">
+                                    <span className="student-label">Email</span>
+                                    <input
+                                        className="student-input"
+                                        type="email"
+                                        value={studentForm.email}
+                                        onChange={(event) =>
+                                            setStudentForm(
+                                                'email',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="student@example.com"
+                                    />
+                                    {errors.email && (
+                                        <span className="student-error">
+                                            {errors.email}
+                                        </span>
+                                    )}
+                                </label>
+
+                                <label className="student-field">
+                                    <span className="student-label">
+                                        Password
+                                    </span>
+                                    <input
+                                        className="student-input"
+                                        type="password"
+                                        value={studentForm.password}
+                                        onChange={(event) =>
+                                            setStudentForm(
+                                                'password',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="At least 8 characters"
+                                    />
+                                    {errors.password && (
+                                        <span className="student-error">
+                                            {errors.password}
+                                        </span>
+                                    )}
+                                </label>
+
+                                <label className="student-field">
+                                    <span className="student-label">
+                                        Confirm password
+                                    </span>
+                                    <input
+                                        className="student-input"
+                                        type="password"
+                                        value={
+                                            studentForm.password_confirmation
+                                        }
+                                        onChange={(event) =>
+                                            setStudentForm(
+                                                'password_confirmation',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Repeat password"
+                                    />
+                                    {errors.password_confirmation && (
+                                        <span className="student-error">
+                                            {errors.password_confirmation}
+                                        </span>
+                                    )}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="student-modal-footer">
+                            <button
+                                className="ut-btn ut-btn-ghost"
+                                type="button"
+                                onClick={closeAddModal}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="ut-btn ut-btn-primary"
+                                type="submit"
+                                disabled={processing}
+                            >
+                                <Plus size={13} />
+                                {processing ? 'Saving...' : 'Add Student'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {activeQrStudent && (
+                <div className="student-modal-backdrop" role="presentation">
+                    <div className="student-modal">
+                        <div className="student-modal-header">
+                            <div>
+                                <div className="student-modal-title">
+                                    <QrCode size={20} />
+                                    Student QR Code
+                                </div>
+                                <p className="student-modal-subtitle">
+                                    {activeQrStudent.name}
+                                    {activeQrStudent.student_number
+                                        ? ` - ${activeQrStudent.student_number}`
+                                        : ''}
+                                </p>
+                            </div>
+                            <button
+                                className="student-modal-close"
+                                type="button"
+                                onClick={() => setActiveQrStudent(null)}
+                                aria-label="Close QR code modal"
+                            >
+                                <X size={15} />
+                            </button>
+                        </div>
+
+                        <div className="student-modal-body">
+                            <div className="qr-preview">
+                                <div
+                                    className="qr-preview-box"
+                                    dangerouslySetInnerHTML={{
+                                        __html:
+                                            activeQrStudent.qr_code_svg ?? '',
+                                    }}
+                                />
+                                {activeQrStudent.qr_code_value && (
+                                    <div className="qr-code-value">
+                                        {activeQrStudent.qr_code_value}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="student-modal-footer">
+                            <button
+                                className="ut-btn ut-btn-primary"
+                                type="button"
+                                onClick={() => setActiveQrStudent(null)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
