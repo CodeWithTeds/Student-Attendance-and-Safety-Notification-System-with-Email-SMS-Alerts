@@ -16,4 +16,5 @@ interface UserRepositoryInterface
     public function syncChildren(int $parentId, array $studentIds): void;
     public function getStudents(): Collection;
     public function getStudentsPaginated(int $perPage = 15);
+    public function getParentsPaginated(int $perPage = 15);
 }

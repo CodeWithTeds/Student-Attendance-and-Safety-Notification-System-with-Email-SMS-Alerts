@@ -34,6 +34,9 @@ class UserService
             'first_name' => $data['first_name'] ?? null,
             'middle_name' => $data['middle_name'] ?? null,
             'last_name' => $data['last_name'] ?? null,
+            'guardian_phone' => $data['guardian_phone'] ?? null,
+            'notification_sms_enabled' => $data['notification_sms_enabled'] ?? false,
+            'notification_email_enabled' => $data['notification_email_enabled'] ?? false,
         ]);
 
         if (isset($data['student_ids']) && $data['role'] === UserRole::PARENT->value) {
@@ -60,6 +63,9 @@ class UserService
             'first_name' => $data['first_name'] ?? null,
             'middle_name' => $data['middle_name'] ?? null,
             'last_name' => $data['last_name'] ?? null,
+            'guardian_phone' => $data['guardian_phone'] ?? null,
+            'notification_sms_enabled' => $data['notification_sms_enabled'] ?? false,
+            'notification_email_enabled' => $data['notification_email_enabled'] ?? false,
         ] + (isset($data['password']) ? ['password' => $data['password']] : []));
 
         if ($updated && isset($data['student_ids'])) {

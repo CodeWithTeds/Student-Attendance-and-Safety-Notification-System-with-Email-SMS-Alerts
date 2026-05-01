@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ParentGuardianController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\UserController;
 use Laravel\Fortify\Features;
@@ -21,6 +22,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('students', [StudentController::class, 'index'])->name('students.index');
         Route::post('students', [StudentController::class, 'store'])->name('students.store');
         Route::post('students/{id}/approve', [StudentController::class, 'approve'])->name('students.approve');
+
+        Route::get('parents', [ParentGuardianController::class, 'index'])->name('parents.index');
+        Route::post('parents', [ParentGuardianController::class, 'store'])->name('parents.store');
+        Route::put('parents/{guardian}', [ParentGuardianController::class, 'update'])->name('parents.update');
+        Route::delete('parents/{guardian}', [ParentGuardianController::class, 'destroy'])->name('parents.destroy');
     });
 });
 
