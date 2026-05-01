@@ -20,6 +20,15 @@ export default function GuardianTable({ guardians, selected, onToggleAll, onTogg
         }
     };
 
+    const handleNotify = (id: number) => {
+        router.post(`/admin/parents/${id}/notify`, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Flash messages handled by server
+            }
+        });
+    };
+
     const formatDate = (date: string) =>
         new Date(date).toLocaleDateString('en-US', {
             month: 'short',
@@ -129,14 +138,19 @@ export default function GuardianTable({ guardians, selected, onToggleAll, onTogg
                                                 <MessageSquareText size={11} />
                                                 SMS
                                             </span>
-                                            <span
-                                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                                                    guardian.notification_email_enabled ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+                                            <button
+                                                onClick={() => guardian.notification_email_enabled && handleNotify(guardian.id)}
+                                                disabled={!guardian.notification_email_enabled}
+                                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${
+                                                    guardian.notification_email_enabled 
+                                                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 active:scale-95 cursor-pointer' 
+                                                        : 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-60'
                                                 }`}
+                                                title={guardian.notification_email_enabled ? "Click to send attendance email" : "Email notifications disabled"}
                                             >
                                                 <Mail size={11} />
                                                 Email
-                                            </span>
+                                            </button>
                                         </div>
                                     </td>
                                     <td className="px-2 py-2.5 text-[var(--muted-foreground)]">{formatDate(guardian.created_at)}</td>

@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('parents', [ParentGuardianController::class, 'store'])->name('parents.store');
         Route::put('parents/{guardian}', [ParentGuardianController::class, 'update'])->name('parents.update');
         Route::delete('parents/{guardian}', [ParentGuardianController::class, 'destroy'])->name('parents.destroy');
+        Route::post('parents/{guardian}/notify', [ParentGuardianController::class, 'notify'])->name('parents.notify');
     });
 });
 
