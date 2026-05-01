@@ -22,11 +22,23 @@ class UpdateGuardianRequest extends FormRequest
             'first_name' => ['nullable', 'string', 'max:255'],
             'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
-            'guardian_phone' => ['nullable', 'string', 'max:30'],
+            'guardian_phone' => ['nullable', 'string', 'digits:11'],
             'notification_sms_enabled' => ['boolean'],
             'notification_email_enabled' => ['boolean'],
             'student_ids' => ['nullable', 'array'],
-            'student_ids.*' => [Rule::exists('users', 'id')->where('role', UserRole::STUDENT->value)],
+            'student_ids.*' => [
+                Rule::exists('users', 'id')->where('role', UserRole::STUDENT->value),
+                function ($attribute, $value, $fail) {
+                    $guardianId = $this->route('guardian');
+                    $count = \Illuminate\Support\Facades\DB::table('parent_student')
+                        ->where('student_id', $value)
+                        ->where('parent_id', '!=', $guardianId)
+                        ->count();
+                    if ($count >= 2) {
+                        $fail("The student with ID {$value} has already been assigned to 2 parents.");
+                    }
+                }
+            ],
         ];
     }
 

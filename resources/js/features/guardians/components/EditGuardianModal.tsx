@@ -203,13 +203,13 @@ export default function EditGuardianModal({
                             <input
                                 className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
                                 value={form.guardian_phone}
-                                onChange={(event) =>
-                                    setData(
-                                        'guardian_phone',
-                                        event.target.value,
-                                    )
-                                }
+                                onChange={(event) => {
+                                    const val = event.target.value.replace(/\D/g, '');
+                                    if (val.length <= 11) setData('guardian_phone', val);
+                                }}
                                 placeholder="09XXXXXXXXX"
+                                maxLength={11}
+                                inputMode="numeric"
                             />
                             {errors.guardian_phone && (
                                 <span className="text-[11px] font-medium text-red-500">
@@ -367,6 +367,10 @@ export default function EditGuardianModal({
                                     {errors.student_ids}
                                 </span>
                             )}
+                            {/* Detailed errors for individual students (e.g. 2 parent limit) */}
+                            {Object.keys(errors).filter(key => key.startsWith('student_ids.')).map(key => (
+                                <span key={key} className="text-[11px] font-medium text-red-500">{errors[key]}</span>
+                            ))}
                         </div>
                     </div>
                 </div>
