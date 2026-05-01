@@ -4,6 +4,7 @@ namespace App\Http\Requests\Guardian;
 
 use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreGuardianRequest extends FormRequest
 {
@@ -25,7 +26,7 @@ class StoreGuardianRequest extends FormRequest
             'notification_sms_enabled' => ['boolean'],
             'notification_email_enabled' => ['boolean'],
             'student_ids' => ['nullable', 'array'],
-            'student_ids.*' => ['exists:users,id'],
+            'student_ids.*' => [Rule::exists('users', 'id')->where('role', UserRole::STUDENT->value)],
         ];
     }
 
