@@ -1,9 +1,7 @@
-import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
 import {
     Search,
     Plus,
-    Filter,
     Download,
     Trash2,
     Pencil,
@@ -15,17 +13,21 @@ import {
     ShieldCheck,
     GraduationCap,
     Heart,
-    MoreHorizontal,
-    Check,
+    Save,
     X,
 } from 'lucide-react';
-import type { SharedData } from '@/types';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+import type { ElementType } from 'react';
 
 interface User {
     id: number;
     name: string;
     email: string;
     role: string;
+    first_name?: string | null;
+    middle_name?: string | null;
+    last_name?: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -47,18 +49,41 @@ interface Props {
 
 const roleMeta: Record<
     string,
-    { label: string; color: string; icon: React.ElementType }
+    { label: string; color: string; icon: ElementType }
 > = {
     admin: { label: 'Admin', color: 'role-admin', icon: ShieldCheck },
     parent: { label: 'Parent', color: 'role-parent', icon: Heart },
     student: { label: 'Student', color: 'role-student', icon: GraduationCap },
 };
 
+type UserForm = {
+    name: string;
+    email: string;
+    role: 'admin' | 'parent' | 'student';
+    password: string;
+    password_confirmation: string;
+    first_name: string;
+    middle_name: string;
+    last_name: string;
+};
+
+const emptyUserForm: UserForm = {
+    name: '',
+    email: '',
+    role: 'admin',
+    password: '',
+    password_confirmation: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+};
+
 export default function UsersIndex({ users }: Props) {
-    const { auth } = usePage<SharedData>().props;
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<number[]>([]);
     const [roleFilter, setRoleFilter] = useState('');
+    const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
 
     const data: User[] = users?.data ?? [];
     const meta = users?.meta ?? {
@@ -75,6 +100,7 @@ export default function UsersIndex({ users }: Props) {
             u.name.toLowerCase().includes(search.toLowerCase()) ||
             u.email.toLowerCase().includes(search.toLowerCase());
         const matchRole = roleFilter ? u.role === roleFilter : true;
+
         return matchSearch && matchRole;
     });
 
@@ -88,11 +114,25 @@ export default function UsersIndex({ users }: Props) {
         );
 
     const goToPage = (url: string | null) => {
-        if (url) router.get(url, {}, { preserveState: true });
+        if (url) {
+            router.get(url, {}, { preserveState: true });
+        }
     };
 
     const deleteUser = (id: number) => {
-        if (confirm('Delete this user?')) router.delete(`/admin/users/${id}`);
+        if (confirm('Delete this user?')) {
+            router.delete(`/admin/users/${id}`);
+        }
+    };
+
+    const openCreateUser = () => {
+        setEditingUser(null);
+        setIsUserModalOpen(true);
+    };
+
+    const openEditUser = (user: User) => {
+        setEditingUser(user);
+        setIsUserModalOpen(true);
     };
 
     const formatDate = (d: string) =>
@@ -205,7 +245,7 @@ export default function UsersIndex({ users }: Props) {
                     <button
                         id="add-user-btn"
                         className="ut-btn ut-btn-primary"
-                        onClick={() => router.visit('/admin/users/create')}
+                        onClick={openCreateUser}
                     >
                         <Plus size={13} /> Add User
                     </button>
@@ -361,9 +401,7 @@ export default function UsersIndex({ users }: Props) {
                                                         className="ut-icon-btn edit"
                                                         title="Edit"
                                                         onClick={() =>
-                                                            router.visit(
-                                                                `/admin/users/${user.id}/edit`,
-                                                            )
+                                                            openEditUser(user)
                                                         }
                                                     >
                                                         <Pencil size={13} />
@@ -420,6 +458,7 @@ export default function UsersIndex({ users }: Props) {
                             { length: Math.min(meta.last_page, 7) },
                             (_, i) => {
                                 const page = i + 1;
+
                                 return (
                                     <button
                                         key={page}
@@ -455,6 +494,12 @@ export default function UsersIndex({ users }: Props) {
                     </div>
                 </div>
             </div>
+
+            <UserFormModal
+                isOpen={isUserModalOpen}
+                onClose={() => setIsUserModalOpen(false)}
+                editingUser={editingUser}
+            />
         </>
     );
 }
@@ -465,3 +510,302 @@ UsersIndex.layout = {
         { title: 'User Management', href: '/admin/users' },
     ],
 };
+
+function UserFormModal({
+    isOpen,
+    onClose,
+    editingUser,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    editingUser: User | null;
+}) {
+    const isEditing = editingUser !== null;
+    const { data, setData, post, put, processing, errors, reset, clearErrors } =
+        useForm<UserForm>(emptyUserForm);
+
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        if (editingUser) {
+            setData({
+                name: editingUser.name ?? '',
+                email: editingUser.email ?? '',
+                role: (editingUser.role as UserForm['role']) ?? 'admin',
+                password: '',
+                password_confirmation: '',
+                first_name: editingUser.first_name ?? '',
+                middle_name: editingUser.middle_name ?? '',
+                last_name: editingUser.last_name ?? '',
+            });
+
+            return;
+        }
+
+        setData(emptyUserForm);
+    }, [editingUser, isOpen, setData]);
+
+    if (!isOpen) {
+        return null;
+    }
+
+    const handleClose = () => {
+        onClose();
+        reset();
+        clearErrors();
+    };
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const options = {
+            preserveScroll: true,
+            onSuccess: handleClose,
+        };
+
+        if (editingUser) {
+            put(`/admin/users/${editingUser.id}`, options);
+
+            return;
+        }
+
+        post('/admin/users', options);
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm">
+            <form
+                className="flex max-h-[86vh] w-full max-w-[860px] flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-2xl"
+                onSubmit={handleSubmit}
+            >
+                <div className="flex items-start justify-between gap-4 border-b border-[var(--border)] p-5">
+                    <div>
+                        <div className="flex items-center gap-2.5 text-lg font-bold text-[var(--foreground)]">
+                            <UserCircle2
+                                className="text-[var(--primary)]"
+                                size={22}
+                            />
+                            {isEditing ? 'Edit User' : 'Add User'}
+                        </div>
+                        <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                            {isEditing
+                                ? 'Update account details. Leave password fields blank to keep the current password.'
+                                : 'Create an account and assign the correct system role.'}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--muted-foreground)] transition-colors hover:bg-[var(--secondary)]"
+                        aria-label="Close user form"
+                    >
+                        <X size={16} />
+                    </button>
+                </div>
+
+                <div className="overflow-y-auto p-6">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div className="flex flex-col gap-1.5 md:col-span-2">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">
+                                Display name
+                            </label>
+                            <input
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                                value={data.name}
+                                onChange={(event) =>
+                                    setData('name', event.target.value)
+                                }
+                                placeholder="Juan Dela Cruz"
+                                required
+                            />
+                            {errors.name && (
+                                <span className="text-[11px] font-medium text-red-500">
+                                    {errors.name}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">
+                                First name
+                            </label>
+                            <input
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                                value={data.first_name}
+                                onChange={(event) =>
+                                    setData('first_name', event.target.value)
+                                }
+                                placeholder="Juan"
+                            />
+                            {errors.first_name && (
+                                <span className="text-[11px] font-medium text-red-500">
+                                    {errors.first_name}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">
+                                Middle name
+                            </label>
+                            <input
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                                value={data.middle_name}
+                                onChange={(event) =>
+                                    setData('middle_name', event.target.value)
+                                }
+                                placeholder="Santos"
+                            />
+                            {errors.middle_name && (
+                                <span className="text-[11px] font-medium text-red-500">
+                                    {errors.middle_name}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">
+                                Last name
+                            </label>
+                            <input
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                                value={data.last_name}
+                                onChange={(event) =>
+                                    setData('last_name', event.target.value)
+                                }
+                                placeholder="Dela Cruz"
+                            />
+                            {errors.last_name && (
+                                <span className="text-[11px] font-medium text-red-500">
+                                    {errors.last_name}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">
+                                Role
+                            </label>
+                            <select
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                                value={data.role}
+                                onChange={(event) =>
+                                    setData(
+                                        'role',
+                                        event.target.value as UserForm['role'],
+                                    )
+                                }
+                                required
+                            >
+                                <option value="admin">Admin</option>
+                                <option value="parent">Parent</option>
+                                <option value="student">Student</option>
+                            </select>
+                            {errors.role && (
+                                <span className="text-[11px] font-medium text-red-500">
+                                    {errors.role}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5 md:col-span-2">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">
+                                Email
+                            </label>
+                            <input
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                                type="email"
+                                value={data.email}
+                                onChange={(event) =>
+                                    setData('email', event.target.value)
+                                }
+                                placeholder="user@example.com"
+                                required
+                            />
+                            {errors.email && (
+                                <span className="text-[11px] font-medium text-red-500">
+                                    {errors.email}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">
+                                {isEditing ? 'New password' : 'Password'}
+                            </label>
+                            <input
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                                type="password"
+                                value={data.password}
+                                onChange={(event) =>
+                                    setData('password', event.target.value)
+                                }
+                                placeholder={
+                                    isEditing
+                                        ? 'Optional'
+                                        : 'At least 8 characters'
+                                }
+                                required={!isEditing}
+                            />
+                            {errors.password && (
+                                <span className="text-[11px] font-medium text-red-500">
+                                    {errors.password}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">
+                                Confirm password
+                            </label>
+                            <input
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-all outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                                type="password"
+                                value={data.password_confirmation}
+                                onChange={(event) =>
+                                    setData(
+                                        'password_confirmation',
+                                        event.target.value,
+                                    )
+                                }
+                                placeholder={
+                                    isEditing ? 'Optional' : 'Repeat password'
+                                }
+                                required={!isEditing}
+                            />
+                            {errors.password_confirmation && (
+                                <span className="text-[11px] font-medium text-red-500">
+                                    {errors.password_confirmation}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 border-t border-[var(--border)] p-4">
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--secondary)]"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
+                    >
+                        {isEditing ? <Save size={14} /> : <Plus size={14} />}
+                        {processing
+                            ? 'Saving...'
+                            : isEditing
+                              ? 'Update User'
+                              : 'Add User'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}

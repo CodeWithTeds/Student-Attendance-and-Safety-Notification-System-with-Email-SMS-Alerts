@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class StudentController extends Controller
+
 {
     public function __construct(
         protected UserService $userService,
