@@ -12,6 +12,66 @@ SASN (Student Attendance System with Notifications) is a modern web application 
 
 ---
 
+## Recent Task: Class / Section Management
+**Date**: 2026-05-03  
+**Objective**: Add admin-only management for grade levels, sections, advisers, and student section assignment while following the existing `/admin/students` CRUD design and avoiding a service layer for this feature per request.
+
+### Backend Implementation
+- Added additive database tables:
+    - `grade_levels`
+    - `advisers`
+    - `sections`
+    - `section_student`
+- Added models:
+    - `App\Models\GradeLevel`
+    - `App\Models\Adviser`
+    - `App\Models\Section`
+- Added admin controller:
+    - `App\Http\Controllers\Admin\ClassSectionController`
+- Added FormRequests under `app/Http/Requests/ClassSection` for grade level, adviser, section, and student assignment validation.
+- Added API Resources:
+    - `GradeLevelResource`
+    - `AdviserResource`
+    - `SectionResource`
+- Extended `UserResource` and `User` model relationship support for section assignment data.
+- Registered admin-only routes under `/admin`:
+    - `/admin/class-sections`
+    - `/admin/grade-levels`
+    - `/admin/advisers`
+    - `/admin/sections`
+    - `/admin/sections/{section}/students`
+
+### Frontend Implementation
+- Added Inertia page:
+    - `resources/js/pages/admin/class-sections/index.tsx`
+- Added feature components under `resources/js/features/class-sections`:
+    - Toolbar
+    - Section table
+    - Grade level modal
+    - Adviser modal
+    - Section modal
+    - Assign students modal
+    - Grade level / adviser registry panel
+- Updated sidebar navigation so **Class / Section** links to `/admin/class-sections`.
+- Matched the existing admin Students CRUD visual pattern: bordered page shell, compact toolbar, scrollable table, icon actions, modal forms, and CSV export.
+
+### Verification Notes
+- `php artisan migrate` was run successfully; new tables were created locally.
+- `npm run build` passed.
+- `php artisan route:list --path=admin` confirmed the new admin routes.
+- `npm run types:check` is blocked by pre-existing unrelated TypeScript errors in guardian/register files.
+- `php artisan test` has one pre-existing unrelated failure in `Tests\Feature\Auth\RegistrationTest` where the user is not authenticated after registration.
+
+### Task Status: Completed
+- [x] Grade level CRUD
+- [x] Adviser CRUD
+- [x] Section CRUD
+- [x] Student section assignment and removal
+- [x] Admin sidebar route wiring
+- [x] Build verification
+
+---
+
 ## 🚀 Recent Task: Attendance Notifications & Guardian CRUD
 **Objective**: Implement automated and manual attendance notifications via email with a modern, integrated design.
 

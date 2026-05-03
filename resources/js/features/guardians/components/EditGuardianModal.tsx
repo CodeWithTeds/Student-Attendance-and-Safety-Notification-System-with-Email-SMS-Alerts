@@ -369,7 +369,7 @@ export default function EditGuardianModal({
                             )}
                             {/* Detailed errors for individual students (e.g. 2 parent limit) */}
                             {Object.keys(errors).filter(key => key.startsWith('student_ids.')).map(key => (
-                                <span key={key} className="text-[11px] font-medium text-red-500">{errors[key]}</span>
+                                <span key={key} className="text-[11px] font-medium text-red-500">{(errors as any)[key]}</span>
                             ))}
                         </div>
                     </div>
