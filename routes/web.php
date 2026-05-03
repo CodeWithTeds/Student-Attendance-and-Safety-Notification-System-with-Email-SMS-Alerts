@@ -1,9 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ClassSectionController;
 use App\Http\Controllers\Admin\ParentGuardianController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\UserController;
+use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
 Route::inertia('/', 'welcome', [
@@ -12,13 +13,13 @@ Route::inertia('/', 'welcome', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
-    
+
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-        
+
         Route::get('students', [StudentController::class, 'index'])->name('students.index');
         Route::post('students', [StudentController::class, 'store'])->name('students.store');
         Route::post('students/{id}/approve', [StudentController::class, 'approve'])->name('students.approve');
@@ -28,7 +29,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('parents/{guardian}', [ParentGuardianController::class, 'update'])->name('parents.update');
         Route::delete('parents/{guardian}', [ParentGuardianController::class, 'destroy'])->name('parents.destroy');
         Route::post('parents/{guardian}/notify', [ParentGuardianController::class, 'notify'])->name('parents.notify');
+
+        Route::get('class-sections', [ClassSectionController::class, 'index'])->name('class-sections.index');
+        Route::post('grade-levels', [ClassSectionController::class, 'storeGradeLevel'])->name('grade-levels.store');
+        Route::put('grade-levels/{gradeLevel}', [ClassSectionController::class, 'updateGradeLevel'])->name('grade-levels.update');
+        Route::delete('grade-levels/{gradeLevel}', [ClassSectionController::class, 'destroyGradeLevel'])->name('grade-levels.destroy');
+        Route::post('advisers', [ClassSectionController::class, 'storeAdviser'])->name('advisers.store');
+        Route::put('advisers/{adviser}', [ClassSectionController::class, 'updateAdviser'])->name('advisers.update');
+        Route::delete('advisers/{adviser}', [ClassSectionController::class, 'destroyAdviser'])->name('advisers.destroy');
+        Route::post('sections', [ClassSectionController::class, 'storeSection'])->name('sections.store');
+        Route::put('sections/{section}', [ClassSectionController::class, 'updateSection'])->name('sections.update');
+        Route::delete('sections/{section}', [ClassSectionController::class, 'destroySection'])->name('sections.destroy');
+        Route::post('sections/{section}/students', [ClassSectionController::class, 'assignStudents'])->name('sections.students.store');
+        Route::delete('sections/{section}/students/{student}', [ClassSectionController::class, 'unassignStudent'])->name('sections.students.destroy');
     });
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

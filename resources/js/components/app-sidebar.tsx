@@ -74,7 +74,7 @@ const accessManagementItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
     {
         title: 'Class / Section',
-        href: '#',
+        href: '/admin/class-sections',
         icon: Calendar,
         roles: ['admin'],
     },
