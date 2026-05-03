@@ -15,6 +15,13 @@ const initialForm: GradeLevelForm = {
     sort_order: '0',
 };
 
+const GRADE_LEVELS = [
+    { name: 'First Year', code: 'FY' },
+    { name: 'Second Year', code: 'SY' },
+    { name: 'Third Year', code: 'TY' },
+    { name: 'Fourth Year', code: 'FOY' },
+];
+
 export default function GradeLevelModal({ isOpen, gradeLevel, onClose }: Props) {
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm<GradeLevelForm>(initialForm);
 
@@ -34,6 +41,19 @@ export default function GradeLevelModal({ isOpen, gradeLevel, onClose }: Props) 
         onClose();
         reset();
         clearErrors();
+    };
+
+    const handleNameChange = (name: string) => {
+        const selected = GRADE_LEVELS.find((g) => g.name === name);
+        if (selected) {
+            setData({
+                ...data,
+                name: selected.name,
+                code: selected.code,
+            });
+        } else {
+            setData('name', name);
+        }
     };
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -75,13 +95,25 @@ export default function GradeLevelModal({ isOpen, gradeLevel, onClose }: Props) 
                 <div className="grid gap-5 p-6">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-semibold text-[var(--foreground)]">Name</label>
-                        <input
+                        <select
                             className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none transition-all focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
                             value={data.name}
-                            onChange={(event) => setData('name', event.target.value)}
-                            placeholder="Grade 7"
+                            onChange={(event) => handleNameChange(event.target.value)}
                             required
-                        />
+                        >
+                            <option value="" disabled>
+                                Select Grade Level
+                            </option>
+                            {GRADE_LEVELS.map((level) => (
+                                <option key={level.code} value={level.name}>
+                                    {level.name}
+                                </option>
+                            ))}
+                            {/* Allow existing custom names if editing */}
+                            {data.name && !GRADE_LEVELS.find((g) => g.name === data.name) && (
+                                <option value={data.name}>{data.name}</option>
+                            )}
+                        </select>
                         {errors.name && <span className="text-[11px] font-medium text-red-500">{errors.name}</span>}
                     </div>
 
