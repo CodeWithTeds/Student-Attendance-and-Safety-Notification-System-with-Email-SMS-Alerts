@@ -114,8 +114,13 @@ export default function AdviserModal({ isOpen, adviser, onClose }: Props) {
                         <input
                             className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none transition-all focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
                             value={data.phone}
-                            onChange={(event) => setData('phone', event.target.value)}
+                            onChange={(event) => {
+                                const val = event.target.value.replace(/\D/g, '');
+                                if (val.length <= 11) setData('phone', val);
+                            }}
                             placeholder="09XXXXXXXXX"
+                            maxLength={11}
+                            inputMode="numeric"
                         />
                         {errors.phone && <span className="text-[11px] font-medium text-red-500">{errors.phone}</span>}
                     </div>
