@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClassSectionController;
 use App\Http\Controllers\Admin\ParentGuardianController;
+use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('class-sections', [ClassSectionController::class, 'index'])->name('class-sections.index');
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
+        Route::get('qr-codes', [QrCodeController::class, 'index'])->name('qr-codes.index');
+        Route::post('qr-codes/{student}/generate', [QrCodeController::class, 'generate'])->name('qr-codes.generate');
+        Route::post('qr-codes/{student}/reset', [QrCodeController::class, 'reset'])->name('qr-codes.reset');
         Route::post('grade-levels', [ClassSectionController::class, 'storeGradeLevel'])->name('grade-levels.store');
         Route::put('grade-levels/{gradeLevel}', [ClassSectionController::class, 'updateGradeLevel'])->name('grade-levels.update');
         Route::delete('grade-levels/{gradeLevel}', [ClassSectionController::class, 'destroyGradeLevel'])->name('grade-levels.destroy');

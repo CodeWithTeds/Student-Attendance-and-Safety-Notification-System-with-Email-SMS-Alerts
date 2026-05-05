@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\User;
 use App\Repositories\User\Contracts\UserRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class EloquentUserRepository implements UserRepositoryInterface
@@ -66,6 +67,28 @@ class EloquentUserRepository implements UserRepositoryInterface
     public function getStudentsPaginated(int $perPage = 15)
     {
         return User::where('role', UserRole::STUDENT->value)->paginate($perPage);
+    }
+
+    public function getQrCodeStudentsPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        return User::query()
+            ->with('sections.gradeLevel')
+            ->where('role', UserRole::STUDENT->value)
+            ->where('status', UserStatus::APPROVED->value)
+            ->when($filters['search'] ?? null, function ($query, string $search): void {
+                $query
+                    ->where(function ($searchQuery) use ($search): void {
+                        $searchQuery
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('student_number', 'like', "%{$search}%");
+                    });
+            })
+            ->when(($filters['qr_status'] ?? null) === 'generated', fn ($query) => $query->whereNotNull('qr_code_value'))
+            ->when(($filters['qr_status'] ?? null) === 'missing', fn ($query) => $query->whereNull('qr_code_value'))
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function getParentsPaginated(int $perPage = 15)

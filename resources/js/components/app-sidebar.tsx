@@ -86,7 +86,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'QR Code Management',
-        href: '#',
+        href: '/admin/qr-codes',
         icon: QrCode,
         roles: ['admin'],
     },

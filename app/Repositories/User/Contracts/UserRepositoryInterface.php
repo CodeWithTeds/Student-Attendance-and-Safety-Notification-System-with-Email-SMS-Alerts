@@ -3,6 +3,7 @@
 namespace App\Repositories\User\Contracts;
 
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 interface UserRepositoryInterface
@@ -24,6 +25,8 @@ interface UserRepositoryInterface
     public function getStudents(): Collection;
 
     public function getStudentsPaginated(int $perPage = 15);
+
+    public function getQrCodeStudentsPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator;
 
     public function getParentsPaginated(int $perPage = 15);
 
