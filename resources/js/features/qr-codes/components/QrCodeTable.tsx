@@ -56,6 +56,9 @@ export function QrCodeTable({
                         <th className="px-4 py-3 text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
                             QR Status
                         </th>
+                        <th className="px-4 py-3 text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
+                            Active QR
+                        </th>
                         <th className="px-4 py-3 text-right text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
                             Actions
                         </th>
@@ -115,6 +118,22 @@ export function QrCodeTable({
                                         <QrCode size={13} />
                                         {hasQrCode ? 'Generated' : 'Missing'}
                                     </span>
+                                </td>
+                                <td className="px-4 py-3">
+                                    {hasQrCode ? (
+                                        <div>
+                                            <p className="font-mono text-xs font-semibold text-[var(--foreground)]">
+                                                {student.qr_code_fingerprint}
+                                            </p>
+                                            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                                                Updated {student.qr_code_updated_at_display}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <span className="text-xs text-[var(--muted-foreground)]">
+                                            Generate first
+                                        </span>
+                                    )}
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex items-center justify-end gap-2">

@@ -25,6 +25,8 @@ class UserResource extends JsonResource
             'last_name' => $this->last_name,
             'qr_code_value' => $this->qr_code_value,
             'qr_code_svg' => $this->qr_code_svg,
+            'qr_code_fingerprint' => $this->qr_code_value ? substr(hash('sha256', $this->qr_code_value), 0, 10) : null,
+            'qr_code_updated_at_display' => $this->qr_code_value ? $this->updated_at?->timezone(config('app.timezone'))->format('M d, Y h:i A') : null,
             'children' => UserResource::collection($this->whenLoaded('children')),
             'parents' => UserResource::collection($this->whenLoaded('parents')),
             'sections' => SectionResource::collection($this->whenLoaded('sections')),

@@ -7,6 +7,8 @@ export interface QrCodeStudent {
     student_number?: string | null;
     qr_code_value?: string | null;
     qr_code_svg?: string | null;
+    qr_code_fingerprint?: string | null;
+    qr_code_updated_at_display?: string | null;
     created_at: string;
     updated_at: string;
     first_name?: string | null;

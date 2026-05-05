@@ -19,6 +19,7 @@ import {
     FolderGit2,
     BookOpen,
     ShieldCheck,
+    ClipboardList,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -73,22 +74,27 @@ const accessManagementItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
     {
-        title: 'Class / Section',
-        href: '/admin/class-sections',
-        icon: Calendar,
+        title: 'Student Operations',
+        href: '#',
+        icon: ClipboardList,
         roles: ['admin'],
-    },
-    {
-        title: 'Attendance',
-        href: '/admin/attendance',
-        icon: Activity,
-        roles: ['admin'],
-    },
-    {
-        title: 'QR Code Management',
-        href: '/admin/qr-codes',
-        icon: QrCode,
-        roles: ['admin'],
+        items: [
+            {
+                title: 'Class / Section',
+                href: '/admin/class-sections',
+                icon: Calendar,
+            },
+            {
+                title: 'Attendance',
+                href: '/admin/attendance',
+                icon: Activity,
+            },
+            {
+                title: 'QR Code Management',
+                href: '/admin/qr-codes',
+                icon: QrCode,
+            },
+        ],
     },
     {
         title: 'QR Scanner',

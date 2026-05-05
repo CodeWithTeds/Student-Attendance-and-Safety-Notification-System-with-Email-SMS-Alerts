@@ -79,8 +79,11 @@ export default function QrCodesIndex({ students, filters }: Props) {
     };
 
     const handleReset = (student: QrCodeStudent) => {
-        if (confirm(`Reset the QR code for ${student.name}? The previous QR code will stop working.`)) {
-            router.post(`/admin/qr-codes/${student.id}/reset`, {}, { preserveScroll: true });
+        if (confirm(`Reset the QR code for ${student.email}? The previous QR code will stop working.`)) {
+            router.post(`/admin/qr-codes/${student.id}/reset`, {}, {
+                preserveScroll: true,
+                onSuccess: () => router.reload({ only: ['students'] }),
+            });
         }
     };
 
