@@ -7,7 +7,6 @@ import {
     Calendar,
     Activity,
     QrCode,
-    Keyboard,
     Bell,
     Megaphone,
     BarChart3,
@@ -94,12 +93,6 @@ const adminNavItems: NavItem[] = [
                 icon: QrCode,
             },
         ],
-    },
-    {
-        title: 'Manual Attendance',
-        href: '#',
-        icon: Keyboard,
-        roles: ['admin'],
     },
     {
         title: 'Notifications',
