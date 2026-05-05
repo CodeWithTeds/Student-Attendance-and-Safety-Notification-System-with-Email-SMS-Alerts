@@ -7,7 +7,6 @@ import {
     Calendar,
     Activity,
     QrCode,
-    ScanLine,
     Keyboard,
     Bell,
     Megaphone,
@@ -95,12 +94,6 @@ const adminNavItems: NavItem[] = [
                 icon: QrCode,
             },
         ],
-    },
-    {
-        title: 'QR Scanner',
-        href: '#',
-        icon: ScanLine,
-        roles: ['admin'],
     },
     {
         title: 'Manual Attendance',
