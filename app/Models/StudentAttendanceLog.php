@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['user_id', 'qr_code_value', 'event_type', 'scanned_at'])]
 class StudentAttendanceLog extends Model
@@ -26,5 +27,10 @@ class StudentAttendanceLog extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function editHistory(): HasMany
+    {
+        return $this->hasMany(StudentAttendanceLogEdit::class);
     }
 }

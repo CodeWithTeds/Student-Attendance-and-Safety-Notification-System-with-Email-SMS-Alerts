@@ -16,7 +16,11 @@ class StudentAttendanceLogResource extends JsonResource
             'status_label' => $this->event_type?->pastTenseLabel(),
             'scanned_at' => $this->scanned_at?->toIso8601String(),
             'scanned_at_display' => $this->scanned_at?->timezone(config('app.timezone'))->format('h:i A'),
+            'scanned_at_full_display' => $this->scanned_at?->timezone(config('app.timezone'))->format('M d, Y h:i A'),
             'student' => new UserResource($this->whenLoaded('student')),
+            'edit_history' => StudentAttendanceLogEditResource::collection($this->whenLoaded('editHistory')),
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClassSectionController;
 use App\Http\Controllers\Admin\ParentGuardianController;
 use App\Http\Controllers\Admin\StudentController;
@@ -33,6 +34,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('parents/{guardian}/notify', [ParentGuardianController::class, 'notify'])->name('parents.notify');
 
         Route::get('class-sections', [ClassSectionController::class, 'index'])->name('class-sections.index');
+        Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
         Route::post('grade-levels', [ClassSectionController::class, 'storeGradeLevel'])->name('grade-levels.store');
         Route::put('grade-levels/{gradeLevel}', [ClassSectionController::class, 'updateGradeLevel'])->name('grade-levels.update');
         Route::delete('grade-levels/{gradeLevel}', [ClassSectionController::class, 'destroyGradeLevel'])->name('grade-levels.destroy');
