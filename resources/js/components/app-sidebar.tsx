@@ -80,7 +80,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Attendance',
-        href: '#',
+        href: '/admin/attendance',
         icon: Activity,
         roles: ['admin'],
     },
@@ -172,6 +172,7 @@ export function AppSidebar() {
     const filteredAdminNavItems = adminNavItems.filter(
         (item) => !item.roles || item.roles.includes(userRole),
     );
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
