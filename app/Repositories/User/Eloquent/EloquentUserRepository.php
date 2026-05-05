@@ -2,8 +2,9 @@
 
 namespace App\Repositories\User\Eloquent;
 
-use App\Models\User;
 use App\Enums\UserRole;
+use App\Enums\UserStatus;
+use App\Models\User;
 use App\Repositories\User\Contracts\UserRepositoryInterface;
 use Illuminate\Support\Collection;
 
@@ -32,15 +33,19 @@ class EloquentUserRepository implements UserRepositoryInterface
     public function update(int $id, array $data): bool
     {
         $user = User::find($id);
-        if (!$user) return false;
-        
+        if (! $user) {
+            return false;
+        }
+
         return $user->update($data);
     }
 
     public function delete(int $id): bool
     {
         $user = User::find($id);
-        if (!$user) return false;
+        if (! $user) {
+            return false;
+        }
 
         return $user->delete();
     }
@@ -66,5 +71,14 @@ class EloquentUserRepository implements UserRepositoryInterface
     public function getParentsPaginated(int $perPage = 15)
     {
         return User::with('children')->where('role', UserRole::PARENT->value)->paginate($perPage);
+    }
+
+    public function findApprovedStudentByQrCode(string $qrCodeValue): ?User
+    {
+        return User::with('parents')
+            ->where('role', UserRole::STUDENT->value)
+            ->where('status', UserStatus::APPROVED->value)
+            ->where('qr_code_value', $qrCodeValue)
+            ->first();
     }
 }

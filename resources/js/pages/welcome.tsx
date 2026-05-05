@@ -8,70 +8,17 @@ import {
     Smartphone,
     CheckCircle2,
     ArrowRight,
-    Play,
     Zap,
     Users,
     Activity,
     Lock,
 } from 'lucide-react';
+import { PublicPageShell } from '@/features/public/components/PublicPageShell';
 
 export default function Welcome() {
     return (
-        <div className="min-h-screen bg-[#F5F5F7] font-sans text-[#1D1D1F] selection:bg-[#FF3B30] selection:text-white">
+        <PublicPageShell activePage="home">
             <Head title="Student Attendance & Safety System" />
-
-            {/* Navbar */}
-            <nav className="fixed top-0 z-50 w-full border-b border-[#1D1D1F]/5 bg-[#F5F5F7]/80 backdrop-blur-xl transition-all duration-300">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-5">
-                    <div className="group flex cursor-pointer items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FF3B30] text-white shadow-lg shadow-[#FF3B30]/20 transition-transform group-hover:rotate-12">
-                            <Shield
-                                size={20}
-                                fill="currentColor"
-                                fillOpacity={0.2}
-                            />
-                        </div>
-                        <span className="text-2xl font-bold tracking-tight text-[#1D1D1F]">
-                            SASN
-                        </span>
-                    </div>
-                    <div className="hidden items-center gap-10 text-[15px] font-semibold text-[#1D1D1F]/70 md:flex">
-                        <a
-                            href="#features"
-                            className="transition-colors hover:text-[#FF3B30]"
-                        >
-                            Features
-                        </a>
-                        <a
-                            href="#how-it-works"
-                            className="transition-colors hover:text-[#FF3B30]"
-                        >
-                            Process
-                        </a>
-                        <a
-                            href="#preview"
-                            className="transition-colors hover:text-[#FF3B30]"
-                        >
-                            System
-                        </a>
-                    </div>
-                    <div className="flex items-center gap-6">
-                        <Link
-                            href={route('login')}
-                            className="text-[15px] font-bold text-[#1D1D1F]/70 transition-colors hover:text-[#1D1D1F]"
-                        >
-                            Sign In
-                        </Link>
-                        <Link
-                            href={route('register')}
-                            className="flex items-center gap-2 rounded-full bg-[#1D1D1F] px-6 py-2.5 text-[15px] font-bold text-white shadow-xl shadow-black/10 transition-all hover:scale-105 hover:bg-[#FF3B30] active:scale-95"
-                        >
-                            Get Started
-                            <ArrowRight size={16} />
-                        </Link>
-                    </div>
-                </div>
-            </nav>
 
             <main>
                 {/* 1. HERO SECTION */}
@@ -497,34 +444,7 @@ export default function Welcome() {
                 </section>
             </main>
 
-            <footer className="border-t border-[#F5F5F7] bg-white py-20">
-                <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-10 px-8 md:flex-row">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FF3B30] text-white">
-                            <Shield size={16} />
-                        </div>
-                        <span className="text-xl font-black tracking-tight">
-                            SASN
-                        </span>
-                    </div>
-                    <p className="text-sm font-bold text-[#1D1D1F]/30">
-                        &copy; {new Date().getFullYear()} SASN System. Precise
-                        Monitoring.
-                    </p>
-                    <div className="flex gap-10 text-sm font-black text-[#1D1D1F]/60">
-                        <a href="#" className="hover:text-[#FF3B30]">
-                            Privacy
-                        </a>
-                        <a href="#" className="hover:text-[#FF3B30]">
-                            Terms
-                        </a>
-                        <a href="#" className="hover:text-[#FF3B30]">
-                            Support
-                        </a>
-                    </div>
-                </div>
-            </footer>
-        </div>
+        </PublicPageShell>
     );
 }
 
