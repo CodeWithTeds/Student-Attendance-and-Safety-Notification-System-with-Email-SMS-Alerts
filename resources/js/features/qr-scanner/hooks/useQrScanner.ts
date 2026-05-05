@@ -104,7 +104,7 @@ export function useQrScanner({ onScan }: UseQrScannerOptions) {
     const start = useCallback(async () => {
         if (!window.BarcodeDetector) {
             setStatus('unsupported');
-            setMessage('This browser does not support live QR detection. Use manual entry below.');
+            setMessage('This browser does not support live QR detection. Use a supported browser to scan student QR codes.');
 
             return;
         }
@@ -132,7 +132,7 @@ export function useQrScanner({ onScan }: UseQrScannerOptions) {
             runDetectionLoop(detector);
         } catch {
             setStatus('error');
-            setMessage('Camera access was blocked or unavailable. Use manual entry below.');
+            setMessage('Camera access was blocked or unavailable. Enable camera access to scan student QR codes.');
         }
     }, [runDetectionLoop]);
 

@@ -2,7 +2,6 @@ import { Head } from '@inertiajs/react';
 import { ArrowRight, BadgeCheck, QrCode, Sparkles } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { PublicPageShell } from '@/features/public/components/PublicPageShell';
-import { ManualQrEntry } from '@/features/qr-scanner/components/ManualQrEntry';
 import { ScanModeControl } from '@/features/qr-scanner/components/ScanModeControl';
 import { ScannerViewport } from '@/features/qr-scanner/components/ScannerViewport';
 import { ScanResultPanel } from '@/features/qr-scanner/components/ScanResultPanel';
@@ -100,10 +99,6 @@ export default function QrScanner() {
                                     message={scanner.message}
                                     onStart={scanner.start}
                                     onStop={scanner.stop}
-                                />
-                                <ManualQrEntry
-                                    onSubmit={recordScan}
-                                    disabled={isProcessing}
                                 />
                             </div>
 
