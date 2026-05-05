@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react';
 import { PublicPageShell } from '@/features/public/components/PublicPageShell';
 import { ManualQrEntry } from '@/features/qr-scanner/components/ManualQrEntry';
 import { ScanModeControl } from '@/features/qr-scanner/components/ScanModeControl';
-import { ScannerSummary } from '@/features/qr-scanner/components/ScannerSummary';
 import { ScannerViewport } from '@/features/qr-scanner/components/ScannerViewport';
 import { ScanResultPanel } from '@/features/qr-scanner/components/ScanResultPanel';
 import { useQrScanner } from '@/features/qr-scanner/hooks/useQrScanner';
@@ -17,7 +16,6 @@ export default function QrScanner() {
     const [scanMode, setScanMode] = useState<ScanMode>('auto');
     const [result, setResult] = useState<AttendanceLogResource | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [successfulScans, setSuccessfulScans] = useState(0);
     const [isProcessing, setIsProcessing] = useState(false);
 
     const recordScan = useCallback(
@@ -36,7 +34,6 @@ export default function QrScanner() {
                 });
 
                 setResult(attendanceLog);
-                setSuccessfulScans((current) => current + 1);
             } catch (scanError) {
                 setError(scanError instanceof Error ? scanError.message : 'Unable to record this scan.');
             } finally {
@@ -47,11 +44,10 @@ export default function QrScanner() {
     );
 
     const scanner = useQrScanner({ onScan: recordScan });
-    const latestAction = result?.event_label ?? 'None';
 
     return (
         <PublicPageShell activePage="qr-scanner">
-            <Head title="Public QR Scanner" />
+            <Head title="Student Attendance Scanner" />
 
             <main className="pt-24">
                 <section className="relative overflow-hidden py-16 sm:py-20">
@@ -63,7 +59,7 @@ export default function QrScanner() {
                             <div>
                                 <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#1D1D1F] px-4 py-2 text-[13px] font-semibold tracking-wide text-white">
                                     <Sparkles size={14} className="text-[#FF3B30]" />
-                                    Public student attendance scanner
+                                    Student attendance scanner
                                 </span>
                                 <h1 className="max-w-4xl text-5xl leading-[1] font-[900] tracking-tight text-[#1D1D1F] sm:text-7xl">
                                     Scan once.
@@ -73,7 +69,7 @@ export default function QrScanner() {
                                     </span>
                                 </h1>
                                 <p className="mt-6 max-w-2xl text-lg leading-relaxed font-medium text-[#1D1D1F]/60">
-                                    A no-auth public scanner for school entry points. It reads approved student QR codes and records the next attendance action in real time.
+                                    Scan approved student QR codes at school entry points and record check-in or check-out attendance in real time.
                                 </p>
                             </div>
 
@@ -95,12 +91,7 @@ export default function QrScanner() {
                             </div>
                         </div>
 
-                        <ScannerSummary
-                            successfulScans={successfulScans}
-                            latestAction={latestAction}
-                        />
-
-                        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+                        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
                             <div className="space-y-6">
                                 <ScannerViewport
                                     videoRef={scanner.videoRef}
@@ -127,13 +118,13 @@ export default function QrScanner() {
                                         <BadgeCheck size={24} />
                                     </div>
                                     <h2 className="text-2xl font-black tracking-tight">
-                                        Approved QR only
+                                        Student QR only
                                     </h2>
                                     <p className="mt-3 text-sm leading-relaxed font-bold text-white/55">
-                                        The API accepts scans only when the QR value belongs to an approved student record.
+                                        Attendance is recorded only when the QR value belongs to an approved student record.
                                     </p>
                                     <div className="mt-5 flex items-center gap-2 text-sm font-black text-[#FF3B30]">
-                                        Ready for gate duty
+                                        Ready for attendance duty
                                         <ArrowRight size={16} />
                                     </div>
                                 </div>
