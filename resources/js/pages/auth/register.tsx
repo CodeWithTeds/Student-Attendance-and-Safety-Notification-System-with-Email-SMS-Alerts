@@ -6,21 +6,29 @@
  * into their own files under features/auth/.
  */
 
-import { FormEvent, useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { User, MapPin, ShieldCheck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { store } from '@/routes/register';
-import { login } from '@/routes';
-import { User, MapPin, ShieldCheck } from 'lucide-react';
 
 // Feature-specific imports (separation of concerns)
-import RegistrationStepper from '@/features/auth/components/RegistrationStepper';
-import BasicInfoStep from '@/features/auth/components/BasicInfoStep';
 import AddressInfoStep from '@/features/auth/components/AddressInfoStep';
+import BasicInfoStep from '@/features/auth/components/BasicInfoStep';
 import CompletionStep from '@/features/auth/components/CompletionStep';
-import { validateStep, hasErrors } from '@/features/auth/schemas/registerSchema';
-import type { RegisterFormData, StepConfig, StepErrors } from '@/features/auth/types/registerTypes';
+import RegistrationStepper from '@/features/auth/components/RegistrationStepper';
+import {
+    validateStep,
+    hasErrors,
+} from '@/features/auth/schemas/registerSchema';
+import type {
+    RegisterFormData,
+    StepConfig,
+    StepErrors,
+} from '@/features/auth/types/registerTypes';
+import { login } from '@/routes';
+import { store } from '@/routes/register';
 
 // ── Step configuration ──
 
@@ -62,7 +70,8 @@ export default function Register() {
     const [currentStep, setCurrentStep] = useState(1);
     const [stepErrors, setStepErrors] = useState<StepErrors>({});
 
-    const { data, setData, post, processing, errors, reset } = useForm<RegisterFormData>(initialFormData);
+    const { data, setData, post, processing, errors, reset } =
+        useForm<RegisterFormData>(initialFormData);
 
     // Generate student_id and student_number on mount
     useEffect(() => {
@@ -71,16 +80,21 @@ export default function Register() {
             student_id: crypto.randomUUID(),
             student_number: `2580${Math.floor(1000 + Math.random() * 9000)}`,
         }));
-    }, []);
+    }, [setData]);
 
     // Clear step errors when user edits a field
-    const handleFieldChange = (field: keyof RegisterFormData, value: string) => {
+    const handleFieldChange = (
+        field: keyof RegisterFormData,
+        value: string,
+    ) => {
         setData(field, value);
+
         // Remove the error for this field on change
         if (stepErrors[field]) {
             setStepErrors((prev) => {
                 const next = { ...prev };
                 delete next[field];
+
                 return next;
             });
         }
@@ -108,7 +122,9 @@ export default function Register() {
         const errors = validateStep(currentStep, data);
         setStepErrors(errors);
 
-        if (hasErrors(errors)) return;
+        if (hasErrors(errors)) {
+            return;
+        }
 
         post(store.url(), {
             onSuccess: () => reset('password', 'password_confirmation'),
