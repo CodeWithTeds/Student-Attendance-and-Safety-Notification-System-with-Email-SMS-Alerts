@@ -5,6 +5,7 @@ import {
     GraduationCap,
     HeartPulse,
     Calendar,
+    CalendarClock,
     Activity,
     QrCode,
     Bell,
@@ -81,6 +82,11 @@ const adminNavItems: NavItem[] = [
                 title: 'Class / Section',
                 href: '/admin/class-sections',
                 icon: Calendar,
+            },
+            {
+                title: 'Schedule',
+                href: '/admin/schedules',
+                icon: CalendarClock,
             },
             {
                 title: 'Attendance',

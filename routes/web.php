@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClassSectionController;
 use App\Http\Controllers\Admin\ParentGuardianController;
 use App\Http\Controllers\Admin\QrCodeController;
+use App\Http\Controllers\Admin\SectionScheduleController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('parents/{guardian}/notify', [ParentGuardianController::class, 'notify'])->name('parents.notify');
 
         Route::get('class-sections', [ClassSectionController::class, 'index'])->name('class-sections.index');
+        Route::get('schedules', [SectionScheduleController::class, 'index'])->name('schedules.index');
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
         Route::get('qr-codes', [QrCodeController::class, 'index'])->name('qr-codes.index');
