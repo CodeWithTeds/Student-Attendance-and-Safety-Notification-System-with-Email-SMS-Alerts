@@ -1,3 +1,5 @@
+import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
 import DataTablePagination from '@/components/common/DataTablePagination';
 import AdviserModal from '@/features/class-sections/components/AdviserModal';
 import AssignStudentsModal from '@/features/class-sections/components/AssignStudentsModal';
@@ -5,10 +7,15 @@ import ClassSectionRegistry from '@/features/class-sections/components/ClassSect
 import ClassSectionToolbar from '@/features/class-sections/components/ClassSectionToolbar';
 import GradeLevelModal from '@/features/class-sections/components/GradeLevelModal';
 import SectionModal from '@/features/class-sections/components/SectionModal';
+import SectionScheduleModal from '@/features/class-sections/components/SectionScheduleModal';
 import SectionTable from '@/features/class-sections/components/SectionTable';
-import { Adviser, GradeLevel, PaginatedSections, Section, Student } from '@/features/class-sections/types';
-import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import type {
+    Adviser,
+    GradeLevel,
+    PaginatedSections,
+    Section,
+    Student,
+} from '@/features/class-sections/types';
 
 interface ResourceCollection<T> {
     data: T[];
@@ -21,16 +28,29 @@ interface Props {
     students: ResourceCollection<Student>;
 }
 
-export default function ClassSectionsIndex({ sections, gradeLevels, advisers, students }: Props) {
+export default function ClassSectionsIndex({
+    sections,
+    gradeLevels,
+    advisers,
+    students,
+}: Props) {
     const [search, setSearch] = useState('');
     const [isGradeLevelModalOpen, setIsGradeLevelModalOpen] = useState(false);
     const [isAdviserModalOpen, setIsAdviserModalOpen] = useState(false);
     const [isSectionModalOpen, setIsSectionModalOpen] = useState(false);
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-    const [gradeLevelToEdit, setGradeLevelToEdit] = useState<GradeLevel | null>(null);
+    const [gradeLevelToEdit, setGradeLevelToEdit] = useState<GradeLevel | null>(
+        null,
+    );
     const [adviserToEdit, setAdviserToEdit] = useState<Adviser | null>(null);
     const [sectionToEdit, setSectionToEdit] = useState<Section | null>(null);
-    const [sectionToAssign, setSectionToAssign] = useState<Section | null>(null);
+    const [sectionToSchedule, setSectionToSchedule] = useState<Section | null>(
+        null,
+    );
+    const [sectionToAssign, setSectionToAssign] = useState<Section | null>(
+        null,
+    );
 
     const data = sections?.data ?? [];
     const meta = sections?.meta ?? {
@@ -51,8 +71,12 @@ export default function ClassSectionsIndex({ sections, gradeLevels, advisers, st
         return (
             section.name.toLowerCase().includes(searchValue) ||
             section.school_year.toLowerCase().includes(searchValue) ||
-            (section.grade_level?.name ?? '').toLowerCase().includes(searchValue) ||
-            (section.adviser?.full_name ?? '').toLowerCase().includes(searchValue)
+            (section.grade_level?.name ?? '')
+                .toLowerCase()
+                .includes(searchValue) ||
+            (section.adviser?.full_name ?? '')
+                .toLowerCase()
+                .includes(searchValue)
         );
     });
 
@@ -82,10 +106,26 @@ export default function ClassSectionsIndex({ sections, gradeLevels, advisers, st
         setIsAssignModalOpen(true);
     };
 
-    const handleExport = () => {
-        if (filteredSections.length === 0) return;
+    const handleScheduleSection = (section: Section) => {
+        setSectionToSchedule(section);
+        setIsScheduleModalOpen(true);
+    };
 
-        const headers = ['ID', 'Grade Level', 'Section', 'School Year', 'Adviser', 'Students', 'Capacity'];
+    const handleExport = () => {
+        if (filteredSections.length === 0) {
+            return;
+        }
+
+        const headers = [
+            'ID',
+            'Grade Level',
+            'Section',
+            'School Year',
+            'Adviser',
+            'Schedule',
+            'Students',
+            'Capacity',
+        ];
         const csvContent = [
             headers.join(','),
             ...filteredSections.map((section) =>
@@ -95,17 +135,23 @@ export default function ClassSectionsIndex({ sections, gradeLevels, advisers, st
                     `"${section.name}"`,
                     `"${section.school_year}"`,
                     `"${section.adviser?.full_name ?? ''}"`,
+                    `"${section.schedule ? `${section.schedule.time_in_display} - ${section.schedule.time_out_display}` : ''}"`,
                     section.students_count,
                     section.capacity ?? '',
                 ].join(','),
             ),
         ].join('\n');
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csvContent], {
+            type: 'text/csv;charset=utf-8;',
+        });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', url);
-        link.setAttribute('download', `class_sections_export_${new Date().getTime()}.csv`);
+        link.setAttribute(
+            'download',
+            `class_sections_export_${new Date().getTime()}.csv`,
+        );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -134,7 +180,13 @@ export default function ClassSectionsIndex({ sections, gradeLevels, advisers, st
                 onExport={handleExport}
             />
 
-            <SectionTable sections={filteredSections} meta={meta} onEdit={handleEditSection} onAssign={handleAssignSection} />
+            <SectionTable
+                sections={filteredSections}
+                meta={meta}
+                onEdit={handleEditSection}
+                onSchedule={handleScheduleSection}
+                onAssign={handleAssignSection}
+            />
 
             <DataTablePagination meta={meta} onPageChange={handlePageChange} />
 
@@ -171,6 +223,15 @@ export default function ClassSectionsIndex({ sections, gradeLevels, advisers, st
                 onClose={() => {
                     setIsSectionModalOpen(false);
                     setSectionToEdit(null);
+                }}
+            />
+
+            <SectionScheduleModal
+                isOpen={isScheduleModalOpen}
+                section={sectionToSchedule}
+                onClose={() => {
+                    setIsScheduleModalOpen(false);
+                    setSectionToSchedule(null);
                 }}
             />
 

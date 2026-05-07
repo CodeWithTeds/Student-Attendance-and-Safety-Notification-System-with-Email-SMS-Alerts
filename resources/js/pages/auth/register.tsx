@@ -74,7 +74,7 @@ export default function Register() {
     }, []);
 
     // Clear step errors when user edits a field
-    const handleFieldChange = <K extends keyof RegisterFormData>(field: K, value: RegisterFormData[K]) => {
+    const handleFieldChange = (field: keyof RegisterFormData, value: string) => {
         setData(field, value);
         // Remove the error for this field on change
         if (stepErrors[field]) {

@@ -21,6 +21,17 @@ export interface Adviser {
     updated_at: string;
 }
 
+export interface SectionSchedule {
+    id: number;
+    section_id: number;
+    time_in: string;
+    time_out: string;
+    time_in_display: string;
+    time_out_display: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Section {
     id: number;
     name: string;
@@ -29,6 +40,7 @@ export interface Section {
     students_count: number;
     grade_level?: GradeLevel | null;
     adviser?: Adviser | null;
+    schedule?: SectionSchedule | null;
     students?: Student[];
     created_at: string;
     updated_at: string;
@@ -82,4 +94,9 @@ export interface SectionForm {
 
 export interface AssignStudentsForm {
     student_ids: number[];
+}
+
+export interface SectionScheduleForm {
+    time_in: string;
+    time_out: string;
 }

@@ -26,6 +26,7 @@ export interface QrCodeStudent {
 }
 
 export interface QrCodeFilters {
+    [key: string]: 'generated' | 'missing' | '' | string | undefined;
     search?: string;
     qr_status?: 'generated' | 'missing' | '';
 }

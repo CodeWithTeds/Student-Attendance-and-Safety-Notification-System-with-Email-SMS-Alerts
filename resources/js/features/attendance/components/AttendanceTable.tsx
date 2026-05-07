@@ -21,7 +21,8 @@ export function AttendanceTable({
     onViewHistory,
 }: AttendanceTableProps) {
     const allSelected =
-        records.length > 0 && records.every((record) => selected.includes(record.id));
+        records.length > 0 &&
+        records.every((record) => selected.includes(record.id));
 
     return (
         <div className="min-h-0 flex-1 overflow-auto">
@@ -39,7 +40,9 @@ export function AttendanceTable({
                                 }`}
                                 aria-label="Select all records"
                             >
-                                {allSelected && <Check size={13} strokeWidth={3} />}
+                                {allSelected && (
+                                    <Check size={13} strokeWidth={3} />
+                                )}
                             </button>
                         </th>
                         <th className="px-4 py-3 text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
@@ -52,7 +55,7 @@ export function AttendanceTable({
                             Scanned At
                         </th>
                         <th className="px-4 py-3 text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
-                            Section
+                            Section / Schedule
                         </th>
                         <th className="px-4 py-3 text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
                             History
@@ -68,7 +71,10 @@ export function AttendanceTable({
                         const section = record.student.current_section;
 
                         return (
-                            <tr key={record.id} className="transition-colors hover:bg-[var(--muted)]/30">
+                            <tr
+                                key={record.id}
+                                className="transition-colors hover:bg-[var(--muted)]/30"
+                            >
                                 <td className="px-4 py-3">
                                     <button
                                         type="button"
@@ -80,7 +86,9 @@ export function AttendanceTable({
                                         }`}
                                         aria-label={`Select attendance record ${record.id}`}
                                     >
-                                        {isSelected && <Check size={13} strokeWidth={3} />}
+                                        {isSelected && (
+                                            <Check size={13} strokeWidth={3} />
+                                        )}
                                     </button>
                                 </td>
                                 <td className="px-4 py-3">
@@ -93,7 +101,9 @@ export function AttendanceTable({
                                                 {record.student.name}
                                             </p>
                                             <p className="text-xs text-[var(--muted-foreground)]">
-                                                {record.student.student_number ?? record.student.email}
+                                                {record.student
+                                                    .student_number ??
+                                                    record.student.email}
                                             </p>
                                         </div>
                                     </div>
@@ -113,7 +123,20 @@ export function AttendanceTable({
                                     {record.scanned_at_full_display}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-[var(--muted-foreground)]">
-                                    {section ? `${section.grade_level?.name ?? ''} ${section.name}`.trim() : 'Not assigned'}
+                                    {section ? (
+                                        <>
+                                            <div>
+                                                {`${section.grade_level?.name ?? ''} ${section.name}`.trim()}
+                                            </div>
+                                            <div className="mt-0.5 text-xs">
+                                                {section.schedule
+                                                    ? `${section.schedule.time_in_display} - ${section.schedule.time_out_display}`
+                                                    : 'No schedule'}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        'Not assigned'
+                                    )}
                                 </td>
                                 <td className="px-4 py-3">
                                     <button
@@ -143,7 +166,10 @@ export function AttendanceTable({
 
             {meta.total === 0 && (
                 <div className="flex h-64 flex-col items-center justify-center text-center">
-                    <UserCheck size={36} className="mb-3 text-[var(--muted-foreground)]" />
+                    <UserCheck
+                        size={36}
+                        className="mb-3 text-[var(--muted-foreground)]"
+                    />
                     <p className="text-sm font-semibold text-[var(--foreground)]">
                         No attendance records found
                     </p>

@@ -49,6 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('sections', [ClassSectionController::class, 'storeSection'])->name('sections.store');
         Route::put('sections/{section}', [ClassSectionController::class, 'updateSection'])->name('sections.update');
         Route::delete('sections/{section}', [ClassSectionController::class, 'destroySection'])->name('sections.destroy');
+        Route::put('sections/{section}/schedule', [ClassSectionController::class, 'updateSectionSchedule'])->name('sections.schedule.update');
+        Route::delete('sections/{section}/schedule', [ClassSectionController::class, 'destroySectionSchedule'])->name('sections.schedule.destroy');
         Route::post('sections/{section}/students', [ClassSectionController::class, 'assignStudents'])->name('sections.students.store');
         Route::delete('sections/{section}/students/{student}', [ClassSectionController::class, 'unassignStudent'])->name('sections.students.destroy');
     });

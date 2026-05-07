@@ -11,6 +11,7 @@ use App\Http\Requests\ClassSection\StoreSectionRequest;
 use App\Http\Requests\ClassSection\UpdateAdviserRequest;
 use App\Http\Requests\ClassSection\UpdateGradeLevelRequest;
 use App\Http\Requests\ClassSection\UpdateSectionRequest;
+use App\Http\Requests\ClassSection\UpdateSectionScheduleRequest;
 use App\Http\Resources\AdviserResource;
 use App\Http\Resources\GradeLevelResource;
 use App\Http\Resources\SectionResource;
@@ -123,10 +124,24 @@ class ClassSectionController extends Controller
         return redirect()->route('admin.class-sections.index')->with('success', 'Student removed from section successfully.');
     }
 
+    public function updateSectionSchedule(UpdateSectionScheduleRequest $request, Section $section): RedirectResponse
+    {
+        $section->schedule()->updateOrCreate(['section_id' => $section->id], $request->scheduleData());
+
+        return redirect()->route('admin.class-sections.index')->with('success', 'Section schedule saved successfully.');
+    }
+
+    public function destroySectionSchedule(Section $section): RedirectResponse
+    {
+        $section->schedule()->delete();
+
+        return redirect()->route('admin.class-sections.index')->with('success', 'Section schedule removed successfully.');
+    }
+
     private function sectionQuery()
     {
         return Section::query()
-            ->with(['gradeLevel', 'adviser', 'students' => fn ($query) => $query->select('users.id', 'users.name', 'users.email', 'users.student_number', 'users.role', 'users.status', 'users.created_at', 'users.updated_at')])
+            ->with(['gradeLevel', 'adviser', 'schedule', 'students' => fn ($query) => $query->select('users.id', 'users.name', 'users.email', 'users.student_number', 'users.role', 'users.status', 'users.created_at', 'users.updated_at')])
             ->withCount('students')
             ->latest();
     }
@@ -151,7 +166,7 @@ class ClassSectionController extends Controller
     {
         return User::query()
             ->select('id', 'name', 'email', 'student_number', 'role', 'status', 'first_name', 'middle_name', 'last_name', 'created_at', 'updated_at')
-            ->with(['sections' => fn ($query) => $query->with('gradeLevel')->select('sections.id', 'sections.grade_level_id', 'sections.name', 'sections.school_year')])
+            ->with(['sections' => fn ($query) => $query->with(['gradeLevel', 'schedule'])->select('sections.id', 'sections.grade_level_id', 'sections.name', 'sections.school_year')])
             ->where('role', UserRole::STUDENT->value)
             ->orderBy('name');
     }

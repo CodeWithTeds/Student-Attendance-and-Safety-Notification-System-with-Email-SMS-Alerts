@@ -17,6 +17,7 @@ class SectionResource extends JsonResource
             'students_count' => $this->students_count ?? 0,
             'grade_level' => new GradeLevelResource($this->whenLoaded('gradeLevel')),
             'adviser' => new AdviserResource($this->whenLoaded('adviser')),
+            'schedule' => new SectionScheduleResource($this->whenLoaded('schedule')),
             'students' => UserResource::collection($this->whenLoaded('students')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

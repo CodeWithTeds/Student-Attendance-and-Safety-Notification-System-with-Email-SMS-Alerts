@@ -13,13 +13,13 @@ class EloquentStudentAttendanceRepository implements StudentAttendanceRepository
 {
     public function create(array $data): StudentAttendanceLog
     {
-        return StudentAttendanceLog::create($data)->load('student.parents');
+        return StudentAttendanceLog::create($data)->load(['student.parents', 'student.sections.gradeLevel', 'student.sections.schedule']);
     }
 
     public function getPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         return StudentAttendanceLog::query()
-            ->with(['student.sections.gradeLevel', 'editHistory.editor'])
+            ->with(['student.sections.gradeLevel', 'student.sections.schedule', 'editHistory.editor'])
             ->when($filters['search'] ?? null, function ($query, string $search): void {
                 $query->whereHas('student', function ($studentQuery) use ($search): void {
                     $studentQuery
@@ -37,7 +37,7 @@ class EloquentStudentAttendanceRepository implements StudentAttendanceRepository
 
     public function getById(int $id): ?StudentAttendanceLog
     {
-        return StudentAttendanceLog::with(['student.sections.gradeLevel', 'editHistory.editor'])->find($id);
+        return StudentAttendanceLog::with(['student.sections.gradeLevel', 'student.sections.schedule', 'editHistory.editor'])->find($id);
     }
 
     public function update(StudentAttendanceLog $attendanceLog, array $data): bool
