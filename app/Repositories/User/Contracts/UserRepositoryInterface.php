@@ -30,5 +30,7 @@ interface UserRepositoryInterface
 
     public function getParentsPaginated(int $perPage = 15);
 
+    public function getParentsForAnnouncement(?array $guardianIds = null): Collection;
+
     public function findApprovedStudentByQrCode(string $qrCodeValue): ?User;
 }

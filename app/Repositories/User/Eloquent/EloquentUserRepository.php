@@ -96,6 +96,16 @@ class EloquentUserRepository implements UserRepositoryInterface
         return User::with('children')->where('role', UserRole::PARENT->value)->paginate($perPage);
     }
 
+    public function getParentsForAnnouncement(?array $guardianIds = null): Collection
+    {
+        return User::query()
+            ->with('children')
+            ->where('role', UserRole::PARENT->value)
+            ->when($guardianIds !== null, fn ($query) => $query->whereIn('id', $guardianIds))
+            ->orderBy('name')
+            ->get();
+    }
+
     public function findApprovedStudentByQrCode(string $qrCodeValue): ?User
     {
         return User::with('parents')
