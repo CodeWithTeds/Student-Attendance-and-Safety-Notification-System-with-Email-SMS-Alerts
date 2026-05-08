@@ -5,6 +5,7 @@ namespace App\Services\Announcement;
 use App\Enums\AnnouncementAudienceType;
 use App\Enums\AnnouncementDeliveryStatus;
 use App\Enums\AnnouncementStatus;
+use App\Events\AnnouncementCreated;
 use App\Mail\SchoolAnnouncementMail;
 use App\Models\Announcement;
 use App\Models\User;
@@ -56,31 +57,20 @@ class AnnouncementService
             'sent_at' => now(),
         ], $guardians);
 
-        $failedDeliveries = $this->deliverToGuardians($announcement, $guardians);
+        AnnouncementCreated::dispatch($announcement);
 
-        if ($failedDeliveries > 0) {
-            $this->announcementRepository->updateStatus($announcement, [
-                'status' => $failedDeliveries >= $guardians->count() ? AnnouncementStatus::FAILED->value : AnnouncementStatus::PARTIAL->value,
-            ]);
-        }
-
-        return $announcement->refresh();
+        return $announcement;
     }
 
-    protected function resolveGuardians(array $data): Collection
+    public function deliverRecipientChunk(int $announcementId, array $recipientIds): void
     {
-        if ($data['audience_type'] === AnnouncementAudienceType::SELECTED_GUARDIANS->value) {
-            return $this->userRepository->getParentsForAnnouncement($data['guardian_ids'] ?? []);
-        }
+        $announcement = $this->announcementRepository->findForDeliveryChunk(
+            announcementId: $announcementId,
+            recipientIds: $recipientIds
+        );
 
-        return $this->userRepository->getParentsForAnnouncement();
-    }
-
-    protected function deliverToGuardians(Announcement $announcement, Collection $guardians): int
-    {
-        $failedDeliveries = 0;
-
-        foreach ($guardians as $guardian) {
+        foreach ($announcement->recipients as $recipient) {
+            $guardian = $recipient->guardian;
             $deliveryData = [];
 
             if ($announcement->email_enabled) {
@@ -97,14 +87,34 @@ class AnnouncementService
                 ];
             }
 
-            if (($deliveryData['email_status'] ?? null) === AnnouncementDeliveryStatus::FAILED->value || ($deliveryData['sms_status'] ?? null) === AnnouncementDeliveryStatus::FAILED->value) {
-                $failedDeliveries++;
-            }
+            $this->announcementRepository->updateRecipientDelivery(
+                $announcement,
+                $recipient->guardian_id,
+                $deliveryData
+            );
+        }
+    }
 
-            $this->announcementRepository->updateRecipientDelivery($announcement, $guardian->id, $deliveryData);
+    public function refreshDeliveryStatus(int $announcementId): void
+    {
+        $counts = $this->announcementRepository->getDeliveryStatusCounts($announcementId);
+
+        if ($counts['failed'] < 1) {
+            return;
         }
 
-        return $failedDeliveries;
+        $this->announcementRepository->updateStatusById($announcementId, [
+            'status' => $counts['failed'] >= $counts['total'] ? AnnouncementStatus::FAILED->value : AnnouncementStatus::PARTIAL->value,
+        ]);
+    }
+
+    protected function resolveGuardians(array $data): Collection
+    {
+        if ($data['audience_type'] === AnnouncementAudienceType::SELECTED_GUARDIANS->value) {
+            return $this->userRepository->getParentsForAnnouncement($data['guardian_ids'] ?? []);
+        }
+
+        return $this->userRepository->getParentsForAnnouncement();
     }
 
     protected function deliverEmail(Announcement $announcement, User $guardian): array

@@ -3,8 +3,10 @@
 use App\Enums\AnnouncementAudienceType;
 use App\Enums\AnnouncementDeliveryStatus;
 use App\Enums\UserRole;
+use App\Jobs\SendAnnouncementRecipientChunk;
 use App\Mail\SchoolAnnouncementMail;
 use App\Models\User;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Mail;
 
 it('allows admins to view announcement management', function (): void {
@@ -61,6 +63,40 @@ it('sends an email and sms announcement to selected guardians', function (): voi
     ]);
 
     Mail::assertSent(SchoolAnnouncementMail::class, fn (SchoolAnnouncementMail $mail) => $mail->guardian->is($guardian));
+});
+
+it('queues announcement delivery chunks after creating recipients', function (): void {
+    Bus::fake();
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $guardians = User::factory()
+        ->count(3)
+        ->create([
+            'role' => UserRole::PARENT,
+            'notification_email_enabled' => true,
+        ]);
+
+    $this->actingAs($admin)
+        ->post('/admin/announcements', [
+            'title' => 'Background delivery',
+            'message' => 'This should be handled by chunked queue jobs.',
+            'sms_enabled' => false,
+            'email_enabled' => true,
+            'audience_type' => AnnouncementAudienceType::SELECTED_GUARDIANS->value,
+            'guardian_ids' => $guardians->pluck('id')->all(),
+        ])
+        ->assertRedirect(route('admin.announcements.index'));
+
+    $this->assertDatabaseCount('announcement_recipients', 3);
+
+    Bus::assertBatched(function ($batch): bool {
+        return $batch->jobs->count() === 1
+            && $batch->jobs->first() instanceof SendAnnouncementRecipientChunk
+            && $batch->jobs->first()->recipientIds !== [];
+    });
+
+    Mail::assertNothingSent();
 });
 
 it('skips announcement channels disabled on the guardian profile', function (): void {

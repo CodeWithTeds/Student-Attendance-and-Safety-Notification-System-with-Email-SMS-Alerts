@@ -31,6 +31,6 @@ class AnnouncementController extends Controller
     {
         $this->announcementService->sendAnnouncement($request->announcementData(), $request->user()?->id);
 
-        return redirect()->route('admin.announcements.index')->with('success', 'Announcement sent successfully.');
+        return redirect()->route('admin.announcements.index')->with('success', 'Announcement queued for delivery.');
     }
 }
