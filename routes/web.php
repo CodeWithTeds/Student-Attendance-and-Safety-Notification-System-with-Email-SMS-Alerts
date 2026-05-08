@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClassSectionController;
+use App\Http\Controllers\Admin\NotificationSettingController;
 use App\Http\Controllers\Admin\ParentGuardianController;
 use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Admin\SectionScheduleController;
@@ -34,6 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('parents/{guardian}', [ParentGuardianController::class, 'update'])->name('parents.update');
         Route::delete('parents/{guardian}', [ParentGuardianController::class, 'destroy'])->name('parents.destroy');
         Route::post('parents/{guardian}/notify', [ParentGuardianController::class, 'notify'])->name('parents.notify');
+
+        Route::get('notifications', [NotificationSettingController::class, 'index'])->name('notifications.index');
+        Route::put('notifications/{notificationSetting}', [NotificationSettingController::class, 'update'])->name('notifications.update');
+        Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
 
         Route::get('class-sections', [ClassSectionController::class, 'index'])->name('class-sections.index');
         Route::get('schedules', [SectionScheduleController::class, 'index'])->name('schedules.index');
