@@ -102,13 +102,13 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Notifications',
-        href: '#',
+        href: '/admin/notifications',
         icon: Bell,
         roles: ['admin'],
     },
     {
         title: 'Announcements',
-        href: '#',
+        href: '/admin/announcements',
         icon: Megaphone,
         roles: ['admin'],
     },
