@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('students', [StudentController::class, 'index'])->name('students.index');
         Route::post('students', [StudentController::class, 'store'])->name('students.store');
+        Route::put('students/{user}', [StudentController::class, 'update'])->name('students.update');
         Route::post('students/{id}/approve', [StudentController::class, 'approve'])->name('students.approve');
 
         Route::get('parents', [ParentGuardianController::class, 'index'])->name('parents.index');

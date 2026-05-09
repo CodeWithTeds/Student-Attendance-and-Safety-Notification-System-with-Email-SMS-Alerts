@@ -56,7 +56,7 @@ export default function EditStudentModal({ isOpen, onClose, student }: Props) {
         event.preventDefault();
         if (!student) return;
 
-        put(`/admin/users/${student.id}`, {
+        put(`/admin/students/${student.id}`, {
             preserveScroll: true,
             onSuccess: handleClose,
         });

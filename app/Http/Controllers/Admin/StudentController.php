@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreStudentRequest;
+use App\Http\Requests\User\UpdateStudentRequest;
 use App\Http\Resources\UserResource;
 use App\Repositories\User\Contracts\UserRepositoryInterface;
 use App\Services\User\UserService;
@@ -30,6 +31,12 @@ class StudentController extends Controller
     {
         $this->userService->createUser($request->studentData());
         return redirect()->route('admin.students.index')->with('success', 'Student created successfully.');
+    }
+
+    public function update(UpdateStudentRequest $request, int $id): RedirectResponse
+    {
+        $this->userService->updateStudent($id, $request->studentData());
+        return redirect()->route('admin.students.index')->with('success', 'Student updated successfully.');
     }
 
     public function approve(int $id): RedirectResponse

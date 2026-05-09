@@ -25,7 +25,7 @@ class ParentSeeder extends Seeder
         $bar = $this->command->getOutput()->createProgressBar(500);
         $bar->start();
 
-        for ($i = 1; $i <= 500; $i++) {
+        for ($i = 1; $i <= 200; $i++) {
             // Random 11-digit PH number: 09 + 9 random digits
             $phone = '09' . str_pad(random_int(0, 999999999), 9, '0', STR_PAD_LEFT);
 

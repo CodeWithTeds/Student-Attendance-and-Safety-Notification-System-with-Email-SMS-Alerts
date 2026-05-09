@@ -56,7 +56,7 @@ class UserService
 
         $name = $this->resolveDisplayName($data);
 
-        $updated = $this->userRepository->update($id, [
+        $updateData = [
             'name' => $name,
             'email' => $data['email'],
             'role' => $data['role'],
@@ -66,7 +66,17 @@ class UserService
             'guardian_phone' => $data['guardian_phone'] ?? null,
             'notification_sms_enabled' => $data['notification_sms_enabled'] ?? false,
             'notification_email_enabled' => $data['notification_email_enabled'] ?? false,
-        ] + (isset($data['password']) ? ['password' => $data['password']] : []));
+        ];
+
+        if (isset($data['student_number'])) {
+            $updateData['student_number'] = $data['student_number'];
+        }
+
+        if (isset($data['password'])) {
+            $updateData['password'] = $data['password'];
+        }
+
+        $updated = $this->userRepository->update($id, $updateData);
 
         if ($updated && isset($data['student_ids'])) {
             $user = $this->userRepository->getById($id);
@@ -76,6 +86,11 @@ class UserService
         }
 
         return $updated;
+    }
+
+    public function updateStudent(int $id, array $data): bool
+    {
+        return $this->updateUser($id, $data);
     }
 
     public function updateStatus(int $id, string $status): bool
