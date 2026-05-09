@@ -1,5 +1,6 @@
 import AddStudentModal from '@/features/students/components/AddStudentModal';
 import EditStudentModal from '@/features/students/components/EditStudentModal';
+import BulkAssignSectionModal from '@/features/students/components/BulkAssignSectionModal';
 import StudentIdCard from '@/features/students/components/StudentIdCard';
 import StudentTable from '@/features/students/components/StudentTable';
 import StudentToolbar from '@/features/students/components/StudentToolbar';
@@ -29,6 +30,7 @@ export default function StudentsIndex({ users, sections }: Props) {
     const [selected, setSelected] = useState<number[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isBulkAssignModalOpen, setIsBulkAssignModalOpen] = useState(false);
     const [activeQrStudent, setActiveQrStudent] = useState<User | null>(null);
     const [studentToEdit, setStudentToEdit] = useState<User | null>(null);
 
@@ -115,6 +117,7 @@ export default function StudentsIndex({ users, sections }: Props) {
                 onSearchChange={setSearch}
                 selectedCount={selected.length}
                 onAddClick={() => setIsAddModalOpen(true)}
+                onBulkAssignClick={() => setIsBulkAssignModalOpen(true)}
                 onExport={handleExport}
             />
 
@@ -144,6 +147,16 @@ export default function StudentsIndex({ users, sections }: Props) {
                     setStudentToEdit(null);
                 }} 
                 student={studentToEdit}
+                sections={sections?.data ?? []}
+            />
+ 
+            <BulkAssignSectionModal
+                isOpen={isBulkAssignModalOpen}
+                onClose={() => {
+                    setIsBulkAssignModalOpen(false);
+                    setSelected([]);
+                }}
+                selectedStudents={data.filter(s => selected.includes(s.id))}
                 sections={sections?.data ?? []}
             />
 

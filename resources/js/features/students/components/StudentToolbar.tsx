@@ -6,9 +6,10 @@ interface Props {
     selectedCount: number;
     onAddClick: () => void;
     onExport: () => void;
+    onBulkAssignClick?: () => void;
 }
 
-export default function StudentToolbar({ search, onSearchChange, selectedCount, onAddClick, onExport }: Props) {
+export default function StudentToolbar({ search, onSearchChange, selectedCount, onAddClick, onExport, onBulkAssignClick }: Props) {
     return (
         <div className="flex flex-wrap items-center gap-3 border-b border-[var(--border)] p-4 bg-[var(--background)]">
             <div className="relative flex-1 min-w-[200px] max-w-[320px]">
@@ -28,6 +29,15 @@ export default function StudentToolbar({ search, onSearchChange, selectedCount, 
             )}
 
             <div className="flex-1" />
+
+            {selectedCount > 0 && onBulkAssignClick && (
+                <button
+                    onClick={onBulkAssignClick}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--primary)] bg-[var(--primary)]/5 px-3.5 text-[13px] font-semibold text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white transition-all shadow-sm"
+                >
+                    <Plus size={14} /> Bulk Assign Section
+                </button>
+            )}
 
             <button 
                 onClick={onExport}
