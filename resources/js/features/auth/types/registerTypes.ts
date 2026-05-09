@@ -10,6 +10,7 @@ export interface RegisterFormData {
     middle_name: string;
     last_name: string;
     suffix: string;
+    grade_level_id: string;
     gender: string;
     date_of_birth: string;
     place_of_birth: string;

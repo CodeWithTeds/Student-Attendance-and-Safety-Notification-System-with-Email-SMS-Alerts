@@ -124,6 +124,9 @@ export function validateBasicInfo(data: RegisterFormData): StepErrors {
 
     const gender = required(data.gender, 'Gender');
     if (gender) errors.gender = gender;
+ 
+    const gradeLevel = required(data.grade_level_id, 'Grade level');
+    if (gradeLevel) errors.grade_level_id = gradeLevel;
 
     const dob = required(data.date_of_birth, 'Date of birth');
     if (dob) errors.date_of_birth = dob;

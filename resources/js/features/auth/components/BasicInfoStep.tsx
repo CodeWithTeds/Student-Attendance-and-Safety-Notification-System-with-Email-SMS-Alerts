@@ -20,10 +20,11 @@ import { sanitizeName, sanitizeAlpha, sanitizeSuffix } from '../utils/inputSanit
 interface BasicInfoStepProps {
     data: RegisterFormData;
     stepErrors: StepErrors;
+    gradeLevels: Array<{ id: number; name: string; code: string }>;
     onChange: <K extends keyof RegisterFormData>(field: K, value: RegisterFormData[K]) => void;
 }
 
-export default function BasicInfoStep({ data, stepErrors, onChange }: BasicInfoStepProps) {
+export default function BasicInfoStep({ data, stepErrors, gradeLevels, onChange }: BasicInfoStepProps) {
     return (
         <div className="space-y-5 animate-in fade-in slide-in-from-right-2 duration-300">
             {/* Auto-generated IDs */}
@@ -103,6 +104,24 @@ export default function BasicInfoStep({ data, stepErrors, onChange }: BasicInfoS
                     />
                     <InputError message={stepErrors.suffix} />
                 </div>
+            </div>
+
+            {/* Grade Level Select */}
+            <div className="space-y-2">
+                <Label htmlFor="grade_level_id">Grade Level <span className="text-destructive">*</span></Label>
+                <Select value={data.grade_level_id} onValueChange={(val) => onChange('grade_level_id', val)}>
+                    <SelectTrigger className={`h-10 ${stepErrors.grade_level_id ? 'border-destructive' : ''}`}>
+                        <SelectValue placeholder="Select grade level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {gradeLevels.map((level) => (
+                            <SelectItem key={level.id} value={level.id.toString()}>
+                                {level.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <InputError message={stepErrors.grade_level_id} />
             </div>
 
             {/* Details row */}

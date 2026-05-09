@@ -55,7 +55,7 @@ export default function StudentTable({
                         <th className="sticky top-0 z-10 bg-[var(--background)] py-3 px-2 text-left text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">Name</th>
                         <th className="sticky top-0 z-10 bg-[var(--background)] py-3 px-2 text-left text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">Email</th>
                         <th className="sticky top-0 z-10 bg-[var(--background)] py-3 px-2 text-left text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">Student No.</th>
-                        <th className="sticky top-0 z-10 bg-[var(--background)] py-3 px-2 text-left text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">Section</th>
+                        <th className="sticky top-0 z-10 bg-[var(--background)] py-3 px-2 text-left text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">Grade Level</th>
                         <th className="sticky top-0 z-10 bg-[var(--background)] py-3 px-2 text-left text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">Status</th>
                         <th className="sticky top-0 z-10 bg-[var(--background)] py-3 px-2 text-left text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">QR Code</th>
                         <th className="sticky top-0 z-10 bg-[var(--background)] py-3 px-2 text-left text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">Created</th>
@@ -116,13 +116,12 @@ export default function StudentTable({
                                         {student.student_number ?? 'Pending'}
                                     </td>
                                     <td className="py-2.5 px-2">
-                                        {student.current_section ? (
-                                            <div className="flex flex-col">
-                                                <span className="font-medium text-[var(--foreground)]">{student.current_section.name}</span>
-                                                <span className="text-[10px] text-[var(--muted-foreground)]">{student.current_section.grade_level?.name}</span>
-                                            </div>
+                                        {student.grade_level ? (
+                                            <span className="font-medium text-[var(--foreground)]">
+                                                {student.grade_level.name}
+                                            </span>
                                         ) : (
-                                            <span className="text-[11px] text-[var(--muted-foreground)] italic">Unassigned</span>
+                                            <span className="text-[11px] text-[var(--muted-foreground)] italic">Not specified</span>
                                         )}
                                     </td>
                                     <td className="py-2.5 px-2">

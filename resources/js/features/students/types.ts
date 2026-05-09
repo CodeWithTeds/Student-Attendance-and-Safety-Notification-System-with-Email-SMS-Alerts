@@ -23,6 +23,7 @@ export interface User {
     first_name?: string | null;
     middle_name?: string | null;
     last_name?: string | null;
+    grade_level?: { id: number; name: string } | null;
     current_section?: Section | null;
 }
 

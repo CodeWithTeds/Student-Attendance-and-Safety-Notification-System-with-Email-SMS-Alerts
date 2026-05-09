@@ -30,6 +30,7 @@ class UserResource extends JsonResource
             'children' => UserResource::collection($this->whenLoaded('children')),
             'parents' => UserResource::collection($this->whenLoaded('parents')),
             'sections' => SectionResource::collection($this->whenLoaded('sections')),
+            'grade_level' => new GradeLevelResource($this->whenLoaded('gradeLevel')),
             'current_section' => $this->whenLoaded('sections', fn () => $this->sections->first() ? new SectionResource($this->sections->first()) : null),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

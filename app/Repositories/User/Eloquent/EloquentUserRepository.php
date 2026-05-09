@@ -74,7 +74,7 @@ class EloquentUserRepository implements UserRepositoryInterface
 
     public function getStudentsPaginated(int $perPage = 15)
     {
-        return User::with(['sections.gradeLevel', 'sections.schedule'])
+        return User::with(['sections.gradeLevel', 'sections.schedule', 'gradeLevel'])
             ->where('role', UserRole::STUDENT->value)
             ->latest()
             ->paginate($perPage);

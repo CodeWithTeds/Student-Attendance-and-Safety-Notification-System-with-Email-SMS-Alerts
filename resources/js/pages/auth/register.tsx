@@ -49,6 +49,7 @@ const initialFormData: RegisterFormData = {
     middle_name: '',
     last_name: '',
     suffix: '',
+    grade_level_id: '',
     gender: 'Male',
     date_of_birth: '',
     place_of_birth: '',
@@ -66,7 +67,7 @@ const initialFormData: RegisterFormData = {
 
 // ── Page Component ──
 
-export default function Register() {
+export default function Register({ gradeLevels = [] }: { gradeLevels: Array<{ id: number; name: string; code: string }> }) {
     const [currentStep, setCurrentStep] = useState(1);
     const [stepErrors, setStepErrors] = useState<StepErrors>({});
 
@@ -142,6 +143,7 @@ export default function Register() {
                     <BasicInfoStep
                         data={data}
                         stepErrors={stepErrors}
+                        gradeLevels={gradeLevels}
                         onChange={handleFieldChange}
                     />
                 )}
