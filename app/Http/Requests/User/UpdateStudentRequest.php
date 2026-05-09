@@ -23,6 +23,8 @@ class UpdateStudentRequest extends FormRequest
             'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
             'student_number' => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($this->route('user'))],
+            'section_ids' => ['nullable', 'array'],
+            'section_ids.*' => ['exists:sections,id'],
         ];
     }
 

@@ -1,3 +1,14 @@
+export interface Section {
+    id: number;
+    name: string;
+    grade_level_id: number;
+    grade_level?: {
+        id: number;
+        name: string;
+    };
+    school_year?: string;
+}
+
 export interface User {
     id: number;
     name: string;
@@ -12,6 +23,7 @@ export interface User {
     first_name?: string | null;
     middle_name?: string | null;
     last_name?: string | null;
+    current_section?: Section | null;
 }
 
 export interface PaginatedUsers {
@@ -33,6 +45,7 @@ export interface AddStudentForm {
     first_name: string;
     middle_name: string;
     last_name: string;
+    section_ids: number[];
 }
 
 export interface EditStudentForm {
@@ -44,4 +57,5 @@ export interface EditStudentForm {
     student_number: string;
     password?: string;
     password_confirmation?: string;
+    section_ids: number[];
 }

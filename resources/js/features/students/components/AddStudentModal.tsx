@@ -1,11 +1,12 @@
 import { useForm } from '@inertiajs/react';
 import { GraduationCap, Plus, X } from 'lucide-react';
 import { FormEvent } from 'react';
-import { AddStudentForm } from '../types';
+import { AddStudentForm, Section } from '../types';
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
+    sections: Section[];
 }
 
 const initialForm: AddStudentForm = {
@@ -16,9 +17,10 @@ const initialForm: AddStudentForm = {
     first_name: '',
     middle_name: '',
     last_name: '',
+    section_ids: [],
 };
 
-export default function AddStudentModal({ isOpen, onClose }: Props) {
+export default function AddStudentModal({ isOpen, onClose, sections }: Props) {
     const {
         data: studentForm,
         setData: setStudentForm,
@@ -120,6 +122,23 @@ export default function AddStudentModal({ isOpen, onClose }: Props) {
                                 required
                             />
                             {errors.last_name && <span className="text-[11px] text-red-500 font-medium">{errors.last_name}</span>}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">Section</label>
+                            <select
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
+                                value={studentForm.section_ids[0] || ''}
+                                onChange={(e) => setStudentForm('section_ids', e.target.value ? [parseInt(e.target.value)] : [])}
+                            >
+                                <option value="">No Section</option>
+                                {sections.map((section) => (
+                                    <option key={section.id} value={section.id}>
+                                        {section.grade_level?.name} - {section.name}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.section_ids && <span className="text-[11px] text-red-500 font-medium">{errors.section_ids}</span>}
                         </div>
 
                         <div className="flex flex-col gap-1.5">

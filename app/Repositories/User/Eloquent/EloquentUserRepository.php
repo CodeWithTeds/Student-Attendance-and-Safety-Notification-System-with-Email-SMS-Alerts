@@ -59,6 +59,14 @@ class EloquentUserRepository implements UserRepositoryInterface
         }
     }
 
+    public function syncSections(int $studentId, array $sectionIds): void
+    {
+        $student = User::find($studentId);
+        if ($student) {
+            $student->sections()->sync($sectionIds);
+        }
+    }
+
     public function getStudents(): Collection
     {
         return User::where('role', UserRole::STUDENT->value)->get();
@@ -66,7 +74,10 @@ class EloquentUserRepository implements UserRepositoryInterface
 
     public function getStudentsPaginated(int $perPage = 15)
     {
-        return User::where('role', UserRole::STUDENT->value)->paginate($perPage);
+        return User::with(['sections.gradeLevel', 'sections.schedule'])
+            ->where('role', UserRole::STUDENT->value)
+            ->latest()
+            ->paginate($perPage);
     }
 
     public function getQrCodeStudentsPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator

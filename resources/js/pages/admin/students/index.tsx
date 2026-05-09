@@ -3,7 +3,7 @@ import EditStudentModal from '@/features/students/components/EditStudentModal';
 import StudentIdCard from '@/features/students/components/StudentIdCard';
 import StudentTable from '@/features/students/components/StudentTable';
 import StudentToolbar from '@/features/students/components/StudentToolbar';
-import { User } from '@/features/students/types';
+import { Section, User } from '@/features/students/types';
 import DataTablePagination from '@/components/common/DataTablePagination';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -21,9 +21,10 @@ interface PaginatedUsers {
 
 interface Props {
     users: { data: User[]; meta: Omit<PaginatedUsers, 'data'> };
+    sections: { data: Section[] };
 }
 
-export default function StudentsIndex({ users }: Props) {
+export default function StudentsIndex({ users, sections }: Props) {
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<number[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -133,6 +134,7 @@ export default function StudentsIndex({ users }: Props) {
             <AddStudentModal 
                 isOpen={isAddModalOpen} 
                 onClose={() => setIsAddModalOpen(false)} 
+                sections={sections?.data ?? []}
             />
 
             <EditStudentModal 
@@ -142,6 +144,7 @@ export default function StudentsIndex({ users }: Props) {
                     setStudentToEdit(null);
                 }} 
                 student={studentToEdit}
+                sections={sections?.data ?? []}
             />
 
             {activeQrStudent && (

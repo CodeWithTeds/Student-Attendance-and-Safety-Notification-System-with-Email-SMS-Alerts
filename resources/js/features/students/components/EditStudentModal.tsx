@@ -1,15 +1,16 @@
 import { useForm } from '@inertiajs/react';
 import { GraduationCap, Save, X } from 'lucide-react';
 import { FormEvent, useEffect } from 'react';
-import { EditStudentForm, User } from '../types';
+import { EditStudentForm, Section, User } from '../types';
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     student: User | null;
+    sections: Section[];
 }
 
-export default function EditStudentModal({ isOpen, onClose, student }: Props) {
+export default function EditStudentModal({ isOpen, onClose, student, sections }: Props) {
     const {
         data: form,
         setData: setForm,
@@ -27,6 +28,7 @@ export default function EditStudentModal({ isOpen, onClose, student }: Props) {
         student_number: '',
         password: '',
         password_confirmation: '',
+        section_ids: [],
     });
 
     useEffect(() => {
@@ -40,6 +42,7 @@ export default function EditStudentModal({ isOpen, onClose, student }: Props) {
                 student_number: student.student_number || '',
                 password: '',
                 password_confirmation: '',
+                section_ids: student.current_section ? [student.current_section.id] : [],
             });
         }
     }, [student, isOpen]);
@@ -142,6 +145,23 @@ export default function EditStudentModal({ isOpen, onClose, student }: Props) {
                                 onChange={(e) => setForm('student_number', e.target.value)}
                             />
                             {errors.student_number && <span className="text-[11px] text-red-500 font-medium">{errors.student_number}</span>}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[var(--foreground)]">Section</label>
+                            <select
+                                className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5 transition-all"
+                                value={form.section_ids[0] || ''}
+                                onChange={(e) => setForm('section_ids', e.target.value ? [parseInt(e.target.value)] : [])}
+                            >
+                                <option value="">No Section</option>
+                                {sections.map((section) => (
+                                    <option key={section.id} value={section.id}>
+                                        {section.grade_level?.name} - {section.name}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.section_ids && <span className="text-[11px] text-red-500 font-medium">{errors.section_ids}</span>}
                         </div>
 
                         <div className="flex flex-col gap-1.5 md:col-span-2">

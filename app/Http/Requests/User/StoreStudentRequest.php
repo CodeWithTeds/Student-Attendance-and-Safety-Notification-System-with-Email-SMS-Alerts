@@ -21,6 +21,8 @@ class StoreStudentRequest extends FormRequest
             'first_name' => ['nullable', 'string', 'max:255'],
             'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
+            'section_ids' => ['nullable', 'array'],
+            'section_ids.*' => ['exists:sections,id'],
         ];
     }
 

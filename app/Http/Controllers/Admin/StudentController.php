@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreStudentRequest;
 use App\Http\Requests\User\UpdateStudentRequest;
+use App\Http\Resources\SectionResource;
 use App\Http\Resources\UserResource;
+use App\Models\Section;
 use App\Repositories\User\Contracts\UserRepositoryInterface;
 use App\Services\User\UserService;
 use Illuminate\Http\RedirectResponse;
@@ -24,6 +26,7 @@ class StudentController extends Controller
     {
         return Inertia::render('admin/students/index', [
             'users' => UserResource::collection($this->userRepository->getStudentsPaginated()),
+            'sections' => SectionResource::collection(Section::with('gradeLevel')->get()),
         ]);
     }
 

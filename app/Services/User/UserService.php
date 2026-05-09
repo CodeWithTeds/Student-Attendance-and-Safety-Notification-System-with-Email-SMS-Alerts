@@ -43,6 +43,10 @@ class UserService
             $this->userRepository->syncChildren($user->id, $data['student_ids']);
         }
 
+        if (isset($data['section_ids']) && $data['role'] === UserRole::STUDENT->value) {
+            $this->userRepository->syncSections($user->id, $data['section_ids']);
+        }
+
         return $user;
     }
 
@@ -82,6 +86,13 @@ class UserService
             $user = $this->userRepository->getById($id);
             if ($user && $user->role === UserRole::PARENT) {
                 $this->userRepository->syncChildren($user->id, $data['student_ids']);
+            }
+        }
+
+        if ($updated && isset($data['section_ids'])) {
+            $user = $this->userRepository->getById($id);
+            if ($user && $user->role === UserRole::STUDENT) {
+                $this->userRepository->syncSections($user->id, $data['section_ids']);
             }
         }
 
