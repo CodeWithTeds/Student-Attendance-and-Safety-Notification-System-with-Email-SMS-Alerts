@@ -7,6 +7,7 @@ use App\Models\StudentAttendanceLogEdit;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface StudentAttendanceRepositoryInterface
 {
@@ -23,4 +24,10 @@ interface StudentAttendanceRepositoryInterface
     public function latestForStudent(User $student): ?StudentAttendanceLog;
 
     public function latestForStudentBetween(User $student, CarbonInterface $startsAt, CarbonInterface $endsAt): ?StudentAttendanceLog;
+
+    public function getReportData(array $filters): Collection;
+
+    public function getSectionsForDropdown(): Collection;
+
+    public function getStudentsForDropdown(): Collection;
 }

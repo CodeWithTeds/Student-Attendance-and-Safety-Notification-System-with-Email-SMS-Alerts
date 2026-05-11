@@ -114,7 +114,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Reports & Analytics',
-        href: '#',
+        href: '/admin/reports',
         icon: BarChart3,
         roles: ['admin'],
     },

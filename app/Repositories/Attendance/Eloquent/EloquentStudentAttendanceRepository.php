@@ -2,12 +2,15 @@
 
 namespace App\Repositories\Attendance\Eloquent;
 
+use App\Enums\UserRole;
+use App\Models\Section;
 use App\Models\StudentAttendanceLog;
 use App\Models\StudentAttendanceLogEdit;
 use App\Models\User;
 use App\Repositories\Attendance\Contracts\StudentAttendanceRepositoryInterface;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class EloquentStudentAttendanceRepository implements StudentAttendanceRepositoryInterface
 {
@@ -63,5 +66,35 @@ class EloquentStudentAttendanceRepository implements StudentAttendanceRepository
             ->whereBetween('scanned_at', [$startsAt, $endsAt])
             ->latest('scanned_at')
             ->first();
+    }
+
+    public function getReportData(array $filters): Collection
+    {
+        return StudentAttendanceLog::query()
+            ->with(['student.sections.gradeLevel'])
+            ->when($filters['date_from'] ?? null, fn ($q, $d) => $q->whereDate('scanned_at', '>=', $d))
+            ->when($filters['date_to'] ?? null, fn ($q, $d) => $q->whereDate('scanned_at', '<=', $d))
+            ->when($filters['student_id'] ?? null, fn ($q, $id) => $q->where('user_id', $id))
+            ->when($filters['section_id'] ?? null, function ($q, $sectionId): void {
+                $q->whereHas('student.sections', fn ($sq) => $sq->where('sections.id', $sectionId));
+            })
+            ->orderBy('scanned_at')
+            ->get();
+    }
+
+    public function getSectionsForDropdown(): Collection
+    {
+        return Section::query()
+            ->with('gradeLevel')
+            ->orderBy('name')
+            ->get(['id', 'name', 'grade_level_id', 'school_year']);
+    }
+
+    public function getStudentsForDropdown(): Collection
+    {
+        return User::query()
+            ->where('role', UserRole::STUDENT->value)
+            ->orderBy('name')
+            ->get(['id', 'name', 'student_number']);
     }
 }
