@@ -17,21 +17,22 @@ class AttendanceReportController extends Controller
 
     public function index(Request $request): Response
     {
+        $filters = $request->only(['date_from', 'date_to', 'student_id', 'section_id']);
+
+        // Default to current month if no dates provided
+        if (empty($filters['date_from'])) {
+            $filters['date_from'] = now()->startOfMonth()->toDateString();
+        }
+        if (empty($filters['date_to'])) {
+            $filters['date_to'] = now()->toDateString();
+        }
+
         return Inertia::render('admin/reports/index', [
             'sections' => $this->reportService->getSectionsForDropdown(),
             'students' => $this->reportService->getStudentsForDropdown(),
-            'filters'  => $request->only(['report_type', 'date_from', 'date_to', 'student_id', 'section_id']),
-            'report'   => null,
+            'filters'  => $filters,
+            'report'   => $this->reportService->generateAllReports($filters),
         ]);
     }
 
-    public function generate(AttendanceReportRequest $request): Response
-    {
-        return Inertia::render('admin/reports/index', [
-            'sections' => $this->reportService->getSectionsForDropdown(),
-            'students' => $this->reportService->getStudentsForDropdown(),
-            'filters'  => $request->reportFilters(),
-            'report'   => $this->reportService->generateAllReports($request->reportFilters()),
-        ]);
-    }
 }

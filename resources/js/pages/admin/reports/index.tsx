@@ -158,30 +158,18 @@ export default function ReportsIndex({ sections, students, filters, report }: Pr
         ...filters,
     };
 
-    const [localDateFrom, setLocalDateFrom] = useState(activeFilters.date_from);
-    const [localDateTo,   setLocalDateTo]   = useState(activeFilters.date_to);
-    const [localStudent,  setLocalStudent]  = useState<number | ''>(activeFilters.student_id ?? '');
-    const [localSection,  setLocalSection]  = useState<number | ''>(activeFilters.section_id ?? '');
-
-    const handleGenerate = () => {
+    const updateFilter = (newFilters: Partial<ReportFilters>) => {
         setIsLoading(true);
-
-        const payload: ReportFilters = {
-            report_type: 'daily', // backend ignores this for generateAllReports
-            date_from:   localDateFrom,
-            date_to:     localDateTo,
-            student_id:  localStudent,
-            section_id:  localSection,
+        const nextFilters = {
+            ...activeFilters,
+            ...newFilters,
         };
 
-        router.post(
-            '/admin/reports/generate',
-            payload as unknown as Record<string, string | number | null | undefined>,
-            {
-                preserveScroll: true,
-                onFinish: () => setIsLoading(false),
-            },
-        );
+        router.get('/admin/reports', nextFilters as any, {
+            preserveState: true,
+            preserveScroll: true,
+            onFinish: () => setIsLoading(false),
+        });
     };
 
     const handleClear = () => {
@@ -197,7 +185,7 @@ export default function ReportsIndex({ sections, students, filters, report }: Pr
         const link = document.createElement('a');
 
         link.href     = url;
-        link.download = `attendance_full_report_${localDateFrom}_${localDateTo}.csv`;
+        link.download = `attendance_full_report_${activeFilters.date_from}_${activeFilters.date_to}.csv`;
         link.click();
         URL.revokeObjectURL(url);
     };
@@ -223,11 +211,14 @@ export default function ReportsIndex({ sections, students, filters, report }: Pr
             {/* ── Toolbar ─────────────────────────────────────────────────── */}
             <div className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--background)] p-4 shadow-sm">
                 <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <h1 className="text-xl font-bold text-[var(--foreground)]">Reports &amp; Analytics</h1>
-                        <p className="text-sm text-[var(--muted-foreground)]">
-                            All five attendance reports — daily, weekly, monthly, per-student, and per-section — in one view.
-                        </p>
+                    <div className="flex items-center gap-3">
+                        <div>
+                            <h1 className="text-xl font-bold text-[var(--foreground)]">Reports &amp; Analytics</h1>
+                            <p className="text-sm text-[var(--muted-foreground)]">
+                                Live dashboard updates as you adjust filters.
+                            </p>
+                        </div>
+                        {isLoading && <RefreshCw size={20} className="animate-spin text-[var(--primary)]" />}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
@@ -248,21 +239,7 @@ export default function ReportsIndex({ sections, students, filters, report }: Pr
                             onClick={handleClear}
                             className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--border)] px-3 text-sm font-semibold text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
                         >
-                            Clear
-                        </button>
-
-                        <button
-                            id="generate-report-btn"
-                            type="button"
-                            onClick={handleGenerate}
-                            disabled={isLoading}
-                            className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {isLoading
-                                ? <RefreshCw size={15} className="animate-spin" />
-                                : <BarChart3 size={15} />
-                            }
-                            Generate Report
+                            Reset Filters
                         </button>
                     </div>
                 </div>
@@ -279,8 +256,8 @@ export default function ReportsIndex({ sections, students, filters, report }: Pr
                             <input
                                 id="date-from"
                                 type="date"
-                                value={localDateFrom}
-                                onChange={(e) => setLocalDateFrom(e.target.value)}
+                                value={activeFilters.date_from}
+                                onChange={(e) => updateFilter({ date_from: e.target.value })}
                                 className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] pr-3 pl-9 text-sm outline-none transition focus:border-[var(--primary)]"
                             />
                         </div>
@@ -296,8 +273,8 @@ export default function ReportsIndex({ sections, students, filters, report }: Pr
                             <input
                                 id="date-to"
                                 type="date"
-                                value={localDateTo}
-                                onChange={(e) => setLocalDateTo(e.target.value)}
+                                value={activeFilters.date_to}
+                                onChange={(e) => updateFilter({ date_to: e.target.value })}
                                 className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] pr-3 pl-9 text-sm outline-none transition focus:border-[var(--primary)]"
                             />
                         </div>
@@ -310,8 +287,8 @@ export default function ReportsIndex({ sections, students, filters, report }: Pr
                         </label>
                         <select
                             id="student-filter"
-                            value={localStudent}
-                            onChange={(e) => setLocalStudent(e.target.value === '' ? '' : Number(e.target.value))}
+                            value={activeFilters.student_id ?? ''}
+                            onChange={(e) => updateFilter({ student_id: e.target.value === '' ? '' : Number(e.target.value) })}
                             className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm outline-none transition focus:border-[var(--primary)]"
                         >
                             <option value="">All Students</option>
@@ -330,8 +307,8 @@ export default function ReportsIndex({ sections, students, filters, report }: Pr
                         </label>
                         <select
                             id="section-filter"
-                            value={localSection}
-                            onChange={(e) => setLocalSection(e.target.value === '' ? '' : Number(e.target.value))}
+                            value={activeFilters.section_id ?? ''}
+                            onChange={(e) => updateFilter({ section_id: e.target.value === '' ? '' : Number(e.target.value) })}
                             className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm outline-none transition focus:border-[var(--primary)]"
                         >
                             <option value="">All Sections</option>

@@ -50,7 +50,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
         Route::get('reports', [AttendanceReportController::class, 'index'])->name('reports.index');
-        Route::post('reports/generate', [AttendanceReportController::class, 'generate'])->name('reports.generate');
         Route::get('qr-codes', [QrCodeController::class, 'index'])->name('qr-codes.index');
         Route::post('qr-codes/{student}/generate', [QrCodeController::class, 'generate'])->name('qr-codes.generate');
         Route::post('qr-codes/{student}/reset', [QrCodeController::class, 'reset'])->name('qr-codes.reset');
