@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ParentGuardianController;
 use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Admin\SectionScheduleController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -52,6 +53,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
         Route::get('reports', [AttendanceReportController::class, 'index'])->name('reports.index');
         Route::get('audit-trail', [AuditTrailController::class, 'index'])->name('audit-trail.index');
+        Route::get('system-settings', [SystemSettingController::class, 'index'])->name('system-settings.index');
+        Route::put('system-settings', [SystemSettingController::class, 'update'])->name('system-settings.update');
         Route::get('qr-codes', [QrCodeController::class, 'index'])->name('qr-codes.index');
         Route::post('qr-codes/{student}/generate', [QrCodeController::class, 'generate'])->name('qr-codes.generate');
         Route::post('qr-codes/{student}/reset', [QrCodeController::class, 'reset'])->name('qr-codes.reset');

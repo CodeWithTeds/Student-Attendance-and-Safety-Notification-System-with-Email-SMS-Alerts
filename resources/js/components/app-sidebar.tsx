@@ -138,7 +138,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'System Settings',
-        href: '#',
+        href: '/admin/system-settings',
         icon: Settings,
         roles: ['admin'],
     },
