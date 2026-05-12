@@ -3,6 +3,7 @@
 namespace App\Repositories\Attendance\Eloquent;
 
 use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use App\Models\Section;
 use App\Models\StudentAttendanceLog;
 use App\Models\StudentAttendanceLogEdit;
@@ -96,5 +97,28 @@ class EloquentStudentAttendanceRepository implements StudentAttendanceRepository
             ->where('role', UserRole::STUDENT->value)
             ->orderBy('name')
             ->get(['id', 'name', 'student_number']);
+    }
+
+    public function getAbsenteeMonitorStudents(array $filters = []): Collection
+    {
+        return User::query()
+            ->with([
+                'sections.gradeLevel',
+                'sections.schedule',
+                'attendanceLogs' => function ($query) use ($filters): void {
+                    $query
+                        ->when($filters['date_from'] ?? null, fn ($q, $date) => $q->whereDate('scanned_at', '>=', $date))
+                        ->when($filters['date_to'] ?? null, fn ($q, $date) => $q->whereDate('scanned_at', '<=', $date))
+                        ->orderBy('scanned_at');
+                },
+            ])
+            ->where('role', UserRole::STUDENT->value)
+            ->where('status', UserStatus::APPROVED->value)
+            ->when($filters['student_id'] ?? null, fn ($query, $studentId) => $query->whereKey($studentId))
+            ->when($filters['section_id'] ?? null, function ($query, $sectionId): void {
+                $query->whereHas('sections', fn ($sectionQuery) => $sectionQuery->where('sections.id', $sectionId));
+            })
+            ->orderBy('name')
+            ->get();
     }
 }

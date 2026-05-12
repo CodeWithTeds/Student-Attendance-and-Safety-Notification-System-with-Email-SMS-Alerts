@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\Admin\AbsenteeMonitorController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AttendanceReportController;
 use App\Http\Controllers\Admin\AuditTrailController;
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
         Route::get('reports', [AttendanceReportController::class, 'index'])->name('reports.index');
+        Route::get('absentee-monitor', [AbsenteeMonitorController::class, 'index'])->name('absentee-monitor.index');
         Route::get('exports', [ExportManagementController::class, 'index'])->name('exports.index');
         Route::get('exports/attendance', [ExportManagementController::class, 'download'])->name('exports.attendance');
         Route::get('audit-trail', [AuditTrailController::class, 'index'])->name('audit-trail.index');

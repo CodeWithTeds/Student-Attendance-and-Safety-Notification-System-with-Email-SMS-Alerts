@@ -120,7 +120,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Absentee Monitor',
-        href: '#',
+        href: '/admin/absentee-monitor',
         icon: Eye,
         roles: ['admin'],
     },
