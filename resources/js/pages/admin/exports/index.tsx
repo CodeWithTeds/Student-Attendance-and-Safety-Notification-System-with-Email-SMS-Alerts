@@ -9,7 +9,7 @@ import {
     RotateCcw,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type {
     ExportDropdownSection,
@@ -86,6 +86,44 @@ export default function ExportManagementIndex({
         ...filters,
     });
     const [isLoading, setIsLoading] = useState(false);
+    const hasMounted = useRef(false);
+    const skipNextAutoRefresh = useRef(false);
+
+    const syncPreview = useCallback((filtersToSync: ExportFilters) => {
+        setIsLoading(true);
+        router.get('/admin/exports', cleanFilters(filtersToSync), {
+            only: ['filters', 'report'],
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+            onCancel: () => setIsLoading(false),
+            onFinish: () => setIsLoading(false),
+        });
+    }, []);
+
+    useEffect(() => {
+        if (!hasMounted.current) {
+            hasMounted.current = true;
+
+            return;
+        }
+
+        if (skipNextAutoRefresh.current) {
+            skipNextAutoRefresh.current = false;
+
+            return;
+        }
+
+        if (!activeFilters.date_from || !activeFilters.date_to) {
+            return;
+        }
+
+        const timeout = window.setTimeout(() => {
+            syncPreview(activeFilters);
+        }, 350);
+
+        return () => window.clearTimeout(timeout);
+    }, [activeFilters, syncPreview]);
 
     const updateFilter = <K extends keyof ExportFilters>(
         key: K,
@@ -98,25 +136,14 @@ export default function ExportManagementIndex({
     };
 
     const refreshPreview = () => {
-        setIsLoading(true);
-        router.get('/admin/exports', cleanFilters(activeFilters), {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-            onFinish: () => setIsLoading(false),
-        });
+        syncPreview(activeFilters);
     };
 
     const resetFilters = () => {
         const nextFilters = defaultFilters();
+        skipNextAutoRefresh.current = true;
         setActiveFilters(nextFilters);
-        setIsLoading(true);
-        router.get('/admin/exports', {}, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-            onFinish: () => setIsLoading(false),
-        });
+        syncPreview(nextFilters);
     };
 
     const exportUrl = (format: ExportFormat): string => {
@@ -278,7 +305,7 @@ export default function ExportManagementIndex({
                         ) : (
                             <BarChart3 size={15} />
                         )}
-                        Preview Report
+                        Refresh Now
                     </button>
                 </div>
             </div>
