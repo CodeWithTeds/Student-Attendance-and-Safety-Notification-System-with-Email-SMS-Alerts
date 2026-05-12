@@ -2,8 +2,10 @@
 
 namespace App\Services\Attendance;
 
+use App\Enums\AuditLogCategory;
 use App\Models\StudentAttendanceLog;
 use App\Repositories\Attendance\Contracts\StudentAttendanceRepositoryInterface;
+use App\Services\Audit\AuditTrailService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -11,7 +13,8 @@ use Illuminate\Validation\ValidationException;
 class AttendanceManagementService
 {
     public function __construct(
-        protected StudentAttendanceRepositoryInterface $attendanceRepository
+        protected StudentAttendanceRepositoryInterface $attendanceRepository,
+        protected AuditTrailService $auditTrailService
     ) {}
 
     public function getPaginatedRecords(array $filters = [], int $perPage = 15): LengthAwarePaginator
@@ -32,7 +35,7 @@ class AttendanceManagementService
 
         $attendanceLog->refresh();
 
-        $this->attendanceRepository->createEditHistory([
+        $editHistory = $this->attendanceRepository->createEditHistory([
             'student_attendance_log_id' => $attendanceLog->id,
             'edited_by_id' => Auth::id(),
             'old_event_type' => $oldEventType->value,
@@ -41,6 +44,20 @@ class AttendanceManagementService
             'new_scanned_at' => $attendanceLog->scanned_at,
             'note' => $data['note'] ?? null,
         ]);
+
+        $this->auditTrailService->record(
+            AuditLogCategory::ATTENDANCE_CHANGE,
+            'attendance.updated',
+            "Updated attendance record #{$attendanceLog->id}.",
+            $editHistory,
+            [
+                'attendance_log_id' => $attendanceLog->id,
+                'old_event_type' => $oldEventType->value,
+                'new_event_type' => $attendanceLog->event_type->value,
+                'old_scanned_at' => $oldScannedAt?->toIso8601String(),
+                'new_scanned_at' => $attendanceLog->scanned_at?->toIso8601String(),
+            ]
+        );
 
         return $this->resolveAttendanceLog($id);
     }

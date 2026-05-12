@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AttendanceReportController;
+use App\Http\Controllers\Admin\AuditTrailController;
 use App\Http\Controllers\Admin\ClassSectionController;
 use App\Http\Controllers\Admin\NotificationSettingController;
 use App\Http\Controllers\Admin\ParentGuardianController;
@@ -50,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
         Route::get('reports', [AttendanceReportController::class, 'index'])->name('reports.index');
+        Route::get('audit-trail', [AuditTrailController::class, 'index'])->name('audit-trail.index');
         Route::get('qr-codes', [QrCodeController::class, 'index'])->name('qr-codes.index');
         Route::post('qr-codes/{student}/generate', [QrCodeController::class, 'generate'])->name('qr-codes.generate');
         Route::post('qr-codes/{student}/reset', [QrCodeController::class, 'reset'])->name('qr-codes.reset');

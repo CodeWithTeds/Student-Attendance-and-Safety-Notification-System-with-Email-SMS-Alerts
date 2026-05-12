@@ -2,16 +2,19 @@
 
 namespace App\Services\Notification;
 
+use App\Enums\AuditLogCategory;
 use App\Enums\NotificationEventType;
 use App\Models\NotificationSetting;
 use App\Repositories\Notification\Contracts\NotificationSettingRepositoryInterface;
+use App\Services\Audit\AuditTrailService;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class NotificationSettingService
 {
     public function __construct(
-        protected NotificationSettingRepositoryInterface $notificationSettingRepository
+        protected NotificationSettingRepositoryInterface $notificationSettingRepository,
+        protected AuditTrailService $auditTrailService
     ) {}
 
     public function getSettings(): Collection
@@ -34,10 +37,24 @@ class NotificationSettingService
     public function updateSetting(int $id, array $data): NotificationSetting
     {
         $notificationSetting = $this->resolveSetting($id);
+        $previous = $notificationSetting->only(['sms_enabled', 'email_enabled', 'title', 'message_template']);
 
         $this->notificationSettingRepository->update($notificationSetting, $data);
 
-        return $notificationSetting->refresh();
+        $notificationSetting->refresh();
+
+        $this->auditTrailService->record(
+            AuditLogCategory::NOTIFICATION,
+            'notification.setting_updated',
+            "Updated {$notificationSetting->event_type->label()} notification settings.",
+            $notificationSetting,
+            [
+                'previous' => $previous,
+                'current' => $notificationSetting->only(['sms_enabled', 'email_enabled', 'title', 'message_template']),
+            ]
+        );
+
+        return $notificationSetting;
     }
 
     protected function resolveSetting(int $id): NotificationSetting

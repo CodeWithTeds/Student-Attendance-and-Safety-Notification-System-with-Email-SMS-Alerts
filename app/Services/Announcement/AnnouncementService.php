@@ -5,12 +5,14 @@ namespace App\Services\Announcement;
 use App\Enums\AnnouncementAudienceType;
 use App\Enums\AnnouncementDeliveryStatus;
 use App\Enums\AnnouncementStatus;
+use App\Enums\AuditLogCategory;
 use App\Events\AnnouncementCreated;
 use App\Mail\SchoolAnnouncementMail;
 use App\Models\Announcement;
 use App\Models\User;
 use App\Repositories\Announcement\Contracts\AnnouncementRepositoryInterface;
 use App\Repositories\User\Contracts\UserRepositoryInterface;
+use App\Services\Audit\AuditTrailService;
 use App\Services\Notification\SmsNotificationService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -23,7 +25,8 @@ class AnnouncementService
     public function __construct(
         protected AnnouncementRepositoryInterface $announcementRepository,
         protected UserRepositoryInterface $userRepository,
-        protected SmsNotificationService $smsNotificationService
+        protected SmsNotificationService $smsNotificationService,
+        protected AuditTrailService $auditTrailService
     ) {}
 
     public function getPaginatedAnnouncements(array $filters = [], int $perPage = 10): LengthAwarePaginator
@@ -59,6 +62,21 @@ class AnnouncementService
 
         AnnouncementCreated::dispatch($announcement);
 
+        $this->auditTrailService->record(
+            AuditLogCategory::NOTIFICATION,
+            'notification.announcement_queued',
+            "Queued announcement \"{$announcement->title}\" for {$guardians->count()} guardian(s).",
+            $announcement,
+            [
+                'announcement_id' => $announcement->id,
+                'guardian_count' => $guardians->count(),
+                'sms_enabled' => $announcement->sms_enabled,
+                'email_enabled' => $announcement->email_enabled,
+                'audience_type' => $announcement->audience_type->value,
+            ],
+            $adminId
+        );
+
         return $announcement;
     }
 
@@ -91,6 +109,20 @@ class AnnouncementService
                 $announcement,
                 $recipient->guardian_id,
                 $deliveryData
+            );
+
+            $this->auditTrailService->record(
+                AuditLogCategory::NOTIFICATION,
+                'notification.delivery_updated',
+                "Updated notification delivery for {$guardian->name}.",
+                $recipient,
+                [
+                    'announcement_id' => $announcement->id,
+                    'announcement_title' => $announcement->title,
+                    'guardian_id' => $guardian->id,
+                    'delivery' => $deliveryData,
+                ],
+                $announcement->created_by_id
             );
         }
     }
