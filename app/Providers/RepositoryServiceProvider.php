@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\Announcement\Contracts\AnnouncementRepositoryInterface;
 use App\Repositories\Announcement\Eloquent\EloquentAnnouncementRepository;
+use App\Repositories\Audit\Contracts\AuditTrailRepositoryInterface;
+use App\Repositories\Audit\Eloquent\EloquentAuditTrailRepository;
 use App\Repositories\Attendance\Contracts\StudentAttendanceRepositoryInterface;
 use App\Repositories\Attendance\Eloquent\EloquentStudentAttendanceRepository;
 use App\Repositories\Notification\Contracts\NotificationSettingRepositoryInterface;
@@ -23,6 +25,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->singleton(StudentAttendanceRepositoryInterface::class, EloquentStudentAttendanceRepository::class);
         $this->app->singleton(NotificationSettingRepositoryInterface::class, EloquentNotificationSettingRepository::class);
         $this->app->singleton(AnnouncementRepositoryInterface::class, EloquentAnnouncementRepository::class);
+        $this->app->singleton(AuditTrailRepositoryInterface::class, EloquentAuditTrailRepository::class);
     }
 
     /**
