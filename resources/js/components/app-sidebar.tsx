@@ -126,7 +126,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Export Management',
-        href: '#',
+        href: '/admin/exports',
         icon: Download,
         roles: ['admin'],
     },

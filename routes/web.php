@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AttendanceReportController;
 use App\Http\Controllers\Admin\AuditTrailController;
 use App\Http\Controllers\Admin\ClassSectionController;
+use App\Http\Controllers\Admin\ExportManagementController;
 use App\Http\Controllers\Admin\NotificationSettingController;
 use App\Http\Controllers\Admin\ParentGuardianController;
 use App\Http\Controllers\Admin\QrCodeController;
@@ -52,6 +53,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
         Route::get('reports', [AttendanceReportController::class, 'index'])->name('reports.index');
+        Route::get('exports', [ExportManagementController::class, 'index'])->name('exports.index');
+        Route::get('exports/attendance', [ExportManagementController::class, 'download'])->name('exports.attendance');
         Route::get('audit-trail', [AuditTrailController::class, 'index'])->name('audit-trail.index');
         Route::get('system-settings', [SystemSettingController::class, 'index'])->name('system-settings.index');
         Route::put('system-settings', [SystemSettingController::class, 'update'])->name('system-settings.update');
