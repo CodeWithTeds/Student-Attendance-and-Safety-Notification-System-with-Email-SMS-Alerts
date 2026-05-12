@@ -30,4 +30,6 @@ interface StudentAttendanceRepositoryInterface
     public function getSectionsForDropdown(): Collection;
 
     public function getStudentsForDropdown(): Collection;
+
+    public function getAbsenteeMonitorStudents(array $filters = []): Collection;
 }
