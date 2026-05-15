@@ -14,8 +14,8 @@ class DashboardRepository
     {
         return [
             'total_students' => DB::table('users')->where('role', 'student')->count(),
-            'total_parents' => DB::table('users')->where('role', 'guardian')->count(),
-            'total_advisers' => DB::table('users')->where('role', 'adviser')->count(),
+            'total_parents' => DB::table('users')->where('role', 'parent')->count(),
+            'total_advisers' => DB::table('advisers')->count(),
             'total_sections' => DB::table('sections')->count(),
             'total_attendance_today' => DB::table('student_attendance_logs')
                 ->whereDate('created_at', today())
