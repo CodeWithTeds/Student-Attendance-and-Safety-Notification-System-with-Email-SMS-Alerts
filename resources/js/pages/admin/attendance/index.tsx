@@ -13,6 +13,7 @@ interface Props {
         meta: AttendanceMeta;
     };
     filters: AttendanceFilters;
+    sections: any[];
 }
 
 function cleanFilters(filters: AttendanceFilters): AttendanceFilters {
@@ -21,7 +22,7 @@ function cleanFilters(filters: AttendanceFilters): AttendanceFilters {
     ) as AttendanceFilters;
 }
 
-export default function AttendanceIndex({ attendanceRecords, filters }: Props) {
+export default function AttendanceIndex({ attendanceRecords, filters, sections }: Props) {
     const [selected, setSelected] = useState<number[]>([]);
     const [activeFilters, setActiveFilters] = useState<AttendanceFilters>(filters ?? {});
     const [recordToEdit, setRecordToEdit] = useState<AttendanceRecord | null>(null);
@@ -112,6 +113,7 @@ export default function AttendanceIndex({ attendanceRecords, filters }: Props) {
 
             <AttendanceToolbar
                 filters={activeFilters}
+                sections={sections}
                 selectedCount={selected.length}
                 onFilterChange={applyFilters}
                 onClear={() => applyFilters({})}

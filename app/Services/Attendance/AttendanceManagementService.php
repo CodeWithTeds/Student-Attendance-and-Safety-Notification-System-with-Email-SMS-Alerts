@@ -22,6 +22,11 @@ class AttendanceManagementService
         return $this->attendanceRepository->getPaginated($filters, $perPage);
     }
 
+    public function getSectionsForDropdown()
+    {
+        return $this->attendanceRepository->getSectionsForDropdown();
+    }
+
     public function updateAttendance(int $id, array $data): StudentAttendanceLog
     {
         $attendanceLog = $this->resolveAttendanceLog($id);

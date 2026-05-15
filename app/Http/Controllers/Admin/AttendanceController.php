@@ -21,9 +21,10 @@ class AttendanceController extends Controller
     {
         return Inertia::render('admin/attendance/index', [
             'attendanceRecords' => StudentAttendanceLogResource::collection(
-                $this->attendanceManagementService->getPaginatedRecords($request->only(['search', 'event_type', 'date']))
+                $this->attendanceManagementService->getPaginatedRecords($request->only(['search', 'event_type', 'date', 'section_id']))
             ),
-            'filters' => $request->only(['search', 'event_type', 'date']),
+            'filters' => $request->only(['search', 'event_type', 'date', 'section_id']),
+            'sections' => $this->attendanceManagementService->getSectionsForDropdown(),
         ]);
     }
 

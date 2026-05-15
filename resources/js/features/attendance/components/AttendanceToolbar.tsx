@@ -3,6 +3,7 @@ import type { AttendanceEventType, AttendanceFilters } from '../types';
 
 interface AttendanceToolbarProps {
     filters: AttendanceFilters;
+    sections?: any[];
     selectedCount: number;
     onFilterChange: (filters: AttendanceFilters) => void;
     onClear: () => void;
@@ -11,6 +12,7 @@ interface AttendanceToolbarProps {
 
 export function AttendanceToolbar({
     filters,
+    sections = [],
     selectedCount,
     onFilterChange,
     onClear,
@@ -39,7 +41,7 @@ export function AttendanceToolbar({
                 </button>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px_auto]">
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px_180px_auto]">
                 <label className="relative">
                     <Search
                         size={16}
@@ -55,6 +57,24 @@ export function AttendanceToolbar({
                         className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] pr-3 pl-9 text-sm outline-none transition focus:border-[var(--primary)]"
                     />
                 </label>
+
+                <select
+                    value={filters.section_id ?? ''}
+                    onChange={(event) =>
+                        onFilterChange({
+                            ...filters,
+                            section_id: event.target.value,
+                        })
+                    }
+                    className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm outline-none transition focus:border-[var(--primary)]"
+                >
+                    <option value="">All sections</option>
+                    {sections.map((section: any) => (
+                        <option key={section.id} value={section.id}>
+                            {section.grade_level?.name ? `${section.grade_level.name} - ` : ''}{section.name}
+                        </option>
+                    ))}
+                </select>
 
                 <select
                     value={filters.event_type ?? ''}

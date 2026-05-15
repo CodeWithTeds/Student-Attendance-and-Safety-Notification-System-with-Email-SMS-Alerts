@@ -34,6 +34,9 @@ class EloquentStudentAttendanceRepository implements StudentAttendanceRepository
             })
             ->when($filters['event_type'] ?? null, fn ($query, string $eventType) => $query->where('event_type', $eventType))
             ->when($filters['date'] ?? null, fn ($query, string $date) => $query->whereDate('scanned_at', $date))
+            ->when($filters['section_id'] ?? null, function ($query, $sectionId): void {
+                $query->whereHas('student.sections', fn ($sq) => $sq->where('sections.id', $sectionId));
+            })
             ->latest('scanned_at')
             ->paginate($perPage)
             ->withQueryString();
