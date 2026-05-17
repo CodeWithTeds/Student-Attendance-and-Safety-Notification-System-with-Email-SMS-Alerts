@@ -109,15 +109,28 @@ export function AttendanceTable({
                                     </div>
                                 </td>
                                 <td className="px-4 py-3">
-                                    <span
-                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                            record.event_type === 'check_in'
-                                                ? 'bg-emerald-100 text-emerald-700'
-                                                : 'bg-orange-100 text-orange-700'
-                                        }`}
-                                    >
-                                        {record.event_label}
-                                    </span>
+                                    <div className="flex flex-col items-start gap-1">
+                                        <span
+                                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                                record.event_type === 'check_in'
+                                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'
+                                                    : 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400'
+                                            }`}
+                                        >
+                                            {record.event_label}
+                                        </span>
+                                        {record.schedule_status && (
+                                            <span
+                                                className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
+                                                    record.schedule_status === 'Late'
+                                                        ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'
+                                                        : 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400'
+                                                }`}
+                                            >
+                                                {record.schedule_status}
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-4 py-3 text-sm font-medium text-[var(--foreground)]">
                                     {record.scanned_at_full_display}

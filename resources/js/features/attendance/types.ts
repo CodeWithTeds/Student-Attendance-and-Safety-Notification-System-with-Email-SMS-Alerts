@@ -51,6 +51,7 @@ export interface AttendanceRecord {
     scanned_at: string;
     scanned_at_display: string;
     scanned_at_full_display: string;
+    schedule_status?: string;
     student: AttendanceStudent;
     edit_history: AttendanceEditHistory[];
     created_at: string;

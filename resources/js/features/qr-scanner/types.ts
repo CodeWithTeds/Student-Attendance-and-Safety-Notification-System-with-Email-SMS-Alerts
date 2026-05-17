@@ -15,6 +15,7 @@ export interface AttendanceLogResource {
     status_label: string;
     scanned_at: string;
     scanned_at_display: string;
+    schedule_status?: string;
     student: StudentResource;
 }
 
