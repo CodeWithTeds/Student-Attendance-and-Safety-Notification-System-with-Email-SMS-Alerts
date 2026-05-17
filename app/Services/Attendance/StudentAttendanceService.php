@@ -29,12 +29,19 @@ class StudentAttendanceService
 
         $eventType = $this->resolveEventType($student, $data['event_type'] ?? null);
 
-        return $this->attendanceRepository->create([
+        $attendanceLog = $this->attendanceRepository->create([
             'user_id' => $student->id,
             'qr_code_value' => $data['qr_code_value'],
             'event_type' => $eventType->value,
             'scanned_at' => now(),
         ]);
+
+        if ($attendanceLog->student && $attendanceLog->student->parents->isNotEmpty()) {
+            \Illuminate\Support\Facades\Mail::to($attendanceLog->student->parents)
+                ->send(new \App\Mail\StudentAttendanceNotification($attendanceLog));
+        }
+
+        return $attendanceLog;
     }
 
     protected function resolveStudent(string $qrCodeValue): User
@@ -63,30 +70,7 @@ class StudentAttendanceService
         );
 
         if ($latestToday?->event_type === AttendanceEventType::CHECK_IN) {
-            // Validate schedule for checkout
-            $section = $student->sections->first();
-            if ($section && $section->schedule) {
-                $timeOut = \Carbon\Carbon::parse($section->schedule->time_out);
-                if (now()->format('H:i:s') < $timeOut->subMinutes(30)->format('H:i:s')) {
-                    // Too early to check out
-                    throw ValidationException::withMessages([
-                        'qr_code_value' => 'Too early to check out. Your schedule ends at ' . $section->schedule->time_out,
-                    ]);
-                }
-            }
             return AttendanceEventType::CHECK_OUT;
-        }
-
-        // Validate schedule for check in
-        $section = $student->sections->first();
-        if ($section && $section->schedule) {
-            $timeIn = \Carbon\Carbon::parse($section->schedule->time_in);
-            if (now()->format('H:i:s') > $timeIn->addHours(4)->format('H:i:s')) {
-                // If it's more than 4 hours late, they are absent for the day.
-                throw ValidationException::withMessages([
-                    'qr_code_value' => 'You are marked as absent. It is too late to check in for your schedule.',
-                ]);
-            }
         }
 
         return AttendanceEventType::CHECK_IN;

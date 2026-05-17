@@ -10,8 +10,8 @@ interface ScanModeControlProps {
 
 const modes = [
     { value: 'auto', label: 'Auto', icon: RefreshCcw },
-    { value: 'check_in', label: 'Check-in', icon: LogIn },
-    { value: 'check_out', label: 'Check-out', icon: LogOut },
+    { value: 'check_in', label: 'Time In', icon: LogIn },
+    { value: 'check_out', label: 'Time Out', icon: LogOut },
 ] as const;
 
 export function ScanModeControl({ value, onChange }: ScanModeControlProps) {

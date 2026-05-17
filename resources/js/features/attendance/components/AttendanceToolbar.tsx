@@ -87,8 +87,8 @@ export function AttendanceToolbar({
                     className="h-10 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm outline-none transition focus:border-[var(--primary)]"
                 >
                     <option value="">All events</option>
-                    <option value="check_in">Check-in</option>
-                    <option value="check_out">Check-out</option>
+                    <option value="check_in">Time In</option>
+                    <option value="check_out">Time Out</option>
                 </select>
 
                 <label className="relative">

@@ -64,11 +64,11 @@ export default function QrScanner() {
                                     Scan once.
                                     <br />
                                     <span className="text-[#FF3B30]">
-                                        Check in or out instantly.
+                                        Time in or out instantly.
                                     </span>
                                 </h1>
                                 <p className="mt-6 max-w-2xl text-lg leading-relaxed font-medium text-[#1D1D1F]/60">
-                                    Scan approved student QR codes at school entry points and record check-in or check-out attendance in real time.
+                                    Scan approved student QR codes at school entry points and record time-in or time-out attendance in real time.
                                 </p>
                             </div>
 
