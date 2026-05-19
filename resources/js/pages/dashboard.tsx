@@ -43,6 +43,7 @@ type StudentAttendanceRecentLog = {
 type StudentAttendanceSummary = {
     selected_period: AttendancePeriod;
     selected_date: string;
+    max_date: string;
     range_label: string;
     options: {
         label: string;
@@ -393,6 +394,7 @@ function AttendanceDateFilter({ summary }: { summary: NonNullable<StudentAttenda
             <input
                 type="date"
                 value={summary.selected_date}
+                max={summary.max_date}
                 onChange={(event) => updateDate(event.target.value)}
                 className="h-10 rounded-lg border bg-background px-3 text-sm font-semibold text-foreground shadow-sm outline-none transition focus:border-primary"
             />
