@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Guardian\DashboardController as GuardianDashboardController;
+use App\Http\Controllers\Guardian\NotificationController as GuardianNotificationController;
 use App\Http\Controllers\Student\AttendanceRecordController as StudentAttendanceRecordController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\Student\QrScannerController as StudentQrScannerController;
@@ -34,6 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('profile', [StudentProfileController::class, 'show'])->name('profile');
         Route::get('qr-scanner', [StudentQrScannerController::class, 'index'])->name('qr-scanner');
         Route::get('attendance-records', [StudentAttendanceRecordController::class, 'index'])->name('attendance-records');
+    });
+
+    Route::middleware('role:parent')->prefix('parent')->name('parent.')->group(function () {
+        Route::get('dashboard', [GuardianDashboardController::class, 'index'])->name('dashboard');
+        Route::get('notifications', [GuardianNotificationController::class, 'index'])->name('notifications');
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {

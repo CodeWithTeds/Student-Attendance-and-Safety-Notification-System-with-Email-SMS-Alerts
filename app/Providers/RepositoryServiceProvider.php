@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Repositories\Announcement\Contracts\AnnouncementRepositoryInterface;
 use App\Repositories\Announcement\Eloquent\EloquentAnnouncementRepository;
-use App\Repositories\Audit\Contracts\AuditTrailRepositoryInterface;
-use App\Repositories\Audit\Eloquent\EloquentAuditTrailRepository;
 use App\Repositories\Attendance\Contracts\StudentAttendanceRepositoryInterface;
 use App\Repositories\Attendance\Eloquent\EloquentStudentAttendanceRepository;
+use App\Repositories\Audit\Contracts\AuditTrailRepositoryInterface;
+use App\Repositories\Audit\Eloquent\EloquentAuditTrailRepository;
+use App\Repositories\Guardian\Contracts\GuardianPortalRepositoryInterface;
+use App\Repositories\Guardian\Eloquent\EloquentGuardianPortalRepository;
 use App\Repositories\Notification\Contracts\NotificationSettingRepositoryInterface;
 use App\Repositories\Notification\Eloquent\EloquentNotificationSettingRepository;
 use App\Repositories\System\Contracts\SystemSettingRepositoryInterface;
@@ -29,6 +31,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->singleton(AnnouncementRepositoryInterface::class, EloquentAnnouncementRepository::class);
         $this->app->singleton(AuditTrailRepositoryInterface::class, EloquentAuditTrailRepository::class);
         $this->app->singleton(SystemSettingRepositoryInterface::class, EloquentSystemSettingRepository::class);
+        $this->app->singleton(GuardianPortalRepositoryInterface::class, EloquentGuardianPortalRepository::class);
     }
 
     /**

@@ -43,6 +43,7 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+        roles: ['admin', 'student'],
     },
 ];
 
@@ -167,6 +168,21 @@ const studentNavItems: NavItem[] = [
     },
 ];
 
+const parentNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/parent/dashboard',
+        icon: LayoutGrid,
+        roles: ['parent'],
+    },
+    {
+        title: 'Notifications',
+        href: '/parent/notifications',
+        icon: Bell,
+        roles: ['parent'],
+    },
+];
+
 const footerNavItems: NavItem[] = [
 
 ];
@@ -185,6 +201,9 @@ export function AppSidebar() {
         (item) => !item.roles || item.roles.includes(userRole),
     );
     const filteredStudentNavItems = studentNavItems.filter(
+        (item) => !item.roles || item.roles.includes(userRole),
+    );
+    const filteredParentNavItems = parentNavItems.filter(
         (item) => !item.roles || item.roles.includes(userRole),
     );
 
@@ -220,6 +239,12 @@ export function AppSidebar() {
                     <NavMain
                         items={filteredStudentNavItems}
                         label="Student"
+                    />
+                )}
+                {filteredParentNavItems.length > 0 && (
+                    <NavMain
+                        items={filteredParentNavItems}
+                        label="Parent / Guardian"
                     />
                 )}
             </SidebarContent>
