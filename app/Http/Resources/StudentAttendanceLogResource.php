@@ -10,11 +10,18 @@ class StudentAttendanceLogResource extends JsonResource
     public function toArray(Request $request): array
     {
         $scheduleStatus = 'On Time';
-        
-        if ($this->event_type?->value === 'check_in' && $this->scanned_at && $this->relationLoaded('student')) {
+
+        $section = null;
+        $schedule = null;
+
+        if ($this->relationLoaded('student') && $this->student?->relationLoaded('sections')) {
             $section = $this->student->sections->first();
-            if ($section && $section->relationLoaded('schedule') && $section->schedule) {
-                $timeIn = $section->schedule->time_in;
+            $schedule = $section && $section->relationLoaded('schedule') ? $section->schedule : null;
+        }
+
+        if ($this->event_type?->value === 'check_in' && $this->scanned_at) {
+            if ($schedule) {
+                $timeIn = $schedule->time_in;
                 $scanTime = $this->scanned_at->timezone(config('app.timezone'))->format('H:i:s');
                 if ($scanTime > $timeIn) {
                     $scheduleStatus = 'Late';
@@ -33,6 +40,7 @@ class StudentAttendanceLogResource extends JsonResource
             'scanned_at' => $this->scanned_at?->toIso8601String(),
             'scanned_at_display' => $this->scanned_at?->timezone(config('app.timezone'))->format('h:i A'),
             'scanned_at_full_display' => $this->scanned_at?->timezone(config('app.timezone'))->format('M d, Y h:i A'),
+            'schedule' => $schedule ? new SectionScheduleResource($schedule) : null,
             'student' => new UserResource($this->whenLoaded('student')),
             'edit_history' => StudentAttendanceLogEditResource::collection($this->whenLoaded('editHistory')),
             'created_at' => $this->created_at?->toIso8601String(),

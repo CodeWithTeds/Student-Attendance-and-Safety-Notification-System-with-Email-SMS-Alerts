@@ -8,6 +8,15 @@ export interface StudentResource {
     student_number: string | null;
 }
 
+export interface AttendanceScheduleResource {
+    id: number;
+    section_id: number;
+    time_in: string;
+    time_out: string;
+    time_in_display: string;
+    time_out_display: string;
+}
+
 export interface AttendanceLogResource {
     id: number;
     event_type: AttendanceEventType;
@@ -16,6 +25,7 @@ export interface AttendanceLogResource {
     scanned_at: string;
     scanned_at_display: string;
     schedule_status?: string;
+    schedule?: AttendanceScheduleResource | null;
     student: StudentResource;
 }
 

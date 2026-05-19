@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Attendance\Contracts;
 
+use App\Enums\AttendanceEventType;
 use App\Models\StudentAttendanceLog;
 use App\Models\StudentAttendanceLogEdit;
 use App\Models\User;
@@ -24,6 +25,8 @@ interface StudentAttendanceRepositoryInterface
     public function latestForStudent(User $student): ?StudentAttendanceLog;
 
     public function latestForStudentBetween(User $student, CarbonInterface $startsAt, CarbonInterface $endsAt): ?StudentAttendanceLog;
+
+    public function hasEventForStudentBetween(User $student, AttendanceEventType $eventType, CarbonInterface $startsAt, CarbonInterface $endsAt): bool;
 
     public function getReportData(array $filters): Collection;
 

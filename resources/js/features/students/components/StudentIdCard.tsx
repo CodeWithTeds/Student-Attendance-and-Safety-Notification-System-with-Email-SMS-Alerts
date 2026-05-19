@@ -229,6 +229,12 @@ export default function StudentIdCard({ student, onClose }: Props) {
                                             <span className="font-semibold text-[var(--muted-foreground)]">Student</span>
                                             <span className="font-black text-[var(--foreground)]">{latestAttendance.student.name}</span>
                                         </div>
+                                        <div className="flex items-center justify-between rounded-xl bg-[var(--secondary)] px-3 py-2">
+                                            <span className="font-semibold text-[var(--muted-foreground)]">Schedule</span>
+                                            <span className="font-black text-[var(--foreground)]">
+                                                {latestAttendance.schedule ? `${latestAttendance.schedule.time_in_display} - ${latestAttendance.schedule.time_out_display}` : 'No schedule'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             ) : (

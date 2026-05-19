@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Attendance\Eloquent;
 
+use App\Enums\AttendanceEventType;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\Section;
@@ -70,6 +71,15 @@ class EloquentStudentAttendanceRepository implements StudentAttendanceRepository
             ->whereBetween('scanned_at', [$startsAt, $endsAt])
             ->latest('scanned_at')
             ->first();
+    }
+
+    public function hasEventForStudentBetween(User $student, AttendanceEventType $eventType, CarbonInterface $startsAt, CarbonInterface $endsAt): bool
+    {
+        return StudentAttendanceLog::query()
+            ->where('user_id', $student->id)
+            ->where('event_type', $eventType->value)
+            ->whereBetween('scanned_at', [$startsAt, $endsAt])
+            ->exists();
     }
 
     public function getReportData(array $filters): Collection

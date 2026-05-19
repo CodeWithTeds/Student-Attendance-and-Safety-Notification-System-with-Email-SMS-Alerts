@@ -22,14 +22,23 @@ class StudentAttendanceService
     {
         $student = $this->resolveStudent($data['qr_code_value']);
         $requestedEventType = $data['event_type'] ?? null;
-        $latestToday = $this->attendanceRepository->latestForStudentBetween(
+        $dayStartsAt = now()->startOfDay();
+        $dayEndsAt = now()->endOfDay();
+        $hasCheckInToday = $this->attendanceRepository->hasEventForStudentBetween(
             $student,
-            now()->startOfDay(),
-            now()->endOfDay()
+            AttendanceEventType::CHECK_IN,
+            $dayStartsAt,
+            $dayEndsAt
         );
-        $eventType = $this->resolveEventType($latestToday, $requestedEventType);
+        $hasCheckOutToday = $this->attendanceRepository->hasEventForStudentBetween(
+            $student,
+            AttendanceEventType::CHECK_OUT,
+            $dayStartsAt,
+            $dayEndsAt
+        );
+        $eventType = $this->resolveEventType($hasCheckInToday, $requestedEventType);
 
-        $this->ensureScanIsAllowed($student, $latestToday, $eventType, $requestedEventType);
+        $this->ensureScanIsAllowed($student, $hasCheckInToday, $hasCheckOutToday, $eventType);
 
         $latestScan = $this->attendanceRepository->latestForStudent($student);
         if (! $requestedEventType && $latestScan && $latestScan->scanned_at->diffInMinutes(now()) < 1) {
@@ -69,34 +78,42 @@ class StudentAttendanceService
         return $student;
     }
 
-    protected function resolveEventType(?StudentAttendanceLog $latestToday, ?string $requestedEventType): AttendanceEventType
+    protected function resolveEventType(bool $hasCheckInToday, ?string $requestedEventType): AttendanceEventType
     {
         if ($requestedEventType) {
             return AttendanceEventType::from($requestedEventType);
         }
 
-        if ($latestToday?->event_type === AttendanceEventType::CHECK_IN) {
+        if ($hasCheckInToday) {
             return AttendanceEventType::CHECK_OUT;
         }
 
         return AttendanceEventType::CHECK_IN;
     }
 
-    protected function ensureScanIsAllowed(User $student, ?StudentAttendanceLog $latestToday, AttendanceEventType $eventType, ?string $requestedEventType): void
+    protected function ensureScanIsAllowed(User $student, bool $hasCheckInToday, bool $hasCheckOutToday, AttendanceEventType $eventType): void
     {
-        if (! $requestedEventType) {
-            return;
+        if ($hasCheckInToday && $hasCheckOutToday) {
+            throw ValidationException::withMessages([
+                'qr_code_value' => "{$student->name} already completed Time In and Time Out today.",
+            ]);
         }
 
-        if ($eventType === AttendanceEventType::CHECK_IN && $latestToday?->event_type === AttendanceEventType::CHECK_IN) {
+        if ($eventType === AttendanceEventType::CHECK_IN && $hasCheckInToday) {
             throw ValidationException::withMessages([
                 'qr_code_value' => "{$student->name} is still timed in. Scan Time Out before another Time In.",
             ]);
         }
 
-        if ($eventType === AttendanceEventType::CHECK_OUT && $latestToday?->event_type !== AttendanceEventType::CHECK_IN) {
+        if ($eventType === AttendanceEventType::CHECK_OUT && ! $hasCheckInToday) {
             throw ValidationException::withMessages([
                 'qr_code_value' => "{$student->name} has no active Time In today. Scan Time In first.",
+            ]);
+        }
+
+        if ($eventType === AttendanceEventType::CHECK_OUT && $hasCheckOutToday) {
+            throw ValidationException::withMessages([
+                'qr_code_value' => "{$student->name} already timed out today.",
             ]);
         }
     }

@@ -43,6 +43,15 @@ export interface AttendanceEditHistory {
     };
 }
 
+export interface AttendanceSchedule {
+    id: number;
+    section_id: number;
+    time_in: string;
+    time_out: string;
+    time_in_display: string;
+    time_out_display: string;
+}
+
 export interface AttendanceRecord {
     id: number;
     event_type: AttendanceEventType;
@@ -52,6 +61,7 @@ export interface AttendanceRecord {
     scanned_at_display: string;
     scanned_at_full_display: string;
     schedule_status?: string;
+    schedule?: AttendanceSchedule | null;
     student: AttendanceStudent;
     edit_history: AttendanceEditHistory[];
     created_at: string;

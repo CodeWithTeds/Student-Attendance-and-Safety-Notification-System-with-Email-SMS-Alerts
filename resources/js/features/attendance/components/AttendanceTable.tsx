@@ -69,6 +69,7 @@ export function AttendanceTable({
                     {records.map((record) => {
                         const isSelected = selected.includes(record.id);
                         const section = record.student.current_section;
+                        const schedule = record.schedule ?? section?.schedule ?? null;
 
                         return (
                             <tr
@@ -142,8 +143,8 @@ export function AttendanceTable({
                                                 {`${section.grade_level?.name ?? ''} ${section.name}`.trim()}
                                             </div>
                                             <div className="mt-0.5 text-xs">
-                                                {section.schedule
-                                                    ? `${section.schedule.time_in_display} - ${section.schedule.time_out_display}`
+                                                {schedule
+                                                    ? `${schedule.time_in_display} - ${schedule.time_out_display}`
                                                     : 'No schedule'}
                                             </div>
                                         </>

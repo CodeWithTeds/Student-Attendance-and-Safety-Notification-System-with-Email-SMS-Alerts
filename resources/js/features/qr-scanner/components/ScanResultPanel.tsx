@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, Clock, GraduationCap, Hash } from 'lucide-react';
+import { AlertCircle, CalendarClock, CheckCircle2, Clock, GraduationCap, Hash } from 'lucide-react';
 import type { AttendanceLogResource } from '../types';
 
 interface ScanResultPanelProps {
@@ -93,6 +93,19 @@ export function ScanResultPanel({ result, error, isProcessing }: ScanResultPanel
                         </p>
                         <p className="text-xs font-bold text-[#1D1D1F]/40">
                             {result.scanned_at_display}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F5F7] text-[#FF3B30]">
+                        <CalendarClock size={18} />
+                    </div>
+                    <div>
+                        <p className="text-sm font-black text-[#1D1D1F]">
+                            {result.schedule ? `${result.schedule.time_in_display} - ${result.schedule.time_out_display}` : 'No schedule assigned'}
+                        </p>
+                        <p className="text-xs font-bold text-[#1D1D1F]/40">
+                            Schedule
                         </p>
                     </div>
                 </div>
