@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Dashboard\DashboardIndexRequest;
 use App\Services\Dashboard\DashboardService;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __construct(protected DashboardService $dashboardService)
-    {
-    }
+    public function __construct(protected DashboardService $dashboardService) {}
 
-    public function index(Request $request)
+    public function index(DashboardIndexRequest $request): Response
     {
-        $stats = $this->dashboardService->getAnalyticsData();
         return Inertia::render('dashboard', [
-            'stats' => $stats,
+            'stats' => $this->dashboardService->getAnalyticsData($request->user(), $request->attendancePeriod()),
         ]);
     }
 }

@@ -1,6 +1,11 @@
 <?php
 
+use App\Enums\AttendanceEventType;
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
+use App\Models\StudentAttendanceLog;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 test('guests are redirected to the login page', function () {
     $response = $this->get(route('dashboard'));
@@ -13,4 +18,42 @@ test('authenticated users can visit the dashboard', function () {
 
     $response = $this->get(route('dashboard'));
     $response->assertOk();
+});
+
+test('student dashboard includes filterable attendance summary', function (): void {
+    Carbon::setTestNow('2026-05-19 10:00:00');
+
+    $student = User::factory()->create([
+        'role' => UserRole::STUDENT,
+        'status' => UserStatus::APPROVED,
+        'student_number' => '2026000199',
+    ]);
+
+    StudentAttendanceLog::create([
+        'user_id' => $student->id,
+        'qr_code_value' => 'SASN-STUDENT|dashboard-in|2026000199|student@example.test',
+        'event_type' => AttendanceEventType::CHECK_IN->value,
+        'scanned_at' => '2026-05-19 07:30:00',
+    ]);
+
+    StudentAttendanceLog::create([
+        'user_id' => $student->id,
+        'qr_code_value' => 'SASN-STUDENT|dashboard-out|2026000199|student@example.test',
+        'event_type' => AttendanceEventType::CHECK_OUT->value,
+        'scanned_at' => '2026-05-19 16:10:00',
+    ]);
+
+    $this->actingAs($student)
+        ->get('/dashboard?attendance_period=day')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('dashboard')
+            ->where('stats.student_attendance_summary.selected_period', 'day')
+            ->where('stats.student_attendance_summary.totals.check_ins', 1)
+            ->where('stats.student_attendance_summary.totals.check_outs', 1)
+            ->has('stats.student_attendance_summary.chart', 8)
+            ->has('stats.student_attendance_summary.options', 3)
+        );
+
+    Carbon::setTestNow();
 });

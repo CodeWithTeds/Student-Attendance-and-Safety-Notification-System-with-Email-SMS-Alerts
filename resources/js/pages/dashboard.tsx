@@ -1,10 +1,11 @@
-import { Head } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
-import { Activity, BarChart3, BookOpen, CalendarDays, CheckCircle, Clock3, Gauge, Layers, PieChart, ShieldAlert, TrendingUp, UserCog, Users } from 'lucide-react';
+import { Activity, BarChart3, BookOpen, CalendarCheck, CalendarDays, CheckCircle, Clock3, Gauge, Layers, LogIn, LogOut, PieChart, ShieldAlert, TrendingUp, UserCog, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { dashboard } from '@/routes';
+import type { SharedData } from '@/types';
 
 type AttendanceTrendPoint = {
     label: string;
@@ -27,6 +28,36 @@ type SectionOccupancyPoint = ChartPoint & {
     percent: number;
 };
 
+type AttendancePeriod = 'day' | 'week' | 'month';
+
+type StudentAttendanceChartPoint = AttendanceTrendPoint;
+
+type StudentAttendanceRecentLog = {
+    id: number;
+    event_type: 'check_in' | 'check_out';
+    event_label: string;
+    date: string;
+    time: string;
+};
+
+type StudentAttendanceSummary = {
+    selected_period: AttendancePeriod;
+    range_label: string;
+    options: {
+        label: string;
+        value: AttendancePeriod;
+    }[];
+    totals: {
+        check_ins: number;
+        check_outs: number;
+        total: number;
+        active_days: number;
+        attendance_rate: number;
+    };
+    chart: StudentAttendanceChartPoint[];
+    recent_logs: StudentAttendanceRecentLog[];
+} | null;
+
 interface DashboardProps {
     stats: {
         total_students: number;
@@ -42,6 +73,7 @@ interface DashboardProps {
         student_status_distribution: DonutPoint[];
         grade_level_distribution: ChartPoint[];
         section_occupancy: SectionOccupancyPoint[];
+        student_attendance_summary: StudentAttendanceSummary;
     };
 }
 
@@ -274,8 +306,151 @@ function HorizontalProgressChart({ data }: { data: SectionOccupancyPoint[] }) {
     );
 }
 
+function StudentAttendanceStackedChart({ data }: { data: StudentAttendanceChartPoint[] }) {
+    if (data.length === 0 || data.every((item) => item.total === 0)) {
+        return <EmptyChart />;
+    }
+
+    const maxValue = Math.max(...data.map((item) => item.total), 1);
+
+    return (
+        <div className="space-y-4">
+            <div className="flex h-64 items-end gap-3 overflow-x-auto border-b pb-4">
+                {data.map((item) => {
+                    const checkInHeight = item.total > 0 ? (item.check_ins / item.total) * 100 : 0;
+                    const checkOutHeight = item.total > 0 ? (item.check_outs / item.total) * 100 : 0;
+                    const barHeight = Math.max((item.total / maxValue) * 100, item.total ? 8 : 1);
+
+                    return (
+                        <div key={item.label} className="flex min-w-14 flex-1 flex-col items-center gap-2">
+                            <div className="flex h-48 w-full items-end justify-center">
+                                <div className="flex w-10 flex-col-reverse overflow-hidden rounded-t-lg bg-muted shadow-sm" style={{ height: `${barHeight}%` }} title={`${item.label}: ${item.check_ins} time in, ${item.check_outs} time out`}>
+                                    <div className="bg-emerald-500" style={{ height: `${checkInHeight}%` }} />
+                                    <div className="bg-orange-500" style={{ height: `${checkOutHeight}%` }} />
+                                </div>
+                            </div>
+                            <span className="text-center text-[11px] font-semibold text-muted-foreground">{item.label}</span>
+                        </div>
+                    );
+                })}
+            </div>
+            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-muted-foreground">
+                <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-sm bg-emerald-500" /> Time in</span>
+                <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-sm bg-orange-500" /> Time out</span>
+            </div>
+        </div>
+    );
+}
+
+function AttendancePeriodFilter({ summary }: { summary: NonNullable<StudentAttendanceSummary> }) {
+    const updatePeriod = (period: AttendancePeriod) => {
+        router.get('/dashboard', { attendance_period: period }, {
+            only: ['stats'],
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        });
+    };
+
+    return (
+        <div className="flex rounded-lg border bg-muted/40 p-1">
+            {summary.options.map((option) => (
+                <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => updatePeriod(option.value)}
+                    className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+                        summary.selected_period === option.value
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                    {option.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+function StudentDashboard({ stats }: DashboardProps) {
+    const summary = stats.student_attendance_summary;
+    const { auth } = usePage().props as SharedData;
+
+    if (!summary) {
+        return null;
+    }
+
+    return (
+        <>
+            <Head title="Student Dashboard" />
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto bg-neutral-50/50 p-6 dark:bg-black/20">
+                <div>
+                    <h1 className="text-3xl font-extrabold tracking-tight">My Attendance Dashboard</h1>
+                    <p className="mt-1 font-medium text-muted-foreground">Welcome back, {auth.user.name}. Here is your attendance activity for {summary.range_label}.</p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <StatCard title="Attendance Rate" value={`${summary.totals.attendance_rate}%`} icon={CalendarCheck} description="Based on active school days" trend="neutral" colorFrom="from-blue-500/20" colorTo="to-cyan-500/20" iconColor="text-blue-600 dark:text-blue-400" />
+                    <StatCard title="Time In" value={summary.totals.check_ins} icon={LogIn} description="Recorded check-ins" colorFrom="from-emerald-500/20" colorTo="to-teal-500/20" iconColor="text-emerald-600 dark:text-emerald-400" />
+                    <StatCard title="Time Out" value={summary.totals.check_outs} icon={LogOut} description="Recorded check-outs" colorFrom="from-orange-500/20" colorTo="to-amber-500/20" iconColor="text-orange-600 dark:text-orange-400" />
+                    <StatCard title="Active Days" value={summary.totals.active_days} icon={Activity} description={`${summary.totals.total} attendance records`} colorFrom="from-violet-500/20" colorTo="to-fuchsia-500/20" iconColor="text-violet-600 dark:text-violet-400" />
+                </div>
+
+                <div className="grid gap-4 xl:grid-cols-12">
+                    <Card className="border-none shadow-lg dark:bg-black/40 dark:backdrop-blur-xl xl:col-span-8">
+                        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                            <div className="space-y-1">
+                                <CardTitle>Attendance Summary</CardTitle>
+                                <CardDescription>Stacked time-in and time-out records grouped by {summary.selected_period}.</CardDescription>
+                            </div>
+                            <AttendancePeriodFilter summary={summary} />
+                        </CardHeader>
+                        <CardContent>
+                            <StudentAttendanceStackedChart data={summary.chart} />
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-none shadow-lg dark:bg-black/40 dark:backdrop-blur-xl xl:col-span-4">
+                        <CardHeader>
+                            <CardTitle>Recent Attendance</CardTitle>
+                            <CardDescription>Latest scans in the selected period.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {summary.recent_logs.length === 0 ? (
+                                <div className="flex h-44 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">No attendance records yet</div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {summary.recent_logs.map((log) => (
+                                        <div key={log.id} className="flex items-center justify-between gap-4 rounded-lg border p-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${log.event_type === 'check_in' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-orange-500/10 text-orange-600'}`}>
+                                                    {log.event_type === 'check_in' ? <LogIn className="h-4 w-4" /> : <LogOut className="h-4 w-4" />}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold">{log.event_label}</p>
+                                                    <p className="text-xs text-muted-foreground">{log.date}</p>
+                                                </div>
+                                            </div>
+                                            <span className="text-sm font-semibold">{log.time}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </>
+    );
+}
+
 export default function Dashboard({ stats }: DashboardProps) {
+    const { auth } = usePage().props as SharedData;
     const attendanceRate = stats.total_students > 0 ? Math.round((stats.total_attendance_today / stats.total_students) * 100) : 0;
+
+    if (auth.user.role === 'student') {
+        return <StudentDashboard stats={stats} />;
+    }
 
     return (
         <>

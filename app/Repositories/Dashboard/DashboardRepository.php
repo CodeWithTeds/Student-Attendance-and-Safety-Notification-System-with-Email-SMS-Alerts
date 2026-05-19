@@ -2,6 +2,10 @@
 
 namespace App\Repositories\Dashboard;
 
+use App\Enums\AttendanceEventType;
+use App\Enums\DashboardAttendancePeriod;
+use App\Enums\UserRole;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
@@ -9,7 +13,7 @@ use Illuminate\Support\Str;
 
 class DashboardRepository
 {
-    public function getAnalyticsStats(): array
+    public function getAnalyticsStats(User $user, DashboardAttendancePeriod $attendancePeriod): array
     {
         $today = CarbonImmutable::today();
         $thirtyDaysAgo = $today->subDays(29)->startOfDay();
@@ -35,6 +39,7 @@ class DashboardRepository
             'student_status_distribution' => $this->studentStatusDistribution(),
             'grade_level_distribution' => $this->gradeLevelDistribution(),
             'section_occupancy' => $this->sectionOccupancy(),
+            'student_attendance_summary' => $this->studentAttendanceSummary($user, $attendancePeriod, $today),
         ];
     }
 
@@ -189,7 +194,7 @@ class DashboardRepository
                 $capacity = (int) ($row->capacity ?: max($enrolled, 1));
 
                 return [
-                    'label' => trim(($row->grade_code ? "{$row->grade_code} " : '') . $row->name),
+                    'label' => trim(($row->grade_code ? "{$row->grade_code} " : '').$row->name),
                     'value' => $enrolled,
                     'capacity' => $capacity,
                     'percent' => min(100, round(($enrolled / $capacity) * 100)),
@@ -197,5 +202,149 @@ class DashboardRepository
             })
             ->values()
             ->all();
+    }
+
+    private function studentAttendanceSummary(User $user, DashboardAttendancePeriod $period, CarbonImmutable $today): ?array
+    {
+        if (! $this->isStudent($user)) {
+            return null;
+        }
+
+        [$startsAt, $endsAt] = $this->studentAttendanceRange($period, $today);
+        $logs = DB::table('student_attendance_logs')
+            ->select(['id', 'event_type', 'scanned_at'])
+            ->where('user_id', $user->id)
+            ->whereBetween('scanned_at', [$startsAt, $endsAt])
+            ->orderBy('scanned_at')
+            ->get();
+
+        $checkIns = $logs->where('event_type', AttendanceEventType::CHECK_IN->value)->count();
+        $checkOuts = $logs->where('event_type', AttendanceEventType::CHECK_OUT->value)->count();
+        $activeDays = $logs
+            ->map(fn ($log) => CarbonImmutable::parse($log->scanned_at)->toDateString())
+            ->unique()
+            ->count();
+        $elapsedEndsAt = $endsAt->lessThan($today->endOfDay()) ? $endsAt : $today->endOfDay();
+        $schoolDays = $this->schoolDaysBetween($startsAt, $elapsedEndsAt);
+
+        return [
+            'selected_period' => $period->value,
+            'range_label' => $this->studentAttendanceRangeLabel($period, $startsAt, $endsAt),
+            'options' => collect(DashboardAttendancePeriod::cases())
+                ->map(fn (DashboardAttendancePeriod $option) => [
+                    'label' => $option->label(),
+                    'value' => $option->value,
+                ])
+                ->values()
+                ->all(),
+            'totals' => [
+                'check_ins' => $checkIns,
+                'check_outs' => $checkOuts,
+                'total' => $logs->count(),
+                'active_days' => $activeDays,
+                'attendance_rate' => $schoolDays > 0 ? min(100, round(($activeDays / $schoolDays) * 100)) : 0,
+            ],
+            'chart' => $this->studentAttendanceChart($logs, $period, $startsAt, $endsAt),
+            'recent_logs' => $logs
+                ->reverse()
+                ->take(5)
+                ->map(fn ($log) => [
+                    'id' => (int) $log->id,
+                    'event_type' => (string) $log->event_type,
+                    'event_label' => $log->event_type === AttendanceEventType::CHECK_IN->value ? 'Time In' : 'Time Out',
+                    'date' => CarbonImmutable::parse($log->scanned_at)->format('M j, Y'),
+                    'time' => CarbonImmutable::parse($log->scanned_at)->format('g:i A'),
+                ])
+                ->values()
+                ->all(),
+        ];
+    }
+
+    private function isStudent(User $user): bool
+    {
+        if ($user->role instanceof UserRole) {
+            return $user->role === UserRole::STUDENT;
+        }
+
+        return $user->role === UserRole::STUDENT->value;
+    }
+
+    private function studentAttendanceRange(DashboardAttendancePeriod $period, CarbonImmutable $today): array
+    {
+        return match ($period) {
+            DashboardAttendancePeriod::DAY => [$today->startOfDay(), $today->endOfDay()],
+            DashboardAttendancePeriod::WEEK => [$today->startOfWeek(), $today->endOfWeek()],
+            DashboardAttendancePeriod::MONTH => [$today->startOfMonth(), $today->endOfMonth()],
+        };
+    }
+
+    private function studentAttendanceRangeLabel(DashboardAttendancePeriod $period, CarbonImmutable $startsAt, CarbonImmutable $endsAt): string
+    {
+        return match ($period) {
+            DashboardAttendancePeriod::DAY => $startsAt->format('F j, Y'),
+            DashboardAttendancePeriod::WEEK => $startsAt->format('M j').' - '.$endsAt->format('M j, Y'),
+            DashboardAttendancePeriod::MONTH => $startsAt->format('F Y'),
+        };
+    }
+
+    private function studentAttendanceChart($logs, DashboardAttendancePeriod $period, CarbonImmutable $startsAt, CarbonImmutable $endsAt): array
+    {
+        return match ($period) {
+            DashboardAttendancePeriod::DAY => collect(range(0, 21, 3))
+                ->map(function (int $hour) use ($logs) {
+                    $nextHour = $hour + 3;
+                    $bucketLogs = $logs->filter(function ($log) use ($hour, $nextHour) {
+                        $scannedHour = CarbonImmutable::parse($log->scanned_at)->hour;
+
+                        return $scannedHour >= $hour && $scannedHour < $nextHour;
+                    });
+
+                    return $this->attendanceChartPoint(CarbonImmutable::createFromTime($hour)->format('ga'), $bucketLogs);
+                })
+                ->values()
+                ->all(),
+            DashboardAttendancePeriod::WEEK => collect(CarbonPeriod::create($startsAt, $endsAt))
+                ->map(function ($date) use ($logs) {
+                    $day = CarbonImmutable::parse($date);
+                    $bucketLogs = $logs->filter(fn ($log) => CarbonImmutable::parse($log->scanned_at)->isSameDay($day));
+
+                    return $this->attendanceChartPoint($day->format('D'), $bucketLogs);
+                })
+                ->values()
+                ->all(),
+            DashboardAttendancePeriod::MONTH => collect(CarbonPeriod::create($startsAt, '1 week', $endsAt))
+                ->map(function ($weekStart, int $index) use ($logs, $endsAt) {
+                    $startsOn = CarbonImmutable::parse($weekStart);
+                    $weekEndsOn = $startsOn->addDays(6)->endOfDay();
+                    $endsOn = $weekEndsOn->lessThan($endsAt) ? $weekEndsOn : $endsAt;
+                    $bucketLogs = $logs->filter(function ($log) use ($startsOn, $endsOn) {
+                        return CarbonImmutable::parse($log->scanned_at)->betweenIncluded($startsOn, $endsOn);
+                    });
+
+                    return $this->attendanceChartPoint('Week '.($index + 1), $bucketLogs);
+                })
+                ->values()
+                ->all(),
+        };
+    }
+
+    private function attendanceChartPoint(string $label, $logs): array
+    {
+        $checkIns = $logs->where('event_type', AttendanceEventType::CHECK_IN->value)->count();
+        $checkOuts = $logs->where('event_type', AttendanceEventType::CHECK_OUT->value)->count();
+
+        return [
+            'label' => $label,
+            'check_ins' => $checkIns,
+            'check_outs' => $checkOuts,
+            'total' => $checkIns + $checkOuts,
+        ];
+    }
+
+    private function schoolDaysBetween(CarbonImmutable $startsAt, CarbonImmutable $endsAt): int
+    {
+        return collect(CarbonPeriod::create($startsAt->startOfDay(), $endsAt->startOfDay()))
+            ->filter(fn ($date) => CarbonImmutable::parse($date)->isWeekday())
+            ->count();
     }
 }
