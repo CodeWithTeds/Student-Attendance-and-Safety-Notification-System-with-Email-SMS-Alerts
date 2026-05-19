@@ -3,10 +3,12 @@
 namespace App\Services\Attendance;
 
 use App\Enums\AttendanceEventType;
+use App\Mail\StudentAttendanceNotification;
 use App\Models\StudentAttendanceLog;
 use App\Models\User;
 use App\Repositories\Attendance\Contracts\StudentAttendanceRepositoryInterface;
 use App\Repositories\User\Contracts\UserRepositoryInterface;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class StudentAttendanceService
@@ -19,15 +21,25 @@ class StudentAttendanceService
     public function recordScan(array $data): StudentAttendanceLog
     {
         $student = $this->resolveStudent($data['qr_code_value']);
-        
+        $requestedEventType = $data['event_type'] ?? null;
+        $latestToday = $this->attendanceRepository->latestForStudentBetween(
+            $student,
+            now()->startOfDay(),
+            now()->endOfDay()
+        );
+        $eventType = $this->resolveEventType($latestToday, $requestedEventType);
+
+        $this->ensureScanIsAllowed($student, $latestToday, $eventType, $requestedEventType);
+
         $latestScan = $this->attendanceRepository->latestForStudent($student);
-        if ($latestScan && $latestScan->scanned_at->diffInMinutes(now()) < 1) {
+        if (! $requestedEventType && $latestScan && $latestScan->scanned_at->diffInMinutes(now()) < 1) {
             throw ValidationException::withMessages([
-                'qr_code_value' => 'Please wait at least 1 minute before scanning again to avoid duplicates.',
+                'qr_code_value' => sprintf(
+                    'Attendance was just recorded as %s. Please wait before scanning this QR again.',
+                    $latestScan->event_type?->pastTenseLabel() ?? 'recorded'
+                ),
             ]);
         }
-
-        $eventType = $this->resolveEventType($student, $data['event_type'] ?? null);
 
         $attendanceLog = $this->attendanceRepository->create([
             'user_id' => $student->id,
@@ -37,8 +49,8 @@ class StudentAttendanceService
         ]);
 
         if ($attendanceLog->student && $attendanceLog->student->parents->isNotEmpty()) {
-            \Illuminate\Support\Facades\Mail::to($attendanceLog->student->parents)
-                ->send(new \App\Mail\StudentAttendanceNotification($attendanceLog));
+            Mail::to($attendanceLog->student->parents)
+                ->queue(new StudentAttendanceNotification($attendanceLog));
         }
 
         return $attendanceLog;
@@ -57,22 +69,35 @@ class StudentAttendanceService
         return $student;
     }
 
-    protected function resolveEventType(User $student, ?string $requestedEventType): AttendanceEventType
+    protected function resolveEventType(?StudentAttendanceLog $latestToday, ?string $requestedEventType): AttendanceEventType
     {
         if ($requestedEventType) {
             return AttendanceEventType::from($requestedEventType);
         }
-
-        $latestToday = $this->attendanceRepository->latestForStudentBetween(
-            $student,
-            now()->startOfDay(),
-            now()->endOfDay()
-        );
 
         if ($latestToday?->event_type === AttendanceEventType::CHECK_IN) {
             return AttendanceEventType::CHECK_OUT;
         }
 
         return AttendanceEventType::CHECK_IN;
+    }
+
+    protected function ensureScanIsAllowed(User $student, ?StudentAttendanceLog $latestToday, AttendanceEventType $eventType, ?string $requestedEventType): void
+    {
+        if (! $requestedEventType) {
+            return;
+        }
+
+        if ($eventType === AttendanceEventType::CHECK_IN && $latestToday?->event_type === AttendanceEventType::CHECK_IN) {
+            throw ValidationException::withMessages([
+                'qr_code_value' => "{$student->name} is still timed in. Scan Time Out before another Time In.",
+            ]);
+        }
+
+        if ($eventType === AttendanceEventType::CHECK_OUT && $latestToday?->event_type !== AttendanceEventType::CHECK_IN) {
+            throw ValidationException::withMessages([
+                'qr_code_value' => "{$student->name} has no active Time In today. Scan Time In first.",
+            ]);
+        }
     }
 }

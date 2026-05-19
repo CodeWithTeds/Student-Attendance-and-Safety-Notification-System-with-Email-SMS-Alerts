@@ -19,6 +19,7 @@ import {
     BookOpen,
     ShieldCheck,
     ClipboardList,
+    ScanLine,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -144,6 +145,15 @@ const adminNavItems: NavItem[] = [
     },
 ];
 
+const studentNavItems: NavItem[] = [
+    {
+        title: 'Attendance QR Scan',
+        href: '/student/qr-scanner',
+        icon: ScanLine,
+        roles: ['student'],
+    },
+];
+
 const footerNavItems: NavItem[] = [
 
 ];
@@ -159,6 +169,9 @@ export function AppSidebar() {
         (item) => !item.roles || item.roles.includes(userRole),
     );
     const filteredAdminNavItems = adminNavItems.filter(
+        (item) => !item.roles || item.roles.includes(userRole),
+    );
+    const filteredStudentNavItems = studentNavItems.filter(
         (item) => !item.roles || item.roles.includes(userRole),
     );
 
@@ -188,6 +201,12 @@ export function AppSidebar() {
                     <NavMain
                         items={filteredAdminNavItems}
                         label="Administration"
+                    />
+                )}
+                {filteredStudentNavItems.length > 0 && (
+                    <NavMain
+                        items={filteredStudentNavItems}
+                        label="Student"
                     />
                 )}
             </SidebarContent>

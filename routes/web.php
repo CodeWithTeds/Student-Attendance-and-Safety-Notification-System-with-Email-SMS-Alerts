@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AbsenteeMonitorController;
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AttendanceReportController;
 use App\Http\Controllers\Admin\AuditTrailController;
@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SectionScheduleController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -24,7 +25,11 @@ Route::inertia('/', 'welcome', [
 Route::inertia('qr-scanner', 'public/qr-scanner')->name('qr-scanner');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
+        Route::inertia('qr-scanner', 'student/qr-scanner')->name('qr-scanner');
+    });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
