@@ -43,6 +43,16 @@ class EloquentStudentAttendanceRepository implements StudentAttendanceRepository
             ->withQueryString();
     }
 
+    public function getPaginatedForStudent(User $student, int $perPage = 15): LengthAwarePaginator
+    {
+        return StudentAttendanceLog::query()
+            ->with(['student.sections.gradeLevel', 'student.sections.schedule', 'editHistory.editor'])
+            ->where('user_id', $student->id)
+            ->latest('scanned_at')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
     public function getById(int $id): ?StudentAttendanceLog
     {
         return StudentAttendanceLog::with(['student.sections.gradeLevel', 'student.sections.schedule', 'editHistory.editor'])->find($id);

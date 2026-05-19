@@ -16,6 +16,8 @@ interface StudentAttendanceRepositoryInterface
 
     public function getPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator;
 
+    public function getPaginatedForStudent(User $student, int $perPage = 15): LengthAwarePaginator;
+
     public function getById(int $id): ?StudentAttendanceLog;
 
     public function update(StudentAttendanceLog $attendanceLog, array $data): bool;

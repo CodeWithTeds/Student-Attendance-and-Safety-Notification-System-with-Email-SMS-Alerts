@@ -152,6 +152,12 @@ const studentNavItems: NavItem[] = [
         icon: ScanLine,
         roles: ['student'],
     },
+    {
+        title: 'Attendance Records',
+        href: '/student/attendance-records',
+        icon: ClipboardList,
+        roles: ['student'],
+    },
 ];
 
 const footerNavItems: NavItem[] = [

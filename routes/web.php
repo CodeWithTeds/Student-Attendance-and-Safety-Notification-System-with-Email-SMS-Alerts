@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Student\AttendanceRecordController as StudentAttendanceRecordController;
 use App\Http\Controllers\Student\QrScannerController as StudentQrScannerController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -30,6 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
         Route::get('qr-scanner', [StudentQrScannerController::class, 'index'])->name('qr-scanner');
+        Route::get('attendance-records', [StudentAttendanceRecordController::class, 'index'])->name('attendance-records');
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
