@@ -28,12 +28,12 @@ export default function StudentProfilePage({ student }: StudentProfileProps) {
                             <StudentProfileIdCard student={student} />
                         </div>
 
-                        <div className="min-w-0 flex-1 space-y-4 print:hidden">
-                            <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 shadow-sm">
+                        <div className="min-w-0 flex-1 space-y-3 print:hidden">
+                            <section className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-4 shadow-sm">
                                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                     <div>
                                         <p className="text-xs font-black tracking-[0.12em] text-[var(--muted-foreground)] uppercase">Student information</p>
-                                        <h2 className="mt-2 text-2xl font-black text-[var(--foreground)]">{fullName}</h2>
+                                        <h2 className="mt-1 text-xl font-black text-[var(--foreground)]">{fullName}</h2>
                                         <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">{student.email}</p>
                                     </div>
                                     <span className="w-fit rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
@@ -41,23 +41,23 @@ export default function StudentProfilePage({ student }: StudentProfileProps) {
                                     </span>
                                 </div>
 
-                                <div className="mt-5 grid gap-3 md:grid-cols-2">
-                                    <InfoItem icon={UserRound} label="Student Number" value={student.student_number ?? 'No student number yet'} />
-                                    <InfoItem icon={Mail} label="Email" value={student.email} />
-                                    <InfoItem icon={Phone} label="Guardian Contact" value={student.guardian_phone ?? 'Not set'} />
-                                    <InfoItem icon={UserRound} label="Gender" value={student.gender ?? 'Not set'} />
-                                    <InfoItem icon={ShieldCheck} label="Nationality" value={student.nationality ?? 'Not set'} />
-                                    <InfoItem icon={CalendarClock} label="Date of Birth" value={formatDate(student.date_of_birth)} />
-                                    <InfoItem icon={MapPin} label="Address" value={address} />
+                                <div className="mt-4 grid gap-x-6 md:grid-cols-2">
+                                    <InfoRow icon={UserRound} label="Student Number" value={student.student_number ?? 'No student number yet'} />
+                                    <InfoRow icon={Mail} label="Email" value={student.email} />
+                                    <InfoRow icon={Phone} label="Guardian Contact" value={student.guardian_phone ?? 'Not set'} />
+                                    <InfoRow icon={UserRound} label="Gender" value={student.gender ?? 'Not set'} />
+                                    <InfoRow icon={ShieldCheck} label="Nationality" value={student.nationality ?? 'Not set'} />
+                                    <InfoRow icon={CalendarClock} label="Date of Birth" value={formatDate(student.date_of_birth)} />
+                                    <InfoRow icon={MapPin} label="Address" value={address} wide />
                                 </div>
                             </section>
 
-                            <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 shadow-sm">
+                            <section className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-4 shadow-sm">
                                 <p className="text-xs font-black tracking-[0.12em] text-[var(--muted-foreground)] uppercase">Class & schedule</p>
-                                <div className="mt-4 grid gap-3 md:grid-cols-3">
-                                    <InfoItem icon={GraduationCap} label="Section" value={section ? `${section.grade_level?.name ?? ''} ${section.name}`.trim() : 'Not assigned'} />
-                                    <InfoItem icon={CalendarClock} label="School Year" value={section?.school_year ?? 'Not assigned'} />
-                                    <InfoItem
+                                <div className="mt-3 grid gap-x-6 md:grid-cols-3">
+                                    <InfoRow icon={GraduationCap} label="Section" value={section ? `${section.grade_level?.name ?? ''} ${section.name}`.trim() : 'Not assigned'} />
+                                    <InfoRow icon={CalendarClock} label="School Year" value={section?.school_year ?? 'Not assigned'} />
+                                    <InfoRow
                                         icon={CalendarClock}
                                         label="Schedule"
                                         value={schedule ? `${schedule.time_in_display} - ${schedule.time_out_display}` : 'No schedule'}
@@ -65,25 +65,23 @@ export default function StudentProfilePage({ student }: StudentProfileProps) {
                                 </div>
                             </section>
 
-                            <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 shadow-sm">
+                            <section className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-4 shadow-sm">
                                 <p className="text-xs font-black tracking-[0.12em] text-[var(--muted-foreground)] uppercase">Parents / guardians</p>
-                                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                                <div className="mt-3 divide-y divide-[var(--border)]">
                                     {(student.parents ?? []).length > 0 ? (
                                         student.parents?.map((guardian) => (
-                                            <div key={guardian.id} className="rounded-xl border border-[var(--border)] bg-[var(--secondary)]/35 p-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                                        <UsersRound size={18} />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="truncate text-sm font-black text-[var(--foreground)]">{guardian.name}</p>
-                                                        <p className="truncate text-xs font-semibold text-[var(--muted-foreground)]">{guardian.email}</p>
-                                                    </div>
+                                            <div key={guardian.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                                    <UsersRound size={15} />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="truncate text-sm font-black text-[var(--foreground)]">{guardian.name}</p>
+                                                    <p className="truncate text-xs font-semibold text-[var(--muted-foreground)]">{guardian.email}</p>
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="rounded-xl border border-dashed border-[var(--border)] p-4 text-sm font-semibold text-[var(--muted-foreground)]">
+                                        <p className="text-sm font-semibold text-[var(--muted-foreground)]">
                                             No parent or guardian is linked yet.
                                         </p>
                                     )}
@@ -108,14 +106,16 @@ export default function StudentProfilePage({ student }: StudentProfileProps) {
     );
 }
 
-function InfoItem({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
+function InfoRow({ icon: Icon, label, value, wide = false }: { icon: LucideIcon; label: string; value: string; wide?: boolean }) {
     return (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--secondary)]/35 p-4">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Icon size={17} />
+        <div className={`flex min-w-0 items-start gap-3 border-b border-[var(--border)] py-2.5 last:border-b-0 md:last:border-b ${wide ? 'md:col-span-2' : ''}`}>
+            <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Icon size={14} />
             </div>
-            <p className="text-xs font-black tracking-[0.12em] text-[var(--muted-foreground)] uppercase">{label}</p>
-            <p className="mt-1 break-words text-sm font-bold text-[var(--foreground)]">{value}</p>
+            <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-black tracking-[0.12em] text-[var(--muted-foreground)] uppercase">{label}</p>
+                <p className="mt-0.5 break-words text-sm font-bold text-[var(--foreground)]">{value}</p>
+            </div>
         </div>
     );
 }
