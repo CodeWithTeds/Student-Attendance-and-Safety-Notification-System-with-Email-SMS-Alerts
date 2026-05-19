@@ -42,6 +42,7 @@ type StudentAttendanceRecentLog = {
 
 type StudentAttendanceSummary = {
     selected_period: AttendancePeriod;
+    selected_date: string;
     range_label: string;
     options: {
         label: string;
@@ -343,8 +344,8 @@ function StudentAttendanceStackedChart({ data }: { data: StudentAttendanceChartP
 }
 
 function AttendancePeriodFilter({ summary }: { summary: NonNullable<StudentAttendanceSummary> }) {
-    const updatePeriod = (period: AttendancePeriod) => {
-        router.get('/dashboard', { attendance_period: period }, {
+    const updateFilters = (period: AttendancePeriod, date: string) => {
+        router.get('/dashboard', { attendance_period: period, attendance_date: date }, {
             only: ['stats'],
             preserveScroll: true,
             preserveState: true,
@@ -358,7 +359,7 @@ function AttendancePeriodFilter({ summary }: { summary: NonNullable<StudentAtten
                 <button
                     key={option.value}
                     type="button"
-                    onClick={() => updatePeriod(option.value)}
+                    onClick={() => updateFilters(option.value, summary.selected_date)}
                     className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
                         summary.selected_period === option.value
                             ? 'bg-background text-foreground shadow-sm'
@@ -369,6 +370,33 @@ function AttendancePeriodFilter({ summary }: { summary: NonNullable<StudentAtten
                 </button>
             ))}
         </div>
+    );
+}
+
+function AttendanceDateFilter({ summary }: { summary: NonNullable<StudentAttendanceSummary> }) {
+    const updateDate = (date: string) => {
+        if (!date) {
+            return;
+        }
+
+        router.get('/dashboard', { attendance_period: summary.selected_period, attendance_date: date }, {
+            only: ['stats'],
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        });
+    };
+
+    return (
+        <label className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <CalendarDays className="h-4 w-4" />
+            <input
+                type="date"
+                value={summary.selected_date}
+                onChange={(event) => updateDate(event.target.value)}
+                className="h-10 rounded-lg border bg-background px-3 text-sm font-semibold text-foreground shadow-sm outline-none transition focus:border-primary"
+            />
+        </label>
     );
 }
 
@@ -403,7 +431,10 @@ function StudentDashboard({ stats }: DashboardProps) {
                                 <CardTitle>Attendance Summary</CardTitle>
                                 <CardDescription>Stacked time-in and time-out records grouped by {summary.selected_period}.</CardDescription>
                             </div>
-                            <AttendancePeriodFilter summary={summary} />
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                <AttendanceDateFilter summary={summary} />
+                                <AttendancePeriodFilter summary={summary} />
+                            </div>
                         </CardHeader>
                         <CardContent>
                             <StudentAttendanceStackedChart data={summary.chart} />

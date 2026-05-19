@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class DashboardRepository
 {
-    public function getAnalyticsStats(User $user, DashboardAttendancePeriod $attendancePeriod): array
+    public function getAnalyticsStats(User $user, DashboardAttendancePeriod $attendancePeriod, CarbonImmutable $attendanceDate): array
     {
         $today = CarbonImmutable::today();
         $thirtyDaysAgo = $today->subDays(29)->startOfDay();
@@ -39,7 +39,7 @@ class DashboardRepository
             'student_status_distribution' => $this->studentStatusDistribution(),
             'grade_level_distribution' => $this->gradeLevelDistribution(),
             'section_occupancy' => $this->sectionOccupancy(),
-            'student_attendance_summary' => $this->studentAttendanceSummary($user, $attendancePeriod, $today),
+            'student_attendance_summary' => $this->studentAttendanceSummary($user, $attendancePeriod, $attendanceDate, $today),
         ];
     }
 
@@ -204,13 +204,13 @@ class DashboardRepository
             ->all();
     }
 
-    private function studentAttendanceSummary(User $user, DashboardAttendancePeriod $period, CarbonImmutable $today): ?array
+    private function studentAttendanceSummary(User $user, DashboardAttendancePeriod $period, CarbonImmutable $selectedDate, CarbonImmutable $today): ?array
     {
         if (! $this->isStudent($user)) {
             return null;
         }
 
-        [$startsAt, $endsAt] = $this->studentAttendanceRange($period, $today);
+        [$startsAt, $endsAt] = $this->studentAttendanceRange($period, $selectedDate);
         $logs = DB::table('student_attendance_logs')
             ->select(['id', 'event_type', 'scanned_at'])
             ->where('user_id', $user->id)
@@ -229,6 +229,8 @@ class DashboardRepository
 
         return [
             'selected_period' => $period->value,
+            'selected_date' => $selectedDate->toDateString(),
+            'max_date' => $today->toDateString(),
             'range_label' => $this->studentAttendanceRangeLabel($period, $startsAt, $endsAt),
             'options' => collect(DashboardAttendancePeriod::cases())
                 ->map(fn (DashboardAttendancePeriod $option) => [
@@ -343,6 +345,10 @@ class DashboardRepository
 
     private function schoolDaysBetween(CarbonImmutable $startsAt, CarbonImmutable $endsAt): int
     {
+        if ($startsAt->greaterThan($endsAt)) {
+            return 0;
+        }
+
         return collect(CarbonPeriod::create($startsAt->startOfDay(), $endsAt->startOfDay()))
             ->filter(fn ($date) => CarbonImmutable::parse($date)->isWeekday())
             ->count();
