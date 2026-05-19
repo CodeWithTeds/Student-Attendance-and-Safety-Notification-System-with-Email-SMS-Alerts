@@ -114,6 +114,48 @@ it('allows parents to view notification alerts scoped to linked children', funct
         );
 });
 
+it('filters parent notification attendance alerts by event type and date', function (): void {
+    $parent = User::factory()->parent()->create([
+        'notification_sms_enabled' => true,
+        'notification_email_enabled' => true,
+    ]);
+    $child = User::factory()->student()->create(['status' => UserStatus::APPROVED]);
+    $today = now()->toDateString();
+
+    $parent->children()->attach($child->id);
+
+    StudentAttendanceLog::create([
+        'user_id' => $child->id,
+        'qr_code_value' => 'SASN-STUDENT|guardian|notify-filter-in|child@example.test',
+        'event_type' => AttendanceEventType::CHECK_IN->value,
+        'scanned_at' => now()->setTime(8, 0),
+    ]);
+    StudentAttendanceLog::create([
+        'user_id' => $child->id,
+        'qr_code_value' => 'SASN-STUDENT|guardian|notify-filter-out|child@example.test',
+        'event_type' => AttendanceEventType::CHECK_OUT->value,
+        'scanned_at' => now()->setTime(17, 0),
+    ]);
+    StudentAttendanceLog::create([
+        'user_id' => $child->id,
+        'qr_code_value' => 'SASN-STUDENT|guardian|notify-filter-old|child@example.test',
+        'event_type' => AttendanceEventType::CHECK_IN->value,
+        'scanned_at' => now()->subDay()->setTime(8, 0),
+    ]);
+
+    $this->actingAs($parent)
+        ->get("/parent/notifications?event_type=check_in&date_from={$today}&date_to={$today}")
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('parent/notifications')
+            ->has('attendanceAlerts.data', 1)
+            ->where('attendanceAlerts.data.0.event_type', AttendanceEventType::CHECK_IN->value)
+            ->where('filters.event_type', AttendanceEventType::CHECK_IN->value)
+            ->where('filters.date_from', $today)
+            ->where('filters.date_to', $today)
+        );
+});
+
 it('allows parents to monitor daily and monthly attendance records', function (): void {
     $parent = User::factory()->parent()->create();
     $child = User::factory()->student()->create(['status' => UserStatus::APPROVED]);

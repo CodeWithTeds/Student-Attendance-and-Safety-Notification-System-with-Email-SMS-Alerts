@@ -26,7 +26,15 @@ interface Props {
 }
 
 const cleanFilters = (filters: GuardianFilters) =>
-    Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== '' && value !== null && value !== undefined));
+    Object.fromEntries(
+        Object.entries({
+            search: filters.search,
+            student_id: filters.student_id,
+            event_type: filters.event_type,
+            date_from: filters.date_from,
+            date_to: filters.date_to,
+        }).filter(([, value]) => value !== '' && value !== null && value !== undefined),
+    );
 
 export default function ParentNotifications({ guardian, children, attendanceAlerts, announcementNotifications, filters, summary }: Props) {
     const [localFilters, setLocalFilters] = useState<GuardianFilters>(filters);
@@ -90,7 +98,6 @@ export default function ParentNotifications({ guardian, children, attendanceAler
             <ParentPortalToolbar
                 filters={localFilters}
                 childrenOptions={children?.data ?? []}
-                showNotificationFilters
                 onFilterChange={updateFilter}
                 onApply={applyFilters}
                 onReset={resetFilters}

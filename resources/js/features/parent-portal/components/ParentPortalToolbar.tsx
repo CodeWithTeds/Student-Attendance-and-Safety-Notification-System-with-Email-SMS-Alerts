@@ -5,7 +5,6 @@ interface Props {
     filters: GuardianFilters;
     childrenOptions: GuardianChild[];
     selectedCount?: number;
-    showNotificationFilters?: boolean;
     onFilterChange: (key: keyof GuardianFilters, value: string) => void;
     onApply: () => void;
     onReset: () => void;
@@ -16,7 +15,6 @@ export default function ParentPortalToolbar({
     filters,
     childrenOptions,
     selectedCount = 0,
-    showNotificationFilters = false,
     onFilterChange,
     onApply,
     onReset,
@@ -70,31 +68,6 @@ export default function ParentPortalToolbar({
                 value={filters.date_to ?? ''}
                 onChange={(event) => onFilterChange('date_to', event.target.value)}
             />
-
-            {showNotificationFilters && (
-                <>
-                    <select
-                        className="h-9 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-[13px] text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
-                        value={filters.channel ?? ''}
-                        onChange={(event) => onFilterChange('channel', event.target.value)}
-                    >
-                        <option value="">All channels</option>
-                        <option value="sms">SMS</option>
-                        <option value="email">Email</option>
-                    </select>
-
-                    <select
-                        className="h-9 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-[13px] text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/5"
-                        value={filters.delivery_status ?? ''}
-                        onChange={(event) => onFilterChange('delivery_status', event.target.value)}
-                    >
-                        <option value="">All delivery</option>
-                        <option value="sent">Sent</option>
-                        <option value="skipped">Skipped</option>
-                        <option value="failed">Failed</option>
-                    </select>
-                </>
-            )}
 
             {selectedCount > 0 && (
                 <span className="rounded-md bg-[var(--muted)] px-2 py-1 text-xs font-medium text-[var(--muted-foreground)]">
