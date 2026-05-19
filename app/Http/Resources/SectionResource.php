@@ -11,6 +11,7 @@ class SectionResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'grade_level_id' => $this->grade_level_id,
             'name' => $this->name,
             'school_year' => $this->school_year,
             'capacity' => $this->capacity,

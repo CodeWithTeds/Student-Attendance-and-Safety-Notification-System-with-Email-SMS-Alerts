@@ -7,6 +7,14 @@ export interface Section {
         name: string;
     };
     school_year?: string;
+    schedule?: {
+        id: number;
+        section_id?: number;
+        time_in: string;
+        time_out: string;
+        time_in_display: string;
+        time_out_display: string;
+    } | null;
 }
 
 export interface User {
@@ -23,6 +31,19 @@ export interface User {
     first_name?: string | null;
     middle_name?: string | null;
     last_name?: string | null;
+    suffix?: string | null;
+    gender?: string | null;
+    date_of_birth?: string | null;
+    place_of_birth?: string | null;
+    nationality?: string | null;
+    house_no?: string | null;
+    street?: string | null;
+    barangay?: string | null;
+    city?: string | null;
+    province?: string | null;
+    zip_code?: string | null;
+    guardian_phone?: string | null;
+    parents?: User[];
     grade_level?: { id: number; name: string } | null;
     current_section?: Section | null;
 }

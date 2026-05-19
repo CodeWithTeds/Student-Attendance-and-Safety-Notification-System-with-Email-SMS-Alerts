@@ -20,6 +20,7 @@ import {
     ShieldCheck,
     ClipboardList,
     ScanLine,
+    UserRound,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -146,6 +147,12 @@ const adminNavItems: NavItem[] = [
 ];
 
 const studentNavItems: NavItem[] = [
+    {
+        title: 'Profile',
+        href: '/student/profile',
+        icon: UserRound,
+        roles: ['student'],
+    },
     {
         title: 'Attendance QR Scan',
         href: '/student/qr-scanner',

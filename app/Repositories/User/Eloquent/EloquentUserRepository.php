@@ -109,6 +109,13 @@ class EloquentUserRepository implements UserRepositoryInterface
             ->find($id);
     }
 
+    public function getStudentProfile(int $id): ?User
+    {
+        return User::with(['parents', 'sections.gradeLevel', 'sections.schedule', 'gradeLevel'])
+            ->where('role', UserRole::STUDENT->value)
+            ->find($id);
+    }
+
     public function getParentsPaginated(int $perPage = 15)
     {
         return User::with('children')->where('role', UserRole::PARENT->value)->paginate($perPage);

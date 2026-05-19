@@ -16,8 +16,17 @@ export interface QrCodeStudent {
     last_name?: string | null;
     current_section?: {
         id: number;
+        grade_level_id: number;
         name: string;
         school_year: string;
+        schedule?: {
+            id: number;
+            section_id?: number;
+            time_in: string;
+            time_out: string;
+            time_in_display: string;
+            time_out_display: string;
+        } | null;
         grade_level?: {
             id: number;
             name: string;
