@@ -12,6 +12,9 @@ export interface GuardianProfile {
 export type GuardianChild = AttendanceStudent;
 
 export interface GuardianFilters {
+    period?: 'daily' | 'monthly' | '';
+    date?: string | null;
+    month?: string | null;
     student_id?: string | number | null;
     event_type?: 'check_in' | 'check_out' | '';
     date_from?: string | null;
@@ -40,6 +43,14 @@ export interface GuardianNotificationSummary {
     sms_contact?: string | null;
     email_contact: string;
     linked_children: number;
+}
+
+export interface GuardianAnnouncementSummary {
+    total_children: number;
+    sms_enabled: boolean;
+    email_enabled: boolean;
+    sms_contact?: string | null;
+    email_contact: string;
 }
 
 export interface ChildAttendanceSummary {

@@ -15,8 +15,6 @@ import {
     Download,
     History,
     Settings,
-    FolderGit2,
-    BookOpen,
     ShieldCheck,
     ClipboardList,
     ScanLine,
@@ -176,9 +174,21 @@ const parentNavItems: NavItem[] = [
         roles: ['parent'],
     },
     {
+        title: 'Attendance Monitoring',
+        href: '/parent/attendance-monitoring',
+        icon: Activity,
+        roles: ['parent'],
+    },
+    {
         title: 'Notifications',
         href: '/parent/notifications',
         icon: Bell,
+        roles: ['parent'],
+    },
+    {
+        title: 'Announcements',
+        href: '/parent/announcements',
+        icon: Megaphone,
         roles: ['parent'],
     },
 ];

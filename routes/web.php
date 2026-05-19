@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Guardian\AnnouncementController as GuardianAnnouncementController;
+use App\Http\Controllers\Guardian\AttendanceMonitoringController as GuardianAttendanceMonitoringController;
 use App\Http\Controllers\Guardian\DashboardController as GuardianDashboardController;
 use App\Http\Controllers\Guardian\NotificationController as GuardianNotificationController;
 use App\Http\Controllers\Student\AttendanceRecordController as StudentAttendanceRecordController;
@@ -40,7 +42,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:parent')->prefix('parent')->name('parent.')->group(function () {
         Route::get('dashboard', [GuardianDashboardController::class, 'index'])->name('dashboard');
+        Route::get('attendance-monitoring', [GuardianAttendanceMonitoringController::class, 'index'])->name('attendance-monitoring');
         Route::get('notifications', [GuardianNotificationController::class, 'index'])->name('notifications');
+        Route::get('announcements', [GuardianAnnouncementController::class, 'index'])->name('announcements');
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {

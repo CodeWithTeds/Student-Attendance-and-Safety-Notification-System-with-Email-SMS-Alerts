@@ -21,16 +21,20 @@ import type { NavItem } from '@/types';
 
 export function NavMain({
     items = [],
-    label = 'Platform',
+    label = '',
 }: {
     items: NavItem[];
     label?: string;
 }) {
     const { isCurrentUrl } = useCurrentUrl();
 
+    if (items.length === 0) {
+        return null;
+    }
+
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>{label}</SidebarGroupLabel>
+            {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
             <SidebarMenu>
                 {items.map((item) => {
                     const hasItems = item.items && item.items.length > 0;

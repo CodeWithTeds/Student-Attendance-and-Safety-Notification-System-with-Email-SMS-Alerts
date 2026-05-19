@@ -5,6 +5,7 @@ import { Bell, Megaphone } from 'lucide-react';
 interface Props {
     notifications: NotificationHistory[];
     meta: AttendanceMeta;
+    scrollClassName?: string;
 }
 
 const statusClass = (status?: string | null) => {
@@ -15,7 +16,7 @@ const statusClass = (status?: string | null) => {
     return 'bg-slate-100 text-slate-500';
 };
 
-export default function AnnouncementNotificationTable({ notifications, meta }: Props) {
+export default function AnnouncementNotificationTable({ notifications, meta, scrollClassName = 'max-h-52' }: Props) {
     return (
         <div className="border-t border-[var(--border)] bg-[var(--background)] px-4 py-3">
             <div className="mb-2 flex items-center justify-between gap-3">
@@ -28,7 +29,7 @@ export default function AnnouncementNotificationTable({ notifications, meta }: P
                 <Bell size={16} className="text-[var(--muted-foreground)]" />
             </div>
 
-            <div className="max-h-52 overflow-auto">
+            <div className={`${scrollClassName} overflow-auto`}>
                 <table className="w-full min-w-[760px] border-collapse text-[13px]">
                     <thead>
                         <tr className="border-b border-[var(--border)]">
