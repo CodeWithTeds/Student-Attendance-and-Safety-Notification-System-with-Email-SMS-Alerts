@@ -46,6 +46,8 @@ export function ScanResultPanel({ result, error, isProcessing }: ScanResultPanel
         );
     }
 
+    const resultTitle = result.schedule_status === 'Late' ? 'Late Time In' : result.status_label;
+
     return (
         <aside className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-[#1D1D1F]/5">
             <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl ${
@@ -66,7 +68,7 @@ export function ScanResultPanel({ result, error, isProcessing }: ScanResultPanel
                 )}
             </div>
             <h2 className="text-3xl font-black tracking-tight text-[#1D1D1F]">
-                {result.status_label}
+                {resultTitle}
             </h2>
 
             <div className="mt-6 space-y-4">

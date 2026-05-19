@@ -4,10 +4,13 @@ namespace App\Services\Attendance;
 
 use App\Enums\AttendanceEventType;
 use App\Mail\StudentAttendanceNotification;
+use App\Models\SectionSchedule;
 use App\Models\StudentAttendanceLog;
 use App\Models\User;
 use App\Repositories\Attendance\Contracts\StudentAttendanceRepositoryInterface;
 use App\Repositories\User\Contracts\UserRepositoryInterface;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
@@ -22,8 +25,9 @@ class StudentAttendanceService
     {
         $student = $this->resolveStudent($data['qr_code_value']);
         $requestedEventType = $data['event_type'] ?? null;
-        $dayStartsAt = now()->startOfDay();
-        $dayEndsAt = now()->endOfDay();
+        $scannedAt = now();
+        $dayStartsAt = $scannedAt->copy()->startOfDay();
+        $dayEndsAt = $scannedAt->copy()->endOfDay();
         $hasCheckInToday = $this->attendanceRepository->hasEventForStudentBetween(
             $student,
             AttendanceEventType::CHECK_IN,
@@ -38,10 +42,10 @@ class StudentAttendanceService
         );
         $eventType = $this->resolveEventType($hasCheckInToday, $requestedEventType);
 
-        $this->ensureScanIsAllowed($student, $hasCheckInToday, $hasCheckOutToday, $eventType);
+        $this->ensureScanIsAllowed($student, $hasCheckInToday, $hasCheckOutToday, $eventType, $scannedAt);
 
         $latestScan = $this->attendanceRepository->latestForStudent($student);
-        if (! $requestedEventType && $latestScan && $latestScan->scanned_at->diffInMinutes(now()) < 1) {
+        if (! $requestedEventType && $latestScan && $latestScan->scanned_at->diffInMinutes($scannedAt) < 1) {
             throw ValidationException::withMessages([
                 'qr_code_value' => sprintf(
                     'Attendance was just recorded as %s. Please wait before scanning this QR again.',
@@ -54,7 +58,7 @@ class StudentAttendanceService
             'user_id' => $student->id,
             'qr_code_value' => $data['qr_code_value'],
             'event_type' => $eventType->value,
-            'scanned_at' => now(),
+            'scanned_at' => $scannedAt,
         ]);
 
         if ($attendanceLog->student && $attendanceLog->student->parents->isNotEmpty()) {
@@ -91,7 +95,7 @@ class StudentAttendanceService
         return AttendanceEventType::CHECK_IN;
     }
 
-    protected function ensureScanIsAllowed(User $student, bool $hasCheckInToday, bool $hasCheckOutToday, AttendanceEventType $eventType): void
+    protected function ensureScanIsAllowed(User $student, bool $hasCheckInToday, bool $hasCheckOutToday, AttendanceEventType $eventType, CarbonInterface $scannedAt): void
     {
         if ($hasCheckInToday && $hasCheckOutToday) {
             throw ValidationException::withMessages([
@@ -116,5 +120,61 @@ class StudentAttendanceService
                 'qr_code_value' => "{$student->name} already timed out today.",
             ]);
         }
+
+        $schedule = $this->studentSchedule($student);
+
+        if (! $schedule) {
+            throw ValidationException::withMessages([
+                'qr_code_value' => "{$student->name} has no section schedule assigned. Please contact the registrar before scanning attendance.",
+            ]);
+        }
+
+        $this->ensureScheduleAllowsScan($student, $schedule, $eventType, $scannedAt);
+    }
+
+    protected function studentSchedule(User $student): ?SectionSchedule
+    {
+        $section = $student->relationLoaded('sections') ? $student->sections->first() : null;
+
+        if (! $section || ! $section->relationLoaded('schedule')) {
+            return null;
+        }
+
+        return $section->schedule;
+    }
+
+    protected function ensureScheduleAllowsScan(User $student, SectionSchedule $schedule, AttendanceEventType $eventType, CarbonInterface $scannedAt): void
+    {
+        $timezone = $this->appTimezone();
+        $scannedAtLocal = CarbonImmutable::instance($scannedAt)->timezone($timezone);
+        $scheduledTimeIn = $this->scheduledTime($schedule->time_in, $scannedAtLocal);
+        $scheduledTimeOut = $this->scheduledTime($schedule->time_out, $scannedAtLocal);
+
+        if ($eventType === AttendanceEventType::CHECK_IN && $scannedAtLocal->lt($scheduledTimeIn->subHour())) {
+            throw ValidationException::withMessages([
+                'qr_code_value' => "{$student->name} can only Time In within 1 hour before the scheduled Time In at {$this->displayTime($schedule->time_in)}.",
+            ]);
+        }
+
+        if ($eventType === AttendanceEventType::CHECK_OUT && $scannedAtLocal->lt($scheduledTimeOut)) {
+            throw ValidationException::withMessages([
+                'qr_code_value' => "{$student->name} can only Time Out at or after the scheduled Time Out at {$this->displayTime($schedule->time_out)}.",
+            ]);
+        }
+    }
+
+    protected function scheduledTime(string $time, CarbonInterface $scannedAt): CarbonImmutable
+    {
+        return CarbonImmutable::parse($scannedAt->format('Y-m-d').' '.$time, $this->appTimezone());
+    }
+
+    protected function displayTime(string $time): string
+    {
+        return CarbonImmutable::parse($time, $this->appTimezone())->format('h:i A');
+    }
+
+    protected function appTimezone(): string
+    {
+        return (string) config('app.timezone', 'UTC');
     }
 }

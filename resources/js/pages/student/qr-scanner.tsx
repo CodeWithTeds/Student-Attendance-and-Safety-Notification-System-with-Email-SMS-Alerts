@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { AlertCircle, CheckCircle2, Clock3, LogIn, LogOut, QrCode, ScanLine, ShieldCheck, X } from 'lucide-react';
+import { AlertCircle, CalendarClock, CheckCircle2, Clock3, LogIn, LogOut, QrCode, ScanLine, ShieldCheck, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { ScanModeControl } from '@/features/qr-scanner/components/ScanModeControl';
@@ -7,7 +7,7 @@ import { ScannerViewport } from '@/features/qr-scanner/components/ScannerViewpor
 import { ScanResultPanel } from '@/features/qr-scanner/components/ScanResultPanel';
 import { useQrScanner } from '@/features/qr-scanner/hooks/useQrScanner';
 import { recordQrAttendance } from '@/features/qr-scanner/services/qrAttendanceApi';
-import type { AttendanceEventType, AttendanceLogResource } from '@/features/qr-scanner/types';
+import type { AttendanceEventType, AttendanceLogResource, AttendanceScheduleResource } from '@/features/qr-scanner/types';
 
 type ScanMode = AttendanceEventType | 'auto';
 type ScanToastType = 'success' | 'warning' | 'error';
@@ -17,6 +17,21 @@ type ScanToast = {
     type: ScanToastType;
     title: string;
     message: string;
+};
+
+type StudentSection = {
+    id: number;
+    name: string;
+    school_year: string;
+    grade_level?: {
+        id: number;
+        name: string;
+    } | null;
+    schedule?: AttendanceScheduleResource | null;
+} | null;
+
+type StudentQrScannerProps = {
+    studentSection: StudentSection;
 };
 
 const toastStyles: Record<ScanToastType, string> = {
@@ -31,7 +46,7 @@ const toastIconStyles: Record<ScanToastType, string> = {
     error: 'text-red-600',
 };
 
-export default function StudentQrScanner() {
+export default function StudentQrScanner({ studentSection }: StudentQrScannerProps) {
     const [scanMode, setScanMode] = useState<ScanMode>('auto');
     const [result, setResult] = useState<AttendanceLogResource | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -63,11 +78,7 @@ export default function StudentQrScanner() {
                 });
 
                 setResult(attendanceLog);
-                showToast(
-                    attendanceLog.schedule_status === 'Late' ? 'warning' : 'success',
-                    attendanceLog.schedule_status === 'Late' ? 'Late time in recorded' : `${attendanceLog.status_label} recorded`,
-                    `${attendanceLog.student.name} was marked ${attendanceLog.status_label.toLowerCase()} at ${attendanceLog.scanned_at_display}. Parent notifications were queued when enabled.`,
-                );
+                showAttendanceToast(attendanceLog, showToast);
             } catch (scanError) {
                 const message = scanError instanceof Error ? scanError.message : 'Unable to record this scan.';
 
@@ -118,13 +129,14 @@ export default function StudentQrScanner() {
                         />
 
                         <div className="grid gap-3 md:grid-cols-3">
-                            <InfoPill icon={LogIn} label="Time In" text="Records arrival and marks late when past the section schedule." />
-                            <InfoPill icon={LogOut} label="Time Out" text="Allowed only after the student has an active Time In today." />
+                            <InfoPill icon={LogIn} label="Time In" text="Opens 1 hour before schedule. More than 20 minutes after schedule is late." />
+                            <InfoPill icon={LogOut} label="Time Out" text="Allowed only at or after the scheduled Time Out with an active Time In today." />
                             <InfoPill icon={ShieldCheck} label="Validation" text="Duplicate scans and invalid QR codes are blocked before saving." />
                         </div>
                     </div>
 
                     <div className="space-y-4">
+                        <SchedulePanel section={studentSection} />
                         <ScanResultPanel result={result} error={error} isProcessing={isProcessing} />
                         <div className="rounded-2xl border bg-background p-5 shadow-sm">
                             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -139,6 +151,70 @@ export default function StudentQrScanner() {
                 </div>
             </div>
         </>
+    );
+}
+
+function showAttendanceToast(attendanceLog: AttendanceLogResource, showToast: (type: ScanToastType, title: string, message: string) => void) {
+    if (attendanceLog.schedule_status === 'Late') {
+        const scheduleText = attendanceLog.schedule ? ` Scheduled Time In was ${attendanceLog.schedule.time_in_display}.` : '';
+
+        showToast(
+            'warning',
+            'Late time in recorded',
+            `${attendanceLog.student.name} was marked late at ${attendanceLog.scanned_at_display}.${scheduleText} Parent notifications were queued when enabled.`,
+        );
+
+        return;
+    }
+
+    showToast(
+        'success',
+        `${attendanceLog.status_label} recorded`,
+        `${attendanceLog.student.name} was marked ${attendanceLog.status_label.toLowerCase()} at ${attendanceLog.scanned_at_display}. Parent notifications were queued when enabled.`,
+    );
+}
+
+function SchedulePanel({ section }: { section: StudentSection }) {
+    const schedule = section?.schedule ?? null;
+    const sectionLabel = section
+        ? [section.grade_level?.name, section.name].filter(Boolean).join(' - ')
+        : 'No section assigned';
+
+    return (
+        <div className="rounded-2xl border bg-background p-5 shadow-sm">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <CalendarClock className="h-5 w-5" />
+            </div>
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <p className="text-xs font-black tracking-[0.12em] text-muted-foreground uppercase">My schedule</p>
+                    <h2 className="mt-1 text-lg font-black text-foreground">{sectionLabel}</h2>
+                </div>
+                {section?.school_year && (
+                    <span className="rounded-lg border bg-muted px-2.5 py-1 text-xs font-black text-muted-foreground">{section.school_year}</span>
+                )}
+            </div>
+
+            {schedule ? (
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                    <ScheduleTime label="Time In" value={schedule.time_in_display} />
+                    <ScheduleTime label="Time Out" value={schedule.time_out_display} />
+                </div>
+            ) : (
+                <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-relaxed text-amber-950">
+                    {section ? 'No schedule is set for your section yet.' : 'Ask an admin to assign your section schedule before scanning attendance.'}
+                </p>
+            )}
+        </div>
+    );
+}
+
+function ScheduleTime({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="rounded-xl border bg-muted/40 p-3">
+            <p className="text-xs font-black tracking-[0.12em] text-muted-foreground uppercase">{label}</p>
+            <p className="mt-1 text-lg font-black text-foreground">{value}</p>
+        </div>
     );
 }
 

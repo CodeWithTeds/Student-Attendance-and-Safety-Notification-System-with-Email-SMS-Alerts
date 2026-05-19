@@ -30,6 +30,8 @@ interface UserRepositoryInterface
 
     public function getQrCodeStudentsPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator;
 
+    public function getStudentWithSchedule(int $id): ?User;
+
     public function getParentsPaginated(int $perPage = 15);
 
     public function getParentsForAnnouncement(?array $guardianIds = null): Collection;

@@ -78,11 +78,7 @@ export default function StudentIdCard({ student, onClose }: Props) {
             });
 
             setLatestAttendance(attendanceLog);
-            showToast(
-                attendanceLog.schedule_status === 'Late' ? 'warning' : 'success',
-                attendanceLog.schedule_status === 'Late' ? 'Late time in recorded' : `${attendanceLog.status_label} recorded`,
-                `${attendanceLog.student.name} was marked ${attendanceLog.status_label.toLowerCase()} at ${attendanceLog.scanned_at_display}. Parent notifications were queued when enabled.`,
-            );
+            showAttendanceToast(attendanceLog, showToast);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unable to record this attendance scan.';
             showToast('error', 'Attendance validation failed', message);
@@ -265,6 +261,26 @@ export default function StudentIdCard({ student, onClose }: Props) {
                 </div>
             </div>
         </div>
+    );
+}
+
+function showAttendanceToast(attendanceLog: AttendanceLogResource, showToast: (type: AttendanceToastType, title: string, message: string) => void) {
+    if (attendanceLog.schedule_status === 'Late') {
+        const scheduleText = attendanceLog.schedule ? ` Scheduled Time In was ${attendanceLog.schedule.time_in_display}.` : '';
+
+        showToast(
+            'warning',
+            'Late time in recorded',
+            `${attendanceLog.student.name} was marked late at ${attendanceLog.scanned_at_display}.${scheduleText} Parent notifications were queued when enabled.`,
+        );
+
+        return;
+    }
+
+    showToast(
+        'success',
+        `${attendanceLog.status_label} recorded`,
+        `${attendanceLog.student.name} was marked ${attendanceLog.status_label.toLowerCase()} at ${attendanceLog.scanned_at_display}. Parent notifications were queued when enabled.`,
     );
 }
 

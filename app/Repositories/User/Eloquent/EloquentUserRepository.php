@@ -102,6 +102,13 @@ class EloquentUserRepository implements UserRepositoryInterface
             ->withQueryString();
     }
 
+    public function getStudentWithSchedule(int $id): ?User
+    {
+        return User::with(['sections.gradeLevel', 'sections.schedule'])
+            ->where('role', UserRole::STUDENT->value)
+            ->find($id);
+    }
+
     public function getParentsPaginated(int $perPage = 15)
     {
         return User::with('children')->where('role', UserRole::PARENT->value)->paginate($perPage);
@@ -119,7 +126,7 @@ class EloquentUserRepository implements UserRepositoryInterface
 
     public function findApprovedStudentByQrCode(string $qrCodeValue): ?User
     {
-        return User::with('parents')
+        return User::with(['parents', 'sections.gradeLevel', 'sections.schedule'])
             ->where('role', UserRole::STUDENT->value)
             ->where('status', UserStatus::APPROVED->value)
             ->where('qr_code_value', $qrCodeValue)
