@@ -33,6 +33,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { dashboardUrlForRole } from '@/lib/dashboard-url';
 import { dashboard } from '@/routes';
 import type { NavItem, SharedData } from '@/types';
 
@@ -223,7 +224,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={dashboardUrlForRole(userRole)} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

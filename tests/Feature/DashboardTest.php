@@ -20,6 +20,14 @@ test('authenticated users can visit the dashboard', function () {
     $response->assertOk();
 });
 
+test('parent users are redirected from the shared dashboard to their dashboard', function () {
+    $parent = User::factory()->parent()->create();
+
+    $this->actingAs($parent)
+        ->get(route('dashboard'))
+        ->assertRedirect(route('parent.dashboard', absolute: false));
+});
+
 test('student dashboard includes filterable attendance summary', function (): void {
     Carbon::setTestNow('2026-05-19 10:00:00');
 

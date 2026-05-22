@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
@@ -20,6 +21,20 @@ test('users can authenticate using the login screen', function () {
 
     $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));
+});
+
+test('parent users are redirected to the parent dashboard after login', function () {
+    $parent = User::factory()->create([
+        'role' => UserRole::PARENT,
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => $parent->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticatedAs($parent);
+    $response->assertRedirect(route('parent.dashboard', absolute: false));
 });
 
 test('users with two factor enabled are redirected to two factor challenge', function () {
