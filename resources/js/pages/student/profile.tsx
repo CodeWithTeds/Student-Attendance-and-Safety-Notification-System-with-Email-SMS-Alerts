@@ -1,14 +1,18 @@
 import { Head } from '@inertiajs/react';
-import { CalendarClock, Download, GraduationCap, Mail, MapPin, Phone, ShieldCheck, UserRound, UsersRound } from 'lucide-react';
+import { CalendarClock, Download, GraduationCap, Mail, MapPin, Phone, Printer, ShieldCheck, UserRound, UsersRound } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useRef } from 'react';
 import StudentProfileIdCard from '@/features/student-profile/components/StudentProfileIdCard';
 import type { StudentProfileProps } from '@/features/student-profile/types';
 
 export default function StudentProfilePage({ student }: StudentProfileProps) {
+    const idCardRef = useRef<SVGSVGElement | null>(null);
     const section = student.current_section;
     const schedule = section?.schedule ?? null;
     const address = formatAddress(student);
     const fullName = [student.first_name, student.middle_name, student.last_name, student.suffix].filter(Boolean).join(' ') || student.name;
+    const handlePrintId = () => printStudentIdCard(idCardRef.current, student);
+    const handleDownloadId = () => downloadStudentIdCard(idCardRef.current, student);
 
     return (
         <>
@@ -25,7 +29,7 @@ export default function StudentProfilePage({ student }: StudentProfileProps) {
                 <div className="min-h-0 flex-1 overflow-auto bg-[var(--secondary)]/30 p-8 print:block print:bg-white print:p-0">
                     <div className="flex flex-col gap-8 md:flex-row md:items-start">
                         <div className="flex shrink-0 justify-center md:w-[360px] md:justify-start">
-                            <StudentProfileIdCard student={student} />
+                            <StudentProfileIdCard ref={idCardRef} student={student} />
                         </div>
 
                         <div className="min-w-0 flex-1 space-y-3 print:hidden">
@@ -91,14 +95,22 @@ export default function StudentProfilePage({ student }: StudentProfileProps) {
                     </div>
                 </div>
 
-                <div className="flex items-center justify-end border-t border-[var(--border)] bg-[var(--background)] p-4 print:hidden">
+                <div className="flex items-center justify-end gap-2 border-t border-[var(--border)] bg-[var(--background)] p-4 print:hidden">
                     <button
                         type="button"
-                        onClick={() => window.print()}
+                        onClick={handlePrintId}
+                        className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--secondary)]"
+                    >
+                        <Printer size={16} />
+                        Print ID
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleDownloadId}
                         className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--secondary)]"
                     >
                         <Download size={16} />
-                        Print ID
+                        Download ID
                     </button>
                 </div>
             </div>
@@ -136,6 +148,95 @@ function formatAddress(student: StudentProfileProps['student']): string {
     return [student.house_no, student.street, student.barangay, student.city, student.province, student.zip_code]
         .filter(Boolean)
         .join(', ') || 'Not set';
+}
+
+function downloadStudentIdCard(card: SVGSVGElement | null, student: StudentProfileProps['student']): void {
+    const svg = serializeIdCard(card);
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `student-id-${safeFileName(student.student_number ?? String(student.id))}.svg`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+function printStudentIdCard(card: SVGSVGElement | null, student: StudentProfileProps['student']): void {
+    const svg = serializeIdCard(card);
+    const printWindow = window.open('', '_blank', 'width=420,height=620');
+
+    if (!printWindow) {
+        window.print();
+
+        return;
+    }
+
+    printWindow.document.write(`
+        <!doctype html>
+        <html>
+            <head>
+                <title>${escapeHtml(student.name)} ID Card</title>
+                <style>
+                    @page { size: 320px 500px; margin: 0; }
+                    html, body {
+                        margin: 0;
+                        width: 320px;
+                        height: 500px;
+                        background: white;
+                        print-color-adjust: exact;
+                        -webkit-print-color-adjust: exact;
+                    }
+                    svg {
+                        display: block;
+                        width: 320px;
+                        height: 500px;
+                    }
+                </style>
+            </head>
+            <body>
+                ${svg}
+                <script>
+                    window.onload = () => {
+                        window.focus();
+                        window.print();
+                    };
+                </script>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+function serializeIdCard(card: SVGSVGElement | null): string {
+    if (!card) {
+        throw new Error('Student ID card is not available.');
+    }
+
+    const clone = card.cloneNode(true) as SVGSVGElement;
+
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', '320');
+    clone.setAttribute('height', '500');
+    clone.setAttribute('viewBox', '0 0 320 500');
+    clone.removeAttribute('class');
+
+    return new XMLSerializer().serializeToString(clone);
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+function safeFileName(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'student';
 }
 
 StudentProfilePage.layout = {
