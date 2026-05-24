@@ -32,6 +32,7 @@ export default function ClassSectionToolbar({
             <div className="flex-1" />
 
             <button
+                type="button"
                 onClick={onExport}
                 className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 text-[13px] font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--secondary)]"
             >

@@ -78,15 +78,17 @@ export default function AttendanceIndex({ attendanceRecords, filters, sections }
     };
 
     const handleExport = () => {
-        const selectedRecords = records.filter((record) => selected.includes(record.id));
+        const exportRecords = selected.length > 0
+            ? records.filter((record) => selected.includes(record.id))
+            : records;
 
-        if (selectedRecords.length === 0) {
+        if (exportRecords.length === 0) {
             return;
         }
 
         const rows = [
             ['ID', 'Student', 'Student Number', 'Event', 'Scanned At', 'Edit Count'],
-            ...selectedRecords.map((record) => [
+            ...exportRecords.map((record) => [
                 record.id,
                 `"${record.student.name}"`,
                 `"${record.student.student_number ?? ''}"`,

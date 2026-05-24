@@ -135,6 +135,38 @@ export default function UsersIndex({ users }: Props) {
         setIsUserModalOpen(true);
     };
 
+    const handleExport = () => {
+        const exportData = filtered.length > 0 ? filtered : data;
+
+        if (exportData.length === 0) return;
+
+        const headers = ['ID', 'Name', 'Email', 'Role', 'Created At', 'Updated At'];
+        const csvContent = [
+            headers.join(','),
+            ...exportData.map((user) =>
+                [
+                    user.id,
+                    `"${user.name}"`,
+                    `"${user.email}"`,
+                    `"${user.role}"`,
+                    `"${new Date(user.created_at).toLocaleDateString()}"`,
+                    `"${new Date(user.updated_at).toLocaleDateString()}"`,
+                ].join(','),
+            ),
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `users_export_${Date.now()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     const formatDate = (d: string) =>
         new Date(d).toLocaleDateString('en-US', {
             month: 'short',
@@ -238,7 +270,7 @@ export default function UsersIndex({ users }: Props) {
 
                     <div className="ut-spacer" />
 
-                    <button id="export-btn" className="ut-btn ut-btn-ghost">
+                    <button id="export-btn" className="ut-btn ut-btn-ghost" onClick={handleExport}>
                         <Download size={13} /> Export
                     </button>
 

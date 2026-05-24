@@ -34,10 +34,10 @@ export function AttendanceToolbar({
                     type="button"
                     onClick={onExport}
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={selectedCount === 0}
+                    disabled={false}
                 >
                     <Download size={16} />
-                    Export Selected
+                    {selectedCount > 0 ? `Export Selected (${selectedCount})` : 'Export All'}
                 </button>
             </div>
 
