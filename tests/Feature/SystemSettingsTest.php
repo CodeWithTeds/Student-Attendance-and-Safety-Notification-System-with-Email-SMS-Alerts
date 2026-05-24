@@ -13,13 +13,52 @@ it('allows admins to view system settings', function (): void {
         ->assertInertia(fn ($page) => $page
             ->component('admin/system-settings/index')
             ->where('settings.data.school_name', config('app.name', 'SASN'))
-            ->has('roles', 3)
-            ->has('permissionGroups', 4)
+            ->missing('roles')
+            ->missing('permissionGroups')
         );
 
     $this->assertDatabaseHas('system_settings', [
         'school_name' => config('app.name', 'SASN'),
     ]);
+});
+
+it('preserves role permissions when updating visible system settings', function (): void {
+    $admin = User::factory()->admin()->create();
+
+    SystemSetting::create([
+        'school_name' => 'SASN',
+        'role_permissions' => [
+            'admin' => ['access.users', 'governance.system_settings'],
+            'parent' => ['communications.announcements'],
+            'student' => [],
+        ],
+    ]);
+
+    $this->actingAs($admin)
+        ->put('/admin/system-settings', [
+            'school_name' => 'SASN Updated',
+            'school_id' => null,
+            'school_email' => null,
+            'school_phone' => null,
+            'school_address' => null,
+            'sms_provider' => null,
+            'sms_api_key' => null,
+            'sms_sender_id' => null,
+            'mail_mailer' => null,
+            'mail_host' => null,
+            'mail_port' => null,
+            'mail_username' => null,
+            'mail_password' => null,
+            'mail_encryption' => null,
+            'mail_from_address' => null,
+            'mail_from_name' => null,
+        ])
+        ->assertRedirect(route('admin.system-settings.index'));
+
+    $settings = SystemSetting::firstOrFail();
+
+    expect($settings->school_name)->toBe('SASN Updated')
+        ->and($settings->role_permissions['admin'])->toBe(['access.users', 'governance.system_settings']);
 });
 
 it('allows admins to update school, messaging, and permission settings', function (): void {

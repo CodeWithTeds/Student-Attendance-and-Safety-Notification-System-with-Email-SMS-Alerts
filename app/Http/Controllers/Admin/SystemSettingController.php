@@ -20,8 +20,6 @@ class SystemSettingController extends Controller
     {
         return Inertia::render('admin/system-settings/index', [
             'settings' => new SystemSettingResource($this->systemSettingService->getSettings()),
-            'roles' => $this->systemSettingService->getRoleOptions(),
-            'permissionGroups' => $this->systemSettingService->getPermissionGroups(),
         ]);
     }
 

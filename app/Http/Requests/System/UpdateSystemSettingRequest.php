@@ -31,7 +31,7 @@ class UpdateSystemSettingRequest extends FormRequest
             'mail_encryption' => ['nullable', 'string', 'max:20'],
             'mail_from_address' => ['nullable', 'email', 'max:160'],
             'mail_from_name' => ['nullable', 'string', 'max:160'],
-            'role_permissions' => ['required', 'array'],
+            'role_permissions' => ['sometimes', 'array'],
             'role_permissions.*' => ['array'],
             'role_permissions.*.*' => ['string', 'max:120'],
         ];

@@ -54,5 +54,4 @@ export interface SystemSettingsForm {
     mail_encryption: string;
     mail_from_address: string;
     mail_from_name: string;
-    role_permissions: Record<string, string[]>;
 }

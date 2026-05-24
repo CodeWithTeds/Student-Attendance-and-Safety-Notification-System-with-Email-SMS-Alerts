@@ -123,10 +123,11 @@ class SystemSettingService
 
     protected function preparePayload(array $data): array
     {
-        $payload = [
-            ...$data,
-            'role_permissions' => $this->normalizeRolePermissions($data['role_permissions'] ?? []),
-        ];
+        $payload = $data;
+
+        if (array_key_exists('role_permissions', $payload)) {
+            $payload['role_permissions'] = $this->normalizeRolePermissions($payload['role_permissions'] ?? []);
+        }
 
         if (blank($payload['sms_api_key'] ?? null)) {
             unset($payload['sms_api_key']);

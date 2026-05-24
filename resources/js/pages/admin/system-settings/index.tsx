@@ -6,14 +6,10 @@ import {
     Mail,
     MessageSquareText,
     Save,
-    ShieldCheck,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Fragment } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type {
-    PermissionGroup,
-    RoleOption,
     SystemSettings,
     SystemSettingsForm,
 } from '@/features/system-settings/types';
@@ -24,8 +20,6 @@ interface Resource<T> {
 
 interface Props {
     settings: Resource<SystemSettings>;
-    roles: RoleOption[];
-    permissionGroups: PermissionGroup[];
 }
 
 const fieldInputClass =
@@ -35,19 +29,8 @@ function textValue(value: string | number | null | undefined): string {
     return value === null || value === undefined ? '' : String(value);
 }
 
-function normalizeRolePermissions(
-    roles: RoleOption[],
-    current: Record<string, string[]>,
-): Record<string, string[]> {
-    return Object.fromEntries(
-        roles.map((role) => [role.value, current[role.value] ?? []]),
-    );
-}
-
 export default function SystemSettingsIndex({
     settings,
-    roles,
-    permissionGroups,
 }: Props) {
     const current = settings.data;
     const { data, setData, put, processing, errors, recentlySuccessful } =
@@ -68,10 +51,6 @@ export default function SystemSettingsIndex({
             mail_encryption: textValue(current.mail_encryption),
             mail_from_address: textValue(current.mail_from_address),
             mail_from_name: textValue(current.mail_from_name),
-            role_permissions: normalizeRolePermissions(
-                roles,
-                current.role_permissions ?? {},
-            ),
         });
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -79,18 +58,6 @@ export default function SystemSettingsIndex({
 
         put('/admin/system-settings', {
             preserveScroll: true,
-        });
-    };
-
-    const togglePermission = (role: string, permission: string) => {
-        const existing = data.role_permissions[role] ?? [];
-        const nextPermissions = existing.includes(permission)
-            ? existing.filter((item) => item !== permission)
-            : [...existing, permission];
-
-        setData('role_permissions', {
-            ...data.role_permissions,
-            [role]: nextPermissions,
         });
     };
 
@@ -105,8 +72,8 @@ export default function SystemSettingsIndex({
                             System Settings
                         </h1>
                         <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                            Manage school information, messaging credentials,
-                            and role permissions.
+                            Manage school information and messaging
+                            credentials.
                         </p>
                     </div>
 
@@ -352,82 +319,6 @@ export default function SystemSettingsIndex({
                         </Field>
                     </SettingsSection>
 
-                    <SettingsSection
-                        icon={ShieldCheck}
-                        title="Roles & Permissions"
-                    >
-                        <div className="xl:col-span-2">
-                            <div className="overflow-auto rounded-lg border border-[var(--border)]">
-                                <table className="w-full min-w-[760px] border-collapse text-sm">
-                                    <thead>
-                                        <tr className="border-b border-[var(--border)] bg-[var(--accent)]/40">
-                                            <th className="px-3 py-3 text-left text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
-                                                Permission
-                                            </th>
-                                            {roles.map((role) => (
-                                                <th
-                                                    key={role.value}
-                                                    className="px-3 py-3 text-center text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase"
-                                                >
-                                                    {role.label}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-[var(--border)]">
-                                        {permissionGroups.map((group) => (
-                                            <Fragment key={group.key}>
-                                                <tr>
-                                                    <td
-                                                        colSpan={roles.length + 1}
-                                                        className="bg-[var(--accent)]/20 px-3 py-2 text-xs font-bold text-[var(--foreground)]"
-                                                    >
-                                                        {group.label}
-                                                    </td>
-                                                </tr>
-                                                {group.permissions.map((permission) => (
-                                                    <tr key={permission.key}>
-                                                        <td className="px-3 py-3 font-medium text-[var(--foreground)]">
-                                                            {permission.label}
-                                                        </td>
-                                                        {roles.map((role) => {
-                                                            const checked =
-                                                                data.role_permissions[
-                                                                    role.value
-                                                                ]?.includes(
-                                                                    permission.key,
-                                                                ) ?? false;
-
-                                                            return (
-                                                                <td
-                                                                    key={`${role.value}-${permission.key}`}
-                                                                    className="px-3 py-3 text-center"
-                                                                >
-                                                                    <label className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[var(--border)] hover:bg-[var(--accent)]">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={checked}
-                                                                            onChange={() =>
-                                                                                togglePermission(
-                                                                                    role.value,
-                                                                                    permission.key,
-                                                                                )
-                                                                            }
-                                                                            className="h-4 w-4 rounded border-[var(--border)]"
-                                                                        />
-                                                                    </label>
-                                                                </td>
-                                                            );
-                                                        })}
-                                                    </tr>
-                                                ))}
-                                            </Fragment>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </SettingsSection>
                 </div>
 
                 <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-[var(--border)] bg-[var(--background)] p-4">
