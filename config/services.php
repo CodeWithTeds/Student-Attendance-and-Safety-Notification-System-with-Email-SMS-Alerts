@@ -39,4 +39,9 @@ return [
         'driver' => env('SMS_DRIVER', 'log'),
     ],
 
+    'textbee' => [
+        'api_key' => env('TEXTBEE_API_KEY'),
+        'device_id' => env('DEVICE_ID'),
+    ],
+
 ];
