@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { BarcodeDetector as BarcodeDetectorPolyfill } from 'barcode-detector';
 
 interface BarcodeDetectorResult {
     rawValue: string;
@@ -16,6 +17,18 @@ declare global {
     interface Window {
         BarcodeDetector?: BarcodeDetectorConstructor;
     }
+}
+
+/**
+ * Returns the native BarcodeDetector if available, otherwise falls back to the
+ * polyfill so QR scanning works on Windows Chrome/Edge and other unsupported browsers.
+ */
+function getBarcodeDetector(): BarcodeDetectorConstructor {
+    if (window.BarcodeDetector) {
+        return window.BarcodeDetector;
+    }
+
+    return BarcodeDetectorPolyfill as unknown as BarcodeDetectorConstructor;
 }
 
 type ScannerStatus = 'idle' | 'starting' | 'scanning' | 'unsupported' | 'error';
@@ -102,13 +115,6 @@ export function useQrScanner({ onScan }: UseQrScannerOptions) {
     }, []);
 
     const start = useCallback(async () => {
-        if (!window.BarcodeDetector) {
-            setStatus('unsupported');
-            setMessage('This browser does not support live QR detection. Use a supported browser to scan student QR codes.');
-
-            return;
-        }
-
         setStatus('starting');
         setMessage('Requesting camera access...');
 
@@ -125,7 +131,8 @@ export function useQrScanner({ onScan }: UseQrScannerOptions) {
                 await videoRef.current.play();
             }
 
-            const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+            const DetectorClass = getBarcodeDetector();
+            const detector = new DetectorClass({ formats: ['qr_code'] });
 
             setStatus('scanning');
             setMessage('Scanning for a student QR code...');
