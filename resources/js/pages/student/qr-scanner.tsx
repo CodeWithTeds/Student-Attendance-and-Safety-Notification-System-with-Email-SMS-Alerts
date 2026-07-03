@@ -98,26 +98,26 @@ export default function StudentQrScanner({ studentSection }: StudentQrScannerPro
             <Head title="Attendance QR Scan" />
             {toast && <ScanToastItem toast={toast} onDismiss={() => setToast(null)} />}
 
-            <div className="flex h-full flex-1 flex-col gap-6 bg-neutral-50/60 p-6 dark:bg-black/20">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex h-full flex-1 flex-col gap-4 bg-neutral-50/60 p-4 dark:bg-black/20 sm:gap-6 sm:p-6">
+                <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <div className="mb-3 inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-bold text-primary">
-                            <ScanLine className="h-4 w-4" />
+                        <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary sm:mb-3 sm:px-3 sm:py-1.5 sm:text-sm">
+                            <ScanLine className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             Student attendance
                         </div>
-                        <h1 className="text-3xl font-black tracking-tight text-foreground">Attendance QR Scan</h1>
-                        <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-muted-foreground">
-                            Scan an approved student QR code and record Time In or Time Out using the same validation as the public attendance scanner.
+                        <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">Attendance QR Scan</h1>
+                        <p className="mt-1 max-w-2xl text-xs font-medium leading-relaxed text-muted-foreground sm:mt-2 sm:text-sm">
+                            Scan an approved student QR code and record Time In or Time Out.
                         </p>
                     </div>
 
-                    <div className="rounded-xl border bg-background p-4 shadow-sm">
-                        <p className="mb-3 text-xs font-black tracking-[0.12em] text-muted-foreground uppercase">Scan mode</p>
+                    <div className="rounded-xl border bg-background p-3 shadow-sm sm:p-4">
+                        <p className="mb-2 text-[10px] font-black tracking-[0.12em] text-muted-foreground uppercase sm:mb-3 sm:text-xs">Scan mode</p>
                         <ScanModeControl value={scanMode} onChange={setScanMode} />
                     </div>
                 </div>
 
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+                <div className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
                     <div className="space-y-4">
                         <ScannerViewport
                             videoRef={scanner.videoRef}
@@ -128,7 +128,7 @@ export default function StudentQrScanner({ studentSection }: StudentQrScannerPro
                             onStop={scanner.stop}
                         />
 
-                        <div className="grid gap-3 md:grid-cols-3">
+                        <div className="hidden gap-3 md:grid md:grid-cols-3">
                             <InfoPill icon={LogIn} label="Time In" text="Opens 1 hour before schedule. More than 20 minutes after schedule is late." />
                             <InfoPill icon={LogOut} label="Time Out" text="Allowed only at or after the scheduled Time Out with an active Time In today." />
                             <InfoPill icon={ShieldCheck} label="Validation" text="Duplicate scans and invalid QR codes are blocked before saving." />
@@ -138,7 +138,7 @@ export default function StudentQrScanner({ studentSection }: StudentQrScannerPro
                     <div className="space-y-4">
                         <SchedulePanel section={studentSection} />
                         <ScanResultPanel result={result} error={error} isProcessing={isProcessing} />
-                        <div className="rounded-2xl border bg-background p-5 shadow-sm">
+                        <div className="hidden rounded-2xl border bg-background p-5 shadow-sm sm:block">
                             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                 <QrCode className="h-5 w-5" />
                             </div>

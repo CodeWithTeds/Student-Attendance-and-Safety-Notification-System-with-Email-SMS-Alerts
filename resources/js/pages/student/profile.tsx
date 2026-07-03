@@ -98,6 +98,22 @@ export default function StudentProfilePage({ student }: StudentProfileProps) {
                 <div className="flex items-center justify-end gap-2 border-t border-[var(--border)] bg-[var(--background)] p-4 print:hidden">
                     <button
                         type="button"
+                        onClick={() => saveQrToPhone(student)}
+                        className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#FF3B30] px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E0342B] sm:hidden"
+                    >
+                        <Download size={16} />
+                        Save QR to Phone
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => saveQrToPhone(student)}
+                        className="hidden h-10 items-center gap-2 rounded-lg bg-[#FF3B30] px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E0342B] sm:inline-flex"
+                    >
+                        <Download size={16} />
+                        Save QR Image
+                    </button>
+                    <button
+                        type="button"
                         onClick={handlePrintId}
                         className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--secondary)]"
                     >
@@ -237,6 +253,79 @@ function escapeHtml(value: string): string {
 
 function safeFileName(value: string): string {
     return value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'student';
+}
+
+function saveQrToPhone(student: StudentProfileProps['student']): void {
+    if (!student.qr_code_svg) {
+        alert('No QR code generated yet. Ask an admin to generate your QR code.');
+        return;
+    }
+
+    const size = 512;
+    const padding = 40;
+    const qrSize = size - padding * 2;
+
+    // Create a canvas to render the QR as a PNG (phone-friendly for saving to gallery)
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+        alert('Unable to generate image. Try using the Download ID button instead.');
+        return;
+    }
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+
+    // Render the QR SVG onto canvas
+    const img = new Image();
+    const svgBlob = new Blob([student.qr_code_svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+        ctx.drawImage(img, padding, padding, qrSize, qrSize);
+
+        // Add student name below (optional label)
+        ctx.fillStyle = '#1D1D1F';
+        ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+
+        const name = student.first_name
+            ? `${student.first_name} ${student.last_name}`.trim()
+            : student.name;
+
+        // Shrink padding area to fit text
+        ctx.fillText(name, size / 2, size - 12);
+
+        // Convert to PNG blob and trigger download
+        canvas.toBlob((blob) => {
+            if (!blob) return;
+
+            const downloadUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            link.href = downloadUrl;
+            link.download = `qr-code-${safeFileName(student.student_number ?? String(student.id))}.png`;
+
+            // On mobile, this triggers the "save image" dialog
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            URL.revokeObjectURL(downloadUrl);
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+    };
+
+    img.onerror = () => {
+        URL.revokeObjectURL(url);
+        alert('Failed to render QR code image.');
+    };
+
+    img.src = url;
 }
 
 StudentProfilePage.layout = {

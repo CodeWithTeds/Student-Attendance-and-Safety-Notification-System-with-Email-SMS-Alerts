@@ -48,34 +48,35 @@ export default function QrScanner() {
         <PublicPageShell activePage="qr-scanner">
             <Head title="Student Attendance Scanner" />
 
-            <main className="pt-24">
-                <section className="relative overflow-hidden py-16 sm:py-20">
+            <main className="pt-20 sm:pt-24">
+                <section className="relative overflow-hidden py-8 sm:py-16 lg:py-20">
                     <div className="absolute top-0 -left-10 h-72 w-72 rounded-full bg-[#FF3B30]/10 blur-[120px]" />
                     <div className="absolute right-0 bottom-0 h-96 w-96 rounded-full bg-[#FF3B30]/5 blur-[120px]" />
 
-                    <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
-                        <div className="mb-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-end">
+                    <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8">
+                        <div className="mb-6 grid gap-6 sm:mb-10 sm:gap-8 lg:grid-cols-[1fr_420px] lg:items-end">
                             <div>
-                                <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#1D1D1F] px-4 py-2 text-[13px] font-semibold tracking-wide text-white">
+                                <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#1D1D1F] px-3 py-1.5 text-[11px] font-semibold tracking-wide text-white sm:mb-5 sm:px-4 sm:py-2 sm:text-[13px]">
                                     <Sparkles size={14} className="text-[#FF3B30]" />
                                     Student attendance scanner
                                 </span>
-                                <h1 className="max-w-4xl text-5xl leading-[1] font-[900] tracking-tight text-[#1D1D1F] sm:text-7xl">
+                                <h1 className="max-w-4xl text-3xl leading-[1.1] font-[900] tracking-tight text-[#1D1D1F] sm:text-5xl lg:text-7xl">
                                     Scan once.
                                     <br />
                                     <span className="text-[#FF3B30]">
                                         Time in or out instantly.
                                     </span>
                                 </h1>
-                                <p className="mt-6 max-w-2xl text-lg leading-relaxed font-medium text-[#1D1D1F]/60">
+                                <p className="mt-4 max-w-2xl text-sm leading-relaxed font-medium text-[#1D1D1F]/60 sm:mt-6 sm:text-lg">
                                     Scan approved student QR codes at school entry points and record time-in or time-out attendance in real time.
                                 </p>
                             </div>
 
-                            <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-[#1D1D1F]/5">
-                                <div className="mb-5 flex items-center gap-3">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FF3B30] text-white shadow-lg shadow-[#FF3B30]/25">
-                                        <QrCode size={24} />
+                            <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#1D1D1F]/5 sm:rounded-[2rem] sm:p-5">
+                                <div className="mb-4 flex items-center gap-3 sm:mb-5">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FF3B30] text-white shadow-lg shadow-[#FF3B30]/25 sm:h-12 sm:w-12 sm:rounded-2xl">
+                                        <QrCode size={20} className="sm:hidden" />
+                                        <QrCode size={24} className="hidden sm:block" />
                                     </div>
                                     <div>
                                         <p className="text-xs font-black tracking-[0.12em] text-[#FF3B30] uppercase">
@@ -90,8 +91,8 @@ export default function QrScanner() {
                             </div>
                         </div>
 
-                        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-                            <div className="space-y-6">
+                        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+                            <div className="space-y-4 sm:space-y-6">
                                 <ScannerViewport
                                     videoRef={scanner.videoRef}
                                     canvasRef={scanner.canvasRef}
@@ -102,13 +103,13 @@ export default function QrScanner() {
                                 />
                             </div>
 
-                            <div className="space-y-6">
+                            <div className="space-y-4 sm:space-y-6">
                                 <ScanResultPanel
                                     result={result}
                                     error={error}
                                     isProcessing={isProcessing}
                                 />
-                                <div className="rounded-[2rem] bg-[#1D1D1F] p-6 text-white shadow-xl">
+                                <div className="hidden rounded-2xl bg-[#1D1D1F] p-5 text-white shadow-xl sm:block sm:rounded-[2rem] sm:p-6">
                                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#FF3B30]">
                                         <BadgeCheck size={24} />
                                     </div>
