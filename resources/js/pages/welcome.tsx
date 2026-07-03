@@ -52,11 +52,11 @@ export default function Welcome() {
                                 </p>
                                 <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                                     <Link
-                                        href={route('register')}
+                                        href="/attendance"
                                         className="group relative w-full overflow-hidden rounded-2xl bg-[#FF3B30] px-8 py-4 text-center text-lg font-extrabold text-white shadow-2xl shadow-[#FF3B30]/30 transition-all hover:scale-105 active:scale-95 sm:w-auto"
                                     >
                                         <span className="relative z-10 flex items-center justify-center gap-2">
-                                            Get Started
+                                            View Attendance
                                             <ArrowRight
                                                 size={20}
                                                 strokeWidth={3}
@@ -427,10 +427,10 @@ export default function Welcome() {
                         </p>
                         <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
                             <Link
-                                href={route('register')}
+                                href="/attendance"
                                 className="group flex w-full items-center gap-3 rounded-[2rem] bg-[#1D1D1F] px-14 py-7 text-2xl font-black text-white shadow-2xl transition-all hover:scale-105 active:scale-95 sm:w-auto"
                             >
-                                Get Started
+                                View Attendance
                                 <ArrowRight
                                     size={24}
                                     className="transition-transform group-hover:translate-x-1"

@@ -144,7 +144,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration(), // Disabled — students/parents use OTP access
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

@@ -21,6 +21,7 @@ class RoleBasedLoginResponse implements LoginResponseContract
     {
         return match ($request->user()?->role) {
             UserRole::PARENT => route('parent.dashboard', absolute: false),
+            UserRole::STUDENT => route('dashboard', absolute: false),
             default => route('dashboard', absolute: false),
         };
     }

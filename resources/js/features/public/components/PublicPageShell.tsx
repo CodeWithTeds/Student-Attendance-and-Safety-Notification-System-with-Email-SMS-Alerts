@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { PublicFooter } from './PublicFooter';
 import { PublicNavigation } from './PublicNavigation';
 
-type PublicPage = 'home' | 'qr-scanner';
+type PublicPage = 'home' | 'qr-scanner' | 'attendance';
 
 interface PublicPageShellProps {
     activePage: PublicPage;

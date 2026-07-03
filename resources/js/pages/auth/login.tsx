@@ -7,24 +7,21 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
 type Props = {
     status?: string;
     canResetPassword: boolean;
-    canRegister: boolean;
 };
 
 export default function Login({
     status,
     canResetPassword,
-    canRegister,
 }: Props) {
     return (
         <>
-            <Head title="Log in" />
+            <Head title="Admin Login" />
 
             <Form
                 {...store.form()}
@@ -44,7 +41,7 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder="admin@example.com"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -94,14 +91,12 @@ export default function Login({
                             </Button>
                         </div>
 
-                        {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
-                                    Sign up
-                                </TextLink>
-                            </div>
-                        )}
+                        <div className="text-center text-sm text-muted-foreground">
+                            Student or Parent/Guardian?{' '}
+                            <TextLink href="/attendance" tabIndex={5}>
+                                View attendance records
+                            </TextLink>
+                        </div>
                     </>
                 )}
             </Form>
@@ -116,6 +111,6 @@ export default function Login({
 }
 
 Login.layout = {
-    title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    title: 'Admin Login',
+    description: 'Enter your credentials to access the admin panel',
 };

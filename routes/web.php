@@ -19,6 +19,7 @@ use App\Http\Controllers\Guardian\AnnouncementController as GuardianAnnouncement
 use App\Http\Controllers\Guardian\AttendanceMonitoringController as GuardianAttendanceMonitoringController;
 use App\Http\Controllers\Guardian\DashboardController as GuardianDashboardController;
 use App\Http\Controllers\Guardian\NotificationController as GuardianNotificationController;
+use App\Http\Controllers\OtpAccessController;
 use App\Http\Controllers\Student\AttendanceRecordController as StudentAttendanceRecordController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\Student\QrScannerController as StudentQrScannerController;
@@ -30,6 +31,11 @@ Route::inertia('/', 'welcome', [
 ])->name('home');
 
 Route::inertia('qr-scanner', 'public/qr-scanner')->name('qr-scanner');
+
+// OTP-based attendance access for students & parents
+Route::get('attendance', [OtpAccessController::class, 'show'])->name('attendance.access');
+Route::post('attendance/send-otp', [OtpAccessController::class, 'sendOtp'])->name('attendance.send-otp');
+Route::post('attendance/verify-otp', [OtpAccessController::class, 'verifyOtp'])->name('attendance.verify-otp');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

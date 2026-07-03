@@ -52,9 +52,9 @@ class FortifyServiceProvider extends ServiceProvider
             $user = User::where('email', $request->email)->first();
 
             if ($user && Hash::check($request->password, $user->password)) {
-                if ($user->role === UserRole::STUDENT && $user->status === 'pending') {
+                if ($user->role !== UserRole::ADMIN) {
                     throw ValidationException::withMessages([
-                        Fortify::username() => 'Your account is pending approval by an administrator.',
+                        Fortify::username() => 'Please use the attendance portal to view records. This login is for administrators only.',
                     ]);
                 }
 

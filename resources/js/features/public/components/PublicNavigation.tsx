@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, QrCode, Shield } from 'lucide-react';
 
-type PublicPage = 'home' | 'qr-scanner';
+type PublicPage = 'home' | 'qr-scanner' | 'attendance';
 
 interface PublicNavigationProps {
     activePage: PublicPage;
@@ -12,6 +12,7 @@ const navigationItems = [
     { label: 'Process', href: '/#how-it-works', page: 'home' },
     { label: 'System', href: '/#preview', page: 'home' },
     { label: 'QR Scanner', href: '/qr-scanner', page: 'qr-scanner' },
+    { label: 'Attendance', href: '/attendance', page: 'attendance' },
 ] as const;
 
 export function PublicNavigation({ activePage }: PublicNavigationProps) {
@@ -48,7 +49,7 @@ export function PublicNavigation({ activePage }: PublicNavigationProps) {
                         href="/login"
                         className="hidden text-[15px] font-bold text-[#1D1D1F]/70 transition-colors hover:text-[#1D1D1F] sm:inline"
                     >
-                        Sign In
+                        Admin
                     </Link>
                     <Link
                         href="/qr-scanner"
@@ -58,10 +59,10 @@ export function PublicNavigation({ activePage }: PublicNavigationProps) {
                         <QrCode size={18} />
                     </Link>
                     <Link
-                        href="/register"
+                        href="/attendance"
                         className="flex items-center gap-2 rounded-full bg-[#1D1D1F] px-4 py-2.5 text-[14px] font-bold text-white shadow-xl shadow-black/10 transition-all hover:scale-105 hover:bg-[#FF3B30] active:scale-95 sm:px-6 sm:text-[15px]"
                     >
-                        Get Started
+                        View Attendance
                         <ArrowRight size={16} />
                     </Link>
                 </div>
