@@ -20,6 +20,7 @@ class RoleBasedLoginResponse implements LoginResponseContract
     private function redirectPath(Request $request): string
     {
         return match ($request->user()?->role) {
+            UserRole::OFFICE => route('dashboard', absolute: false),
             UserRole::PARENT => route('parent.dashboard', absolute: false),
             UserRole::STUDENT => route('dashboard', absolute: false),
             default => route('dashboard', absolute: false),

@@ -56,6 +56,13 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function office(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::OFFICE,
+        ]);
+    }
+
     public function parent(): static
     {
         return $this->state(fn (array $attributes) => [

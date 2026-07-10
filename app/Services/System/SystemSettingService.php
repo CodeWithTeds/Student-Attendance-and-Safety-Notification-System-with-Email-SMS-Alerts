@@ -108,6 +108,7 @@ class SystemSettingService
 
         return [
             UserRole::ADMIN->value => $allPermissions,
+            UserRole::OFFICE->value => ['communications.announcements'],
             UserRole::PARENT->value => ['communications.announcements'],
             UserRole::STUDENT->value => [],
         ];

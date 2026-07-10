@@ -52,6 +52,7 @@ const roleMeta: Record<
     { label: string; color: string; icon: ElementType }
 > = {
     admin: { label: 'Admin', color: 'role-admin', icon: ShieldCheck },
+    office: { label: 'Office', color: 'role-office', icon: ShieldCheck },
     parent: { label: 'Parent', color: 'role-parent', icon: Heart },
     student: { label: 'Student', color: 'role-student', icon: GraduationCap },
 };
@@ -59,7 +60,7 @@ const roleMeta: Record<
 type UserForm = {
     name: string;
     email: string;
-    role: 'admin' | 'parent' | 'student';
+    role: 'admin' | 'office' | 'parent' | 'student';
     password: string;
     password_confirmation: string;
     first_name: string;
@@ -732,6 +733,7 @@ function UserFormModal({
                                 required
                             >
                                 <option value="admin">Admin</option>
+                                <option value="office">Office</option>
                                 <option value="parent">Parent</option>
                                 <option value="student">Student</option>
                             </select>

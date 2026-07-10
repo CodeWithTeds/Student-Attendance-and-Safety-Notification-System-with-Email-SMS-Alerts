@@ -111,6 +111,6 @@ export default function Login({
 }
 
 Login.layout = {
-    title: 'Admin Login',
-    description: 'Enter your credentials to access the admin panel',
+    title: 'Staff Login',
+    description: 'Enter your credentials to access the system',
 };

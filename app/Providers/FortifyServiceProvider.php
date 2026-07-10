@@ -52,7 +52,7 @@ class FortifyServiceProvider extends ServiceProvider
             $user = User::where('email', $request->email)->first();
 
             if ($user && Hash::check($request->password, $user->password)) {
-                if ($user->role !== UserRole::ADMIN) {
+                if (! in_array($user->role, [UserRole::ADMIN, UserRole::OFFICE])) {
                     throw ValidationException::withMessages([
                         Fortify::username() => 'Please use the attendance portal to view records. This login is for administrators only.',
                     ]);

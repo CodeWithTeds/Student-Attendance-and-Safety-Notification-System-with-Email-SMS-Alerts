@@ -19,6 +19,10 @@ class DashboardController extends Controller
             return to_route('parent.dashboard');
         }
 
+        if ($request->user()->role === UserRole::OFFICE) {
+            return to_route('office.announcements.index');
+        }
+
         return Inertia::render('dashboard', [
             'stats' => $this->dashboardService->getAnalyticsData($request->user(), $request->attendancePeriod(), $request->attendanceDate()),
         ]);

@@ -194,6 +194,15 @@ const parentNavItems: NavItem[] = [
     },
 ];
 
+const officeNavItems: NavItem[] = [
+    {
+        title: 'Announcements',
+        href: '/office/announcements',
+        icon: Megaphone,
+        roles: ['office'],
+    },
+];
+
 const footerNavItems: NavItem[] = [
 
 ];
@@ -215,6 +224,9 @@ export function AppSidebar() {
         (item) => !item.roles || item.roles.includes(userRole),
     );
     const filteredParentNavItems = parentNavItems.filter(
+        (item) => !item.roles || item.roles.includes(userRole),
+    );
+    const filteredOfficeNavItems = officeNavItems.filter(
         (item) => !item.roles || item.roles.includes(userRole),
     );
 
@@ -256,6 +268,12 @@ export function AppSidebar() {
                     <NavMain
                         items={filteredParentNavItems}
                         label="Parent / Guardian"
+                    />
+                )}
+                {filteredOfficeNavItems.length > 0 && (
+                    <NavMain
+                        items={filteredOfficeNavItems}
+                        label="Office"
                     />
                 )}
             </SidebarContent>

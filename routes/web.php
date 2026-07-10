@@ -53,6 +53,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('announcements', [GuardianAnnouncementController::class, 'index'])->name('announcements');
     });
 
+    Route::middleware('role:office')->prefix('office')->name('office.')->group(function () {
+        Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+    });
+
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::post('users', [UserController::class, 'store'])->name('users.store');
